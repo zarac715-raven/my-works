@@ -3,18 +3,16 @@
 // 專案 ID: my-to-do-list-54712
 // =========================================================================
 
-// 您可以直接在此處填入您的 Firebase Web 應用程式配置
-// 可在 Firebase Console > 專案設定 > 一般 > 你的應用程式 > SDK 設定與配置 中找到
 export const defaultFirebaseConfig = {
-  apiKey: "", // 請在此填入您的 Firebase API Key（例如：AIzaSy...）
+  apiKey: "AIzaSyAmIyAtkrJ1XIfnuHIwjfz2qUe0OPI6Kdo",
   authDomain: "my-to-do-list-54712.firebaseapp.com",
   projectId: "my-to-do-list-54712",
   storageBucket: "my-to-do-list-54712.firebasestorage.app",
-  messagingSenderId: "", // 請在此填入 Sender ID（選填）
-  appId: "" // 請在此填入 appId（例如：1:123456789:web:...）
+  messagingSenderId: "195718024919",
+  appId: "1:195718024919:web:dad2dd792bd2244a132a92"
 };
 
-// 支援從瀏覽器 localStorage 讀取動態設定（方便免改扣直接在網頁設定）
+// 支援從瀏覽器 localStorage 讀取動態設定（若使用者有自訂則優先使用）
 export function getActiveFirebaseConfig() {
   const saved = localStorage.getItem("my_todo_firebase_config");
   if (saved) {
