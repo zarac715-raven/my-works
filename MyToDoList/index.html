@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>MyToDoList - 多人即時協作待辦清單 | Firebase</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 9999px; }
+    .task-item-enter {
+      animation: fadeInSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeInSlide {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 bg-slate-900/85 backdrop-blur-md border-b border-slate-800">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Project Badge -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+          <i data-lucide="check-check" class="w-6 h-6 text-white stroke-[2.5]"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-base sm:text-lg tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
+              MyToDoList
+            </h1>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              Firebase 協作版
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden xs:block">
+            專案: <span class="font-mono text-indigo-300">my-to-do-list-54712</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Center / Status Indicator -->
+      <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/60 border border-slate-700/50 text-xs">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="statusDot"></span>
+        <span class="text-slate-300" id="statusText">即時協作已連線</span>
+      </div>
+
+      <!-- Right Actions: Config & User Auth -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        
+        <!-- Settings / Config Button -->
+        <button id="openConfigBtn" class="p-2 rounded-xl bg-slate-800/70 border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-700 transition" title="Firebase 專案設定">
+          <i data-lucide="settings-2" class="w-5 h-5"></i>
+        </button>
+
+        <!-- Auth Section -->
+        <div id="authContainer">
+          <!-- Logged Out State -->
+          <button id="googleLoginBtn" class="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 rounded-xl bg-white text-slate-900 font-semibold text-xs sm:text-sm hover:bg-slate-100 active:scale-95 transition shadow-sm">
+            <svg class="w-4 h-4" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span class="hidden xs:inline">Google 登入</span>
+          </button>
+
+          <!-- Logged In State (Hidden by default) -->
+          <div id="userProfile" class="hidden flex items-center gap-2">
+            <div class="relative group">
+              <button class="flex items-center gap-2 p-1 pl-2 pr-3 rounded-full bg-slate-800/80 border border-slate-700 hover:border-slate-600 transition">
+                <img id="userAvatar" src="" alt="Avatar" class="w-7 h-7 rounded-full object-cover border border-indigo-400">
+                <span id="userName" class="text-xs font-semibold text-slate-200 max-w-[90px] truncate hidden sm:inline-block"></span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+              </button>
+              
+              <!-- Dropdown Menu -->
+              <div class="absolute right-0 mt-2 w-48 py-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50">
+                <div class="px-4 py-2 border-b border-slate-700/60">
+                  <p class="text-xs text-slate-400">登入為</p>
+                  <p id="userEmail" class="text-xs font-semibold text-slate-200 truncate"></p>
+                </div>
+                <button id="logoutBtn" class="w-full text-left px-4 py-2.5 text-xs text-rose-400 hover:bg-slate-700/60 flex items-center gap-2 transition">
+                  <i data-lucide="log-out" class="w-4 h-4"></i>
+                  登出帳號
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6 sm:py-8 space-y-6">
+
+    <!-- Collaboration Room / Board Switcher -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        
+        <!-- Board Info & Tabs -->
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="users" class="w-3.5 h-3.5 text-indigo-400"></i>
+            協作清單看板 (Shared Workspace)
+          </span>
+          <div class="flex items-center gap-2 mt-2">
+            <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+              <span id="currentBoardTitle">🌐 公開團隊協作板</span>
+              <span class="text-xs font-mono font-normal text-slate-400 px-2 py-0.5 rounded bg-slate-800 border border-slate-700" id="currentBoardIdTag">#public-team</span>
+            </h2>
+          </div>
+        </div>
+
+        <!-- Board Actions: Switch / Share -->
+        <div class="flex items-center gap-2">
+          <!-- Copy Share Link -->
+          <button id="copyShareBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold hover:bg-indigo-500/20 transition">
+            <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+            <span>複製協作連結</span>
+          </button>
+          
+          <!-- Switch or Create Board -->
+          <button id="switchBoardBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold hover:text-white hover:bg-slate-700 transition">
+            <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
+            <span>切換/建立看板</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Active Collaborators Avatars -->
+      <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="text-[11px]">參與協作者:</span>
+          <div class="flex -space-x-2 overflow-hidden" id="collaboratorsFacepile">
+            <span class="inline-block h-6 w-6 rounded-full ring-2 ring-slate-900 bg-indigo-500 text-white text-[10px] flex items-center justify-center font-bold">ALL</span>
+          </div>
+        </div>
+        <div class="text-[11px] text-slate-400">
+          <span id="taskCountText">共 0 項任務</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Input Form -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3">
+      <form id="taskForm" class="space-y-3">
+        <div class="relative flex items-center">
+          <input 
+            type="text" 
+            id="taskInput" 
+            required
+            placeholder="新增待辦事項... (輸入完成按 Enter 或點擊新增)" 
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition"
+          >
+          <button 
+            type="submit" 
+            class="absolute right-2 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs sm:text-sm transition flex items-center gap-1 shadow-md shadow-indigo-600/30"
+          >
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>新增</span>
+          </button>
+        </div>
+
+        <!-- Task Metadata Controls -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-1 text-xs text-slate-400">
+          <div class="flex flex-wrap items-center gap-2">
+            
+            <!-- Priority Selector -->
+            <div class="flex items-center gap-1">
+              <span class="text-slate-500">優先級:</span>
+              <select id="prioritySelect" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-200 outline-none focus:border-indigo-500">
+                <option value="normal">🟢 一般 (Normal)</option>
+                <option value="medium">🟡 中等 (Medium)</option>
+                <option value="high">🔴 緊急 (High)</option>
+              </select>
+            </div>
+
+            <!-- Category Tag -->
+            <div class="flex items-center gap-1">
+              <span class="text-slate-500">標籤:</span>
+              <select id="categorySelect" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-200 outline-none focus:border-indigo-500">
+                <option value="待辦">📌 一般待辦</option>
+                <option value="前端">💻 前端開發</option>
+                <option value="設計">🎨 UI 設計</option>
+                <option value="會議">📅 會議討論</option>
+                <option value="測試">🧪 QA 測試</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="text-[11px] text-slate-500 flex items-center gap-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
+            即時同步至 Cloud Firestore
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Progress Bar & Filters -->
+    <div class="space-y-4">
+      
+      <!-- Progress Bar -->
+      <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4">
+        <div class="flex justify-between items-center text-xs font-semibold mb-2">
+          <span class="text-slate-400 flex items-center gap-1.5">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5 text-indigo-400"></i>
+            清單完成進度
+          </span>
+          <span class="text-indigo-300 font-mono" id="progressPercentage">0%</span>
+        </div>
+        <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5">
+          <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 to-pink-500 rounded-full transition-all duration-300 w-0"></div>
+        </div>
+      </div>
+
+      <!-- Filters & Search Toolbar -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+        
+        <!-- Filter Tabs -->
+        <div class="flex items-center gap-1 p-1 bg-slate-900 border border-slate-800 rounded-xl w-full sm:w-auto">
+          <button class="filter-tab active flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition" data-filter="all">
+            全部
+          </button>
+          <button class="filter-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition" data-filter="active">
+            進行中
+          </button>
+          <button class="filter-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition" data-filter="completed">
+            已完成
+          </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative w-full sm:w-64">
+          <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3 top-2.5"></i>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="搜尋任務、標籤或成員..." 
+            class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
+          >
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Task List Feed (Real-Time Synchronized) -->
+    <div id="taskList" class="space-y-2.5">
+      <!-- Loading Skeleton State -->
+      <div id="loadingState" class="text-center py-12 text-slate-500 text-xs flex flex-col items-center gap-2">
+        <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-indigo-400"></i>
+        <span>正在連線至 Firebase 即時資料庫...</span>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-16 bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-8">
+      <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-3 text-slate-400">
+        <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+      </div>
+      <h3 class="font-bold text-sm text-slate-200 mb-1">目前沒有待辦事項</h3>
+      <p class="text-xs text-slate-500 max-w-xs mx-auto">在這個看板中輸入內容新增您的第一筆任務，或切換篩選標籤查看！</p>
+    </div>
+
+  </main>
+
+  <!-- ==================== Firebase Config Modal ==================== -->
+  <div id="configModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
+            <i data-lucide="flame" class="w-5 h-5 text-amber-400"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-slate-100">Firebase 專案連線設定</h3>
+            <p class="text-[11px] text-slate-400">my-to-do-list-54712</p>
+          </div>
+        </div>
+        <button id="closeConfigBtn" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed">
+        若要在本機執行真實 Google 登入與多人即時資料庫同步，請填寫您的 Firebase Web API Key（儲存於您本地瀏覽器）：
+      </p>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 font-semibold mb-1">Project ID</label>
+          <input type="text" id="cfgProjectId" value="my-to-do-list-54712" readonly class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-400 font-mono">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Firebase Web API Key (必要)</label>
+          <input type="text" id="cfgApiKey" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-100 font-mono focus:border-indigo-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Firebase App ID (選填)</label>
+          <input type="text" id="cfgAppId" placeholder="1:123456789:web:..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-100 font-mono focus:border-indigo-500 outline-none">
+        </div>
+      </div>
+
+      <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80 text-[11px] text-slate-400 space-y-1">
+        <p class="font-semibold text-slate-300 flex items-center gap-1">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-indigo-400"></i>
+          如何取得 API Key：
+        </p>
+        <ol class="list-decimal list-inside space-y-0.5 text-slate-400">
+          <li>前往 <a href="https://console.firebase.google.com/project/my-to-do-list-54712/overview" target="_blank" class="text-indigo-400 underline">Firebase 控制台</a></li>
+          <li>進入「專案設定」 > 「一般」 > 複製 Web API 密鑰</li>
+          <li>前往「Authentication」啟用「Google」登入提供者</li>
+          <li>前往「Firestore Database」確認已建立資料庫</li>
+        </ol>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 pt-2">
+        <button id="enableDemoBtn" class="text-xs text-amber-400 hover:underline">
+          啟動免設定展示模式 (Demo Mode)
+        </button>
+        <div class="flex items-center gap-2">
+          <button id="cancelConfigBtn" class="px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300 hover:bg-slate-800">
+            取消
+          </button>
+          <button id="saveConfigBtn" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition">
+            儲存並連線
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== Switch Board Modal ==================== -->
+  <div id="boardModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-sm text-slate-100 flex items-center gap-2">
+          <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i>
+          切換協作清單看板
+        </h3>
+        <button id="closeBoardBtn" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <button class="board-preset-btn w-full text-left p-3 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 transition flex items-center justify-between" data-board="public-team" data-title="🌐 公開團隊協作板">
+          <div>
+            <p class="font-bold text-xs text-slate-100">🌐 公開團隊協作板 (預設)</p>
+            <p class="text-[10px] text-slate-400">所有成員皆可同步查看與協同編輯</p>
+          </div>
+          <span class="text-xs text-indigo-400">加入</span>
+        </button>
+
+        <button id="privateBoardBtn" class="board-preset-btn w-full text-left p-3 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 transition flex items-center justify-between" data-board="my-private" data-title="🔒 我的私人專屬清單">
+          <div>
+            <p class="font-bold text-xs text-slate-100">🔒 我的私人專屬清單</p>
+            <p class="text-[10px] text-slate-400">僅限您本人登入後讀取</p>
+          </div>
+          <span class="text-xs text-indigo-400">加入</span>
+        </button>
+      </div>
+
+      <div class="pt-2 border-t border-slate-800">
+        <label class="block text-xs text-slate-400 font-semibold mb-1">或輸入自訂看板代碼 / 專案名稱：</label>
+        <div class="flex gap-2">
+          <input type="text" id="customBoardInput" placeholder="例如：sprint-2026 或 design-team" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-100 font-mono outline-none focus:border-indigo-500">
+          <button id="joinCustomBoardBtn" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs">
+            進入
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs text-slate-200 shadow-2xl flex items-center gap-2 transform translate-y-16 opacity-0 transition-all duration-300 pointer-events-none">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMsg">通知訊息</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-auto py-6 border-t border-slate-900 text-center text-xs text-slate-500">
+    <p>MyToDoList · Firebase (my-to-do-list-54712) 即時多人協作應用</p>
+  </footer>
+
+  <!-- Firebase Modular SDK & Application Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithPopup, 
+      GoogleAuthProvider, 
+      signOut, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      doc, 
+      addDoc, 
+      updateDoc, 
+      deleteDoc, 
+      onSnapshot, 
+      query, 
+      orderBy, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    
+    import { getActiveFirebaseConfig, saveFirebaseConfig, isConfigValid } from "./firebase-config.js";
+
+    // Application State
+    let app = null;
+    let auth = null;
+    let db = null;
+    let currentUser = null;
+    let isDemoMode = false;
+    let currentBoardId = "public-team";
+    let currentBoardTitle = "🌐 公開團隊協作板";
+    let activeFilter = "all";
+    let currentSearch = "";
+    let unsubscribeFirestore = null;
+    let tasksCache = [];
+
+    // Parse URL params for board sharing (e.g. ?board=sprint-1)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("board")) {
+      currentBoardId = urlParams.get("board");
+      currentBoardTitle = `📁 ${currentBoardId}`;
+    }
+
+    // UI Elements
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const googleLoginBtn = document.getElementById("googleLoginBtn");
+    const userProfile = document.getElementById("userProfile");
+    const userAvatar = document.getElementById("userAvatar");
+    const userName = document.getElementById("userName");
+    const userEmail = document.getElementById("userEmail");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    const taskForm = document.getElementById("taskForm");
+    const taskInput = document.getElementById("taskInput");
+    const prioritySelect = document.getElementById("prioritySelect");
+    const categorySelect = document.getElementById("categorySelect");
+    const taskList = document.getElementById("taskList");
+    const emptyState = document.getElementById("emptyState");
+    const loadingState = document.getElementById("loadingState");
+    const taskCountText = document.getElementById("taskCountText");
+    const progressBar = document.getElementById("progressBar");
+    const progressPercentage = document.getElementById("progressPercentage");
+
+    const currentBoardTitleEl = document.getElementById("currentBoardTitle");
+    const currentBoardIdTag = document.getElementById("currentBoardIdTag");
+    const copyShareBtn = document.getElementById("copyShareBtn");
+    const switchBoardBtn = document.getElementById("switchBoardBtn");
+    const boardModal = document.getElementById("boardModal");
+    const closeBoardBtn = document.getElementById("closeBoardBtn");
+    const joinCustomBoardBtn = document.getElementById("joinCustomBoardBtn");
+    const customBoardInput = document.getElementById("customBoardInput");
+    const collaboratorsFacepile = document.getElementById("collaboratorsFacepile");
+
+    const openConfigBtn = document.getElementById("openConfigBtn");
+    const configModal = document.getElementById("configModal");
+    const closeConfigBtn = document.getElementById("closeConfigBtn");
+    const cancelConfigBtn = document.getElementById("cancelConfigBtn");
+    const saveConfigBtn = document.getElementById("saveConfigBtn");
+    const enableDemoBtn = document.getElementById("enableDemoBtn");
+    const cfgApiKey = document.getElementById("cfgApiKey");
+    const cfgAppId = document.getElementById("cfgAppId");
+
+    const filterTabs = document.querySelectorAll(".filter-tab");
+    const searchInput = document.getElementById("searchInput");
+
+    // Initialize Icons
+    lucide.createIcons();
+
+    // Show Toast
+    function showToast(message, isError = false) {
+      const toast = document.getElementById("toast");
+      const toastMsg = document.getElementById("toastMsg");
+      toastMsg.textContent = message;
+      toast.className = `fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl border text-xs shadow-2xl flex items-center gap-2 transform transition-all duration-300 ${
+        isError ? "bg-rose-950 border-rose-800 text-rose-200" : "bg-slate-800 border-slate-700 text-slate-200"
+      }`;
+      toast.style.transform = "translateY(0)";
+      toast.style.opacity = "1";
+      setTimeout(() => {
+        toast.style.transform = "translateY(4rem)";
+        toast.style.opacity = "0";
+      }, 3000);
+    }
+
+    // Play subtle audio pop on check
+    function playChime() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.25);
+      } catch (e) {}
+    }
+
+    // Initialize Firebase Setup
+    function initFirebase() {
+      const cfg = getActiveFirebaseConfig();
+      cfgApiKey.value = cfg.apiKey || "";
+      cfgAppId.value = cfg.appId || "";
+
+      if (!isConfigValid(cfg)) {
+        statusDot.className = "w-2 h-2 rounded-full bg-amber-400";
+        statusText.textContent = "待設定 Firebase API Key";
+        // Prompt config modal on first load if not in demo
+        if (!sessionStorage.getItem("demo_dismissed")) {
+          configModal.classList.remove("hidden");
+        }
+        return false;
+      }
+
+      try {
+        app = initializeApp(cfg);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        statusDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+        statusText.textContent = "即時連線 (my-to-do-list-54712)";
+
+        // Auth state listener
+        onAuthStateChanged(auth, (user) => {
+          currentUser = user;
+          updateAuthUI(user);
+        });
+
+        // Start listening to Firestore
+        listenToTasks();
+        return true;
+      } catch (err) {
+        console.error("Firebase 初始化失敗:", err);
+        statusDot.className = "w-2 h-2 rounded-full bg-rose-500";
+        statusText.textContent = "連線異常，請檢查設定";
+        showToast("Firebase 初始化失敗，請檢查 API Key 是否正確", true);
+        return false;
+      }
+    }
+
+    // Update Auth UI
+    function updateAuthUI(user) {
+      if (user) {
+        googleLoginBtn.classList.add("hidden");
+        userProfile.classList.remove("hidden");
+        userAvatar.src = user.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`;
+        userName.textContent = user.displayName || "使用者";
+        userEmail.textContent = user.email || "";
+      } else {
+        googleLoginBtn.classList.remove("hidden");
+        userProfile.classList.add("hidden");
+      }
+    }
+
+    // Google Sign-In Action
+    googleLoginBtn.addEventListener("click", async () => {
+      if (isDemoMode || !auth) {
+        // In Demo Mode, simulate a realistic Google user!
+        currentUser = {
+          uid: "demo-user-" + Math.floor(Math.random() * 1000),
+          displayName: "展示夥伴 (Demo User)",
+          email: "demo@example.com",
+          photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=LuckyPartner"
+        };
+        updateAuthUI(currentUser);
+        showToast("已登入模擬帳號！");
+        return;
+      }
+
+      try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        showToast(`歡迎回來，${result.user.displayName}！`);
+      } catch (err) {
+        console.error("Google 登入錯誤:", err);
+        showToast("登入未完成: " + err.message, true);
+      }
+    });
+
+    // Logout
+    logoutBtn.addEventListener("click", async () => {
+      if (auth) {
+        await signOut(auth);
+      }
+      currentUser = null;
+      updateAuthUI(null);
+      showToast("已安全登出");
+    });
+
+    // Real-Time Task Listener
+    function listenToTasks() {
+      if (unsubscribeFirestore) {
+        unsubscribeFirestore();
+      }
+
+      currentBoardTitleEl.textContent = currentBoardTitle;
+      currentBoardIdTag.textContent = `#${currentBoardId}`;
+
+      if (isDemoMode || !db) {
+        renderDemoTasks();
+        return;
+      }
+
+      loadingState.classList.remove("hidden");
+      emptyState.classList.add("hidden");
+
+      try {
+        const tasksRef = collection(db, "boards", currentBoardId, "tasks");
+        const q = query(tasksRef, orderBy("createdAt", "desc"));
+
+        unsubscribeFirestore = onSnapshot(q, (snapshot) => {
+          loadingState.classList.add("hidden");
+          const tasks = [];
+          const collaboratorsMap = new Map();
+
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            tasks.push({ id: docSnap.id, ...data });
+
+            if (data.createdBy && data.createdBy.displayName) {
+              collaboratorsMap.set(data.createdBy.uid, data.createdBy);
+            }
+          });
+
+          tasksCache = tasks;
+          renderTasks();
+          renderCollaborators(collaboratorsMap);
+        }, (error) => {
+          console.error("Firestore 即時監聽錯誤:", error);
+          loadingState.classList.add("hidden");
+          statusDot.className = "w-2 h-2 rounded-full bg-rose-500";
+          statusText.textContent = "資料庫讀取受限";
+          showToast("Firestore 權限不足，請確認安全性規則是否開放", true);
+        });
+      } catch (e) {
+        console.error("建立監聽器失敗", e);
+      }
+    }
+
+    // Render Collaborators
+    function renderCollaborators(collaboratorsMap) {
+      collaboratorsFacepile.innerHTML = "";
+      if (collaboratorsMap.size === 0) {
+        collaboratorsFacepile.innerHTML = `
+          <span class="inline-block h-6 w-6 rounded-full ring-2 ring-slate-900 bg-indigo-600 text-white text-[10px] flex items-center justify-center font-bold">ALL</span>
+        `;
+        return;
+      }
+
+      collaboratorsMap.forEach((user) => {
+        const img = document.createElement("img");
+        img.className = "inline-block h-6 w-6 rounded-full ring-2 ring-slate-900 object-cover";
+        img.src = user.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`;
+        img.title = user.displayName;
+        collaboratorsFacepile.appendChild(img);
+      });
+    }
+
+    // Render Tasks
+    function renderTasks() {
+      // Filter & Search
+      let filtered = tasksCache.filter(task => {
+        if (activeFilter === "active") return !task.completed;
+        if (activeFilter === "completed") return task.completed;
+        return true;
+      });
+
+      if (currentSearch) {
+        const q = currentSearch.toLowerCase();
+        filtered = filtered.filter(task => 
+          (task.text && task.text.toLowerCase().includes(q)) ||
+          (task.category && task.category.toLowerCase().includes(q)) ||
+          (task.createdBy && task.createdBy.displayName && task.createdBy.displayName.toLowerCase().includes(q))
+        );
+      }
+
+      // Update Counts & Progress
+      const totalCount = tasksCache.length;
+      const completedCount = tasksCache.filter(t => t.completed).length;
+      const percent = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
+
+      taskCountText.textContent = `共 ${totalCount} 項任務 · ${completedCount} 項已完成`;
+      progressBar.style.width = `${percent}%`;
+      progressPercentage.textContent = `${percent}%`;
+
+      // Render items
+      if (filtered.length === 0) {
+        taskList.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+      taskList.innerHTML = "";
+
+      filtered.forEach(task => {
+        const card = document.createElement("div");
+        card.className = `task-item-enter bg-slate-900/90 hover:bg-slate-900 border ${
+          task.completed ? "border-slate-800/50 opacity-75" : "border-slate-800"
+        } rounded-xl p-3.5 sm:p-4 flex items-start gap-3 transition-all duration-200 shadow-sm group`;
+
+        // Priority Color Badge
+        let priorityBadge = "";
+        if (task.priority === "high") {
+          priorityBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/25">緊急</span>`;
+        } else if (task.priority === "medium") {
+          priorityBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/25">中等</span>`;
+        } else {
+          priorityBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400">一般</span>`;
+        }
+
+        const categoryBadge = task.category ? `
+          <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+            #${task.category}
+          </span>
+        ` : "";
+
+        // Author Avatar
+        const authorImg = (task.createdBy && task.createdBy.photoURL) 
+          ? `<img src="${task.createdBy.photoURL}" alt="author" class="w-4 h-4 rounded-full inline-block mr-1">`
+          : "";
+        const authorName = (task.createdBy && task.createdBy.displayName) ? task.createdBy.displayName : "匿名協作者";
+
+        card.innerHTML = `
+          <!-- Custom Checkbox -->
+          <button class="toggle-btn mt-0.5 w-5 h-5 rounded-lg border ${
+            task.completed ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-700 hover:border-indigo-500 bg-slate-950"
+          } flex items-center justify-center transition flex-shrink-0" data-id="${task.id}" data-completed="${task.completed}">
+            ${task.completed ? `<i data-lucide="check" class="w-3.5 h-3.5 stroke-[3]"></i>` : ""}
+          </button>
+
+          <!-- Task Body -->
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-1.5 mb-1">
+              ${priorityBadge}
+              ${categoryBadge}
+            </div>
+            <p class="text-xs sm:text-sm font-medium ${
+              task.completed ? "line-through text-slate-500" : "text-slate-100"
+            } leading-relaxed break-words">
+              ${escapeHtml(task.text)}
+            </p>
+            <div class="mt-2 flex items-center gap-3 text-[10px] text-slate-500">
+              <span class="flex items-center">
+                ${authorImg} ${authorName}
+              </span>
+              <span>•</span>
+              <span>${formatTimestamp(task.createdAt)}</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <button class="delete-btn opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition" data-id="${task.id}" title="刪除此任務">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        `;
+
+        taskList.appendChild(card);
+      });
+
+      lucide.createIcons();
+      bindCardActions();
+    }
+
+    // Helper: Escape HTML
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    // Helper: Timestamp formatting
+    function formatTimestamp(ts) {
+      if (!ts) return "剛剛";
+      if (ts.toDate) {
+        const d = ts.toDate();
+        return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      }
+      return "剛剛";
+    }
+
+    // Bind Toggle & Delete Actions
+    function bindCardActions() {
+      document.querySelectorAll(".toggle-btn").forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute("data-id");
+          const currentStatus = btn.getAttribute("data-completed") === "true";
+          const newStatus = !currentStatus;
+
+          if (newStatus) playChime();
+
+          if (isDemoMode || !db) {
+            const task = tasksCache.find(t => t.id === id);
+            if (task) task.completed = newStatus;
+            renderTasks();
+            return;
+          }
+
+          try {
+            const taskRef = doc(db, "boards", currentBoardId, "tasks", id);
+            await updateDoc(taskRef, { completed: newStatus });
+          } catch (err) {
+            console.error("更新任務失敗:", err);
+            showToast("更新失敗: " + err.message, true);
+          }
+        };
+      });
+
+      document.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const id = btn.getAttribute("data-id");
+
+          if (isDemoMode || !db) {
+            tasksCache = tasksCache.filter(t => t.id !== id);
+            renderTasks();
+            showToast("已刪除任務 (展示模式)");
+            return;
+          }
+
+          try {
+            const taskRef = doc(db, "boards", currentBoardId, "tasks", id);
+            await deleteDoc(taskRef);
+            showToast("已從雲端刪除任務");
+          } catch (err) {
+            console.error("刪除失敗:", err);
+            showToast("刪除失敗: " + err.message, true);
+          }
+        };
+      });
+    }
+
+    // Add New Task
+    taskForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = taskInput.value.trim();
+      if (!text) return;
+
+      const priority = prioritySelect.value;
+      const category = categorySelect.value;
+
+      const userPayload = currentUser ? {
+        uid: currentUser.uid,
+        displayName: currentUser.displayName || "Google 夥伴",
+        photoURL: currentUser.photoURL || null
+      } : {
+        uid: "anon",
+        displayName: "匿名訪客",
+        photoURL: null
+      };
+
+      if (isDemoMode || !db) {
+        const newTask = {
+          id: "demo-" + Date.now(),
+          text,
+          priority,
+          category,
+          completed: false,
+          createdBy: userPayload,
+          createdAt: { toDate: () => new Date() }
+        };
+        tasksCache.unshift(newTask);
+        taskInput.value = "";
+        renderTasks();
+        showToast("已在展示模式中新增任務");
+        return;
+      }
+
+      try {
+        const tasksRef = collection(db, "boards", currentBoardId, "tasks");
+        await addDoc(tasksRef, {
+          text,
+          priority,
+          category,
+          completed: false,
+          createdBy: userPayload,
+          createdAt: serverTimestamp()
+        });
+
+        taskInput.value = "";
+        showToast("已成功同步任務至多人清單！");
+      } catch (err) {
+        console.error("新增失敗:", err);
+        showToast("新增失敗，請檢查 Firestore 權限", true);
+      }
+    });
+
+    // Demo Mode Sample Tasks
+    function renderDemoTasks() {
+      loadingState.classList.add("hidden");
+      if (tasksCache.length === 0) {
+        tasksCache = [
+          {
+            id: "demo-1",
+            text: "歡迎使用 MyToDoList！這是一份多人協作待辦清單範例。",
+            priority: "high",
+            category: "前端",
+            completed: false,
+            createdBy: { uid: "u1", displayName: "Alex (協作成員)", photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" },
+            createdAt: { toDate: () => new Date() }
+          },
+          {
+            id: "demo-2",
+            text: "支援即時多人狀態同步、Google 帳號登入與自訂協作板。",
+            priority: "medium",
+            category: "設計",
+            completed: true,
+            createdBy: { uid: "u2", displayName: "Emma (產品經理)", photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma" },
+            createdAt: { toDate: () => new Date(Date.now() - 3600000) }
+          },
+          {
+            id: "demo-3",
+            text: "點擊右上角齒輪設定，填入 Firebase API Key 即可啟動真實雲端連線。",
+            priority: "normal",
+            category: "待辦",
+            completed: false,
+            createdBy: { uid: "u3", displayName: "系統助手", photoURL: "https://api.dicebear.com/7.x/bottts/svg?seed=Admin" },
+            createdAt: { toDate: () => new Date(Date.now() - 7200000) }
+          }
+        ];
+      }
+      renderTasks();
+    }
+
+    // Filter Tabs
+    filterTabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        filterTabs.forEach(t => {
+          t.className = "filter-tab flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 transition";
+        });
+        tab.className = "filter-tab active flex-1 sm:flex-none px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition";
+        activeFilter = tab.getAttribute("data-filter");
+        renderTasks();
+      });
+    });
+
+    // Search Input
+    searchInput.addEventListener("input", (e) => {
+      currentSearch = e.target.value.trim();
+      renderTasks();
+    });
+
+    // Copy Share Link
+    copyShareBtn.addEventListener("click", () => {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?board=${encodeURIComponent(currentBoardId)}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showToast("已複製協作邀請連結至剪貼簿！");
+      }).catch(() => {
+        prompt("請複製此協作連結：", shareUrl);
+      });
+    });
+
+    // Switch Board Modal
+    switchBoardBtn.addEventListener("click", () => boardModal.classList.remove("hidden"));
+    closeBoardBtn.addEventListener("click", () => boardModal.classList.add("hidden"));
+
+    document.querySelectorAll(".board-preset-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const boardId = btn.getAttribute("data-board");
+        const title = btn.getAttribute("data-title");
+        if (boardId === "my-private") {
+          if (!currentUser) {
+            showToast("請先點擊右上角登入 Google 帳號以啟用個人私人清單！", true);
+            return;
+          }
+          currentBoardId = `private-${currentUser.uid}`;
+          currentBoardTitle = `🔒 ${currentUser.displayName} 的私人清單`;
+        } else {
+          currentBoardId = boardId;
+          currentBoardTitle = title;
+        }
+        boardModal.classList.add("hidden");
+        listenToTasks();
+        showToast(`已切換至「${currentBoardTitle}」`);
+      });
+    });
+
+    joinCustomBoardBtn.addEventListener("click", () => {
+      const code = customBoardInput.value.trim();
+      if (!code) return;
+      currentBoardId = code;
+      currentBoardTitle = `📁 ${code}`;
+      boardModal.classList.add("hidden");
+      listenToTasks();
+      showToast(`已切換至協作板 #${code}`);
+    });
+
+    // Config Modal
+    openConfigBtn.addEventListener("click", () => configModal.classList.remove("hidden"));
+    closeConfigBtn.addEventListener("click", () => configModal.classList.add("hidden"));
+    cancelConfigBtn.addEventListener("click", () => configModal.classList.add("hidden"));
+
+    saveConfigBtn.addEventListener("click", () => {
+      const apiKey = cfgApiKey.value.trim();
+      const appId = cfgAppId.value.trim();
+
+      if (!apiKey) {
+        showToast("請填寫 Firebase Web API Key", true);
+        return;
+      }
+
+      const newConfig = {
+        apiKey,
+        authDomain: "my-to-do-list-54712.firebaseapp.com",
+        projectId: "my-to-do-list-54712",
+        storageBucket: "my-to-do-list-54712.firebasestorage.app",
+        messagingSenderId: "",
+        appId
+      };
+
+      saveFirebaseConfig(newConfig);
+      configModal.classList.add("hidden");
+      isDemoMode = false;
+      showToast("設定已儲存，正在重新連線...");
+      initFirebase();
+    });
+
+    enableDemoBtn.addEventListener("click", () => {
+      sessionStorage.setItem("demo_dismissed", "true");
+      configModal.classList.add("hidden");
+      isDemoMode = true;
+      statusDot.className = "w-2 h-2 rounded-full bg-cyan-400";
+      statusText.textContent = "展示模式 (Demo Mode)";
+      showToast("已啟動展示模式，可直接體驗任務新增與操作！");
+      renderDemoTasks();
+    });
+
+    // Start App
+    initFirebase();
+  </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
-# ✨ 我的網頁與多媒體作品集 (My Web & Creative Portfolio)
+﻿# ✨ 我的網頁與多媒體作品集 (My Web & Creative Portfolio)
 
-> 專為行動裝置優先（Mobile-First）設計的個人作品展覽館，收錄純前端互動應用、數據分析儀表板、互動休閒遊戲、系統原型藍圖、商業廣告 DM、AI 概念影像與原創音樂等 32 件作品。
+> 專為行動裝置優先（Mobile-First）設計的個人作品展覽館，收錄純前端互動應用、數據分析儀表板、互動休閒遊戲、系統原型藍圖、商業廣告 DM、AI 概念影像與原創音樂等 33 件作品。
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/zarac715-raven/my-works?color=indigo&style=for-the-badge)
 ![GitHub last commit](https://img.shields.io/github/last-commit/zarac715-raven/my-works?color=purple&style=for-the-badge)
@@ -23,6 +23,10 @@
 My works/
 ├── index.html            # 作品集首頁（Mobile-First 互動展覽館）
 ├── README.md             # 專案說明文件
+├── MyToDoList/           # Firebase 多人即時協作待辦清單應用 (Google Auth + Firestore)
+│   ├── index.html
+│   ├── firebase-config.js
+│   └── README.md
 ├── Web/                  # 網頁應用與數據分析儀表板 (10 件)
 │   ├── daily_water_intake_tracker.html
 │   ├── hogwarts_chrono_magic_clock.html
