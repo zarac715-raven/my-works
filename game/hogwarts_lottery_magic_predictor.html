@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>霍格華茲大樂透魔法選號機 | Hogwarts Lottery Magic Predictor</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Noto+Serif+TC:wght@600;700;900&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Serif TC', serif;
+            background: radial-gradient(circle at center, #1e1730 0%, #0d0818 70%, #05030a 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-magic-title {
+            font-family: 'Cinzel', serif;
+        }
+
+        .number-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Lumos Floating Canvas */
+        #lumosCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 魔法金黃邊框與光暈 */
+        .magic-border {
+            border: 2px solid #d4af37;
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.3), inset 0 0 15px rgba(212, 175, 55, 0.15);
+        }
+
+        .magic-card {
+            background: linear-gradient(145deg, rgba(23, 17, 39, 0.88), rgba(12, 8, 20, 0.95));
+            backdrop-filter: blur(12px);
+        }
+
+        /* 學院顏色按鈕風格 */
+        .gryffindor-btn {
+            background: linear-gradient(135deg, #740001, #ae0001);
+            border-color: #e3a008;
+        }
+        .gryffindor-btn:hover {
+            background: linear-gradient(135deg, #8f0001, #c80002);
+            box-shadow: 0 0 18px rgba(227, 160, 8, 0.6);
+        }
+
+        .slytherin-btn {
+            background: linear-gradient(135deg, #1a472a, #2a623d);
+            border-color: #aaaaaa;
+        }
+        .slytherin-btn:hover {
+            background: linear-gradient(135deg, #235d37, #357a4d);
+            box-shadow: 0 0 18px rgba(42, 98, 61, 0.7);
+        }
+
+        .ravenclaw-btn {
+            background: linear-gradient(135deg, #0e1a40, #222f5b);
+            border-color: #946b2d;
+        }
+        .ravenclaw-btn:hover {
+            background: linear-gradient(135deg, #162861, #2d3e75);
+            box-shadow: 0 0 18px rgba(34, 47, 91, 0.7);
+        }
+
+        .hufflepuff-btn {
+            background: linear-gradient(135deg, #ecb939, #f0c75e);
+            border-color: #000000;
+            color: #000000 !important;
+        }
+        .hufflepuff-btn:hover {
+            background: linear-gradient(135deg, #f5d166, #f7dc79);
+            box-shadow: 0 0 18px rgba(236, 185, 57, 0.7);
+        }
+
+        /* 魔法球立體色彩樣式 */
+        .ball {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            font-weight: 900;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.6), inset -4px -4px 8px rgba(0,0,0,0.5), inset 4px 4px 8px rgba(255,255,255,0.5);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .ball-main {
+            background: radial-gradient(circle at 35% 35%, #ffe680, #d4af37 55%, #664d00);
+            color: #1a0f00;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+            border: 2px solid #fff5cc;
+        }
+
+        .ball-special {
+            background: radial-gradient(circle at 35% 35%, #ff6666, #cc0000 60%, #660000);
+            color: #ffffff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+            border: 2px solid #ffcccc;
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 10px rgba(255, 77, 77, 0.6), inset -4px -4px 8px rgba(0,0,0,0.5), inset 4px 4px 8px rgba(255,255,255,0.5); }
+            100% { box-shadow: 0 0 25px rgba(255, 77, 77, 0.95), inset -4px -4px 8px rgba(0,0,0,0.5), inset 4px 4px 8px rgba(255,255,255,0.5); }
+        }
+
+        /* 魔法球滾動躍動動畫 */
+        .ball-spin {
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0) rotate(-200deg); opacity: 0; }
+            80% { transform: scale(1.15) rotate(10deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        /* Toast notification */
+        #toast {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+    </style>
+</head>
+<body class="relative flex flex-col justify-between min-h-screen">
+
+    <!-- Lumos Particle Canvas Background -->
+    <canvas id="lumosCanvas"></canvas>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 transform translate-y-[-20px] opacity-0 pointer-events-none bg-amber-500 text-slate-950 px-4 py-2.5 rounded-xl font-bold text-sm shadow-xl flex items-center space-x-2 border border-amber-200">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMsg">已複製到剪貼簿！</span>
+    </div>
+
+    <!-- 頁眉標題 -->
+    <header class="relative z-10 pt-8 pb-4 text-center px-4">
+        <div class="inline-flex items-center justify-center space-x-3 mb-2">
+            <i class="fa-solid fa-hat-wizard text-3xl md:text-5xl text-amber-400 animate-bounce"></i>
+            <h1 class="font-magic-title text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-600 tracking-wider">
+                HOGWARTS LOTTO
+            </h1>
+            <i class="fa-solid fa-wand-magic-sparkles text-3xl md:text-5xl text-amber-400"></i>
+        </div>
+        <p class="text-amber-100/80 text-sm md:text-base font-semibold tracking-widest">
+            ✨ 霍格華茲大樂透魔法選號儀式 · 預測幸運魔咒 ✨
+        </p>
+    </header>
+
+    <!-- 主要互動卡片區域 -->
+    <main class="relative z-10 flex-1 max-w-4xl w-full mx-auto px-4 py-4 flex flex-col justify-center">
+        
+        <!-- 主結果展示卡片 -->
+        <div class="magic-card magic-border rounded-3xl p-6 md:p-8 text-center shadow-2xl relative overflow-hidden mb-6">
+            
+            <!-- 裝飾角花 -->
+            <div class="absolute top-3 left-4 text-amber-400/40 text-xl"><i class="fa-solid fa-ankh"></i></div>
+            <div class="absolute top-3 right-4 text-amber-400/40 text-xl"><i class="fa-solid fa-ankh"></i></div>
+
+            <!-- 當前選擇模式標題 -->
+            <div id="currentSpellName" class="text-amber-300 font-bold text-base md:text-lg mb-4 flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-scroll text-amber-400"></i>
+                <span>請施展魔法進行大樂透選號</span>
+            </div>
+
+            <!-- 彩球結果區域 -->
+            <div id="ballsContainer" class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 md:gap-5 my-6 min-h-[100px] py-2">
+                <!-- 預設預覽空彩球 -->
+                <div class="ball ball-main w-12 h-12 md:w-16 md:h-16 text-lg md:text-2xl opacity-40">?</div>
+                <div class="ball ball-main w-12 h-12 md:w-16 md:h-16 text-lg md:text-2xl opacity-40">?</div>
+                <div class="ball ball-main w-12 h-12 md:w-16 md:h-16 text-lg md:text-2xl opacity-40">?</div>
+                <div class="ball ball-main w-12 h-12 md:w-16 md:h-16 text-lg md:text-2xl opacity-40">?</div>
+                <div class="ball ball-main w-12 h-12 md:w-16 md:h-16 text-lg md:text-2xl opacity-40">?</div>
+                <div class="ball ball-main w-12 h-12 md:w-16 md:h-16 text-lg md:text-2xl opacity-40">?</div>
+                <div class="text-amber-400 text-xl font-black mx-1">+</div>
+                <div class="ball ball-special w-12 h-12 md:w-16 md:h-16 text-lg md:text-2xl opacity-40">?</div>
+            </div>
+
+            <!-- 魔法吉兆解讀 -->
+            <div id="magicFortuneText" class="text-slate-300 italic text-xs md:text-sm bg-slate-950/60 p-3.5 rounded-xl border border-amber-500/20 max-w-xl mx-auto">
+                「點擊下方魔法施法按鈕，喚醒幸運力量！」
+            </div>
+
+            <!-- 單組複製按鈕 -->
+            <button id="copyMainBtn" onclick="copyCurrentMain()" class="mt-4 hidden inline-flex items-center space-x-2 px-4 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold transition">
+                <i class="fa-solid fa-copy"></i>
+                <span>複製此組號碼</span>
+            </button>
+        </div>
+
+        <!-- 四學院與魔法選號按鈕區 -->
+        <div class="space-y-4">
+            
+            <!-- 核心一鍵選號 -->
+            <button id="castSpellBtn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-lg md:text-2xl tracking-wider shadow-lg shadow-amber-500/30 transition transform active:scale-95 flex items-center justify-center space-x-3 border-2 border-amber-200">
+                <i class="fa-solid fa-wand-magic text-xl md:text-2xl"></i>
+                <span>施展福吉福靈魔咒（快速選號 1 組）</span>
+            </button>
+
+            <!-- 學院選號主題區 -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <button onclick="generateByHouse('gryffindor')" class="gryffindor-btn p-3 rounded-xl border font-bold text-xs md:text-sm text-white flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 shadow-md">
+                    <i class="fa-solid fa-shield-cat text-lg text-amber-300"></i>
+                    <span>葛來分多 (勇氣選號)</span>
+                </button>
+                <button onclick="generateByHouse('slytherin')" class="slytherin-btn p-3 rounded-xl border font-bold text-xs md:text-sm text-white flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 shadow-md">
+                    <i class="fa-solid fa-staff-snake text-lg text-slate-200"></i>
+                    <span>史萊哲林 (野心選號)</span>
+                </button>
+                <button onclick="generateByHouse('ravenclaw')" class="ravenclaw-btn p-3 rounded-xl border font-bold text-xs md:text-sm text-white flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 shadow-md">
+                    <i class="fa-solid fa-crow text-lg text-amber-400"></i>
+                    <span>雷文克勞 (智慧選號)</span>
+                </button>
+                <button onclick="generateByHouse('hufflepuff')" class="hufflepuff-btn p-3 rounded-xl border font-bold text-xs md:text-sm font-black flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 shadow-md">
+                    <i class="fa-solid fa-shield-halved text-lg text-slate-900"></i>
+                    <span>赫夫帕夫 (忠誠選號)</span>
+                </button>
+            </div>
+
+            <!-- 多組連開與自訂設定 -->
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/80 backdrop-blur-md p-3.5 rounded-2xl border border-amber-500/30">
+                <div class="flex items-center space-x-2 text-xs md:text-sm text-amber-200 font-bold">
+                    <i class="fa-solid fa-layer-group text-amber-400"></i>
+                    <span>一次生成多組魔法組合：</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="generateMultipleSets(3)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-600/40 text-amber-300 border border-amber-500/40 text-xs font-bold transition">3 組</button>
+                    <button onclick="generateMultipleSets(5)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-600/40 text-amber-300 border border-amber-500/40 text-xs font-bold transition">5 組</button>
+                    <button onclick="generateMultipleSets(10)" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-amber-600/40 text-amber-300 border border-amber-500/40 text-xs font-bold transition">10 組</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 多組號碼顯示歷史紀錄區域 -->
+        <div id="multiHistorySection" class="mt-6 hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-amber-400 text-sm font-bold flex items-center space-x-2">
+                    <i class="fa-solid fa-scroll"></i>
+                    <span>魔法多組預測結果</span>
+                </h3>
+                <button onclick="copyAllHistory()" class="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center space-x-1">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>複製全部</span>
+                </button>
+            </div>
+            <div id="multiHistoryContainer" class="space-y-2 max-h-80 overflow-y-auto pr-1"></div>
+        </div>
+
+    </main>
+
+    <!-- 頁腳 -->
+    <footer class="relative z-10 py-6 text-center text-xs text-amber-200/50">
+        Hogwarts Lottery Predictor — 祝您幸運中大獎！ 🪄✨
+    </footer>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // 當前單組資料
+        let currentLottoData = null;
+        let currentHistoryList = [];
+
+        // 學院名言庫
+        const houseQuotes = {
+            gryffindor: [
+                "「勇者的命運掌握在自己手中！」",
+                "「葛來分多的火熱勇氣，帶領你擊中頭獎！」",
+                "「展現你的無畏精神，這組號碼充滿勝算！」"
+            ],
+            slytherin: [
+                "「野心與敏銳，將精準指引財富的方向。」",
+                "「只有懂得審時度勢的人，才能獲得最終寶藏。」",
+                "「高貴與精明，這組號碼經過精準算計。」"
+            ],
+            ravenclaw: [
+                "「智慧是最大的財富，號碼背後蘊含宇宙規律。」",
+                "「理性與知識交織出最完美的魔法概率。」",
+                "「靈敏的思維，已為你解開幸運密碼。」"
+            ],
+            hufflepuff: [
+                "「腳踏實地，幸運之神終將眷顧勤奮之人。」",
+                "「堅毅與善良，帶來豐厚無比的回報。」",
+                "「大地與自然的能量，為這組號碼注入祝福。」"
+            ]
+        };
+
+        // 產生大樂透隨機號碼 (6個1~49不重複主號 + 1個1~49特別號)
+        function drawLottoNumbers() {
+            const numbers = [];
+            while (numbers.length < 6) {
+                const rand = Math.floor(Math.random() * 49) + 1;
+                if (!numbers.includes(rand)) {
+                    numbers.push(rand);
+                }
+            }
+            numbers.sort((a, b) => a - b);
+
+            let specialNum;
+            do {
+                specialNum = Math.floor(Math.random() * 49) + 1;
+            } while (numbers.includes(specialNum));
+
+            return { main: numbers, special: specialNum };
+        }
+
+        // 渲染單組號碼到中央大螢幕
+        function renderMainDisplay(lotto, spellName, quoteText) {
+            currentLottoData = lotto;
+            const container = document.getElementById('ballsContainer');
+            document.getElementById('currentSpellName').innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> <span>${spellName}</span>`;
+            document.getElementById('magicFortuneText').textContent = quoteText;
+            document.getElementById('copyMainBtn').classList.remove('hidden');
+
+            container.innerHTML = '';
+
+            // 渲染 6 個主號碼
+            lotto.main.forEach((num, idx) => {
+                const ball = document.createElement('div');
+                ball.className = 'ball ball-main number-font w-12 h-12 md:w-16 md:h-16 text-xl md:text-2xl ball-spin';
+                ball.style.animationDelay = `${idx * 0.08}s`;
+                ball.textContent = String(num).padStart(2, '0');
+                container.appendChild(ball);
+            });
+
+            // 加號
+            const plus = document.createElement('div');
+            plus.className = 'text-amber-400 text-xl font-black mx-1';
+            plus.textContent = '+';
+            container.appendChild(plus);
+
+            // 渲染特別號
+            const specBall = document.createElement('div');
+            specBall.className = 'ball ball-special number-font w-12 h-12 md:w-16 md:h-16 text-xl md:text-2xl ball-spin';
+            specBall.style.animationDelay = '0.55s';
+            specBall.textContent = String(lotto.special).padStart(2, '0');
+            container.appendChild(specBall);
+
+            // 播放魔法音效
+            playMagicSound();
+            // 觸發星芒爆發效果
+            triggerBurstSparkles();
+        }
+
+        // 施展隨機選號（福吉福靈魔咒）
+        document.getElementById('castSpellBtn').addEventListener('click', () => {
+            document.getElementById('multiHistorySection').classList.add('hidden');
+            const lotto = drawLottoNumbers();
+            renderMainDisplay(lotto, '福吉福靈幸運魔咒 (Felix Felicis)', '「幸運魔藥發揮了作用！感覺今天整個人都幸運爆棚！」');
+        });
+
+        // 學院選號
+        function generateByHouse(house) {
+            document.getElementById('multiHistorySection').classList.add('hidden');
+            const lotto = drawLottoNumbers();
+            const quotes = houseQuotes[house];
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            
+            const houseNames = {
+                gryffindor: '葛來分多勇氣選號',
+                slytherin: '史萊哲林野心選號',
+                ravenclaw: '雷文克勞智慧選號',
+                hufflepuff: '赫夫帕夫忠誠選號'
+            };
+
+            renderMainDisplay(lotto, houseNames[house], randomQuote);
+        }
+
+        // 一次生成多組
+        function generateMultipleSets(count) {
+            const historySection = document.getElementById('multiHistorySection');
+            const container = document.getElementById('multiHistoryContainer');
+            container.innerHTML = '';
+            historySection.classList.remove('hidden');
+
+            currentHistoryList = [];
+
+            const firstLotto = drawLottoNumbers();
+            renderMainDisplay(firstLotto, `幸運幸運連開 (共 ${count} 組)`, `「魔法陣已連續召喚 ${count} 組幸運密碼！」`);
+
+            for (let i = 1; i <= count; i++) {
+                const lotto = (i === 1) ? firstLotto : drawLottoNumbers();
+                currentHistoryList.push(lotto);
+
+                const row = document.createElement('div');
+                row.className = 'bg-slate-900/90 border border-amber-500/20 p-3 rounded-xl flex items-center justify-between text-xs md:text-sm hover:border-amber-500/50 transition';
+
+                const mainStr = lotto.main.map(n => String(n).padStart(2, '0')).join(' , ');
+                const specStr = String(lotto.special).padStart(2, '0');
+
+                row.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="font-bold text-amber-400">第 ${i} 組:</span>
+                        <span class="font-mono font-bold text-amber-100">[ ${mainStr} ]</span>
+                        <span class="font-mono font-bold text-red-400">+ (${specStr})</span>
+                    </div>
+                    <button onclick="copySingleRow(${i-1})" class="text-amber-300 hover:text-amber-100 p-1.5 rounded transition">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                `;
+                container.appendChild(row);
+            }
+        }
+
+        // 複製主要結果
+        function copyCurrentMain() {
+            if (!currentLottoData) return;
+            const mainStr = currentLottoData.main.map(n => String(n).padStart(2, '0')).join(', ');
+            const specStr = String(currentLottoData.special).padStart(2, '0');
+            const text = `【霍格華茲大樂透選號】號碼：${mainStr} | 特別號：${specStr}`;
+            copyToClipboard(text);
+        }
+
+        // 複製單一歷史紀錄
+        function copySingleRow(index) {
+            const lotto = currentHistoryList[index];
+            if (!lotto) return;
+            const mainStr = lotto.main.map(n => String(n).padStart(2, '0')).join(', ');
+            const specStr = String(lotto.special).padStart(2, '0');
+            const text = `【第 ${index + 1} 組號碼】${mainStr} | 特別號：${specStr}`;
+            copyToClipboard(text);
+        }
+
+        // 複製全部歷史
+        function copyAllHistory() {
+            if (currentHistoryList.length === 0) return;
+            const lines = currentHistoryList.map((lotto, idx) => {
+                const mainStr = lotto.main.map(n => String(n).padStart(2, '0')).join(', ');
+                const specStr = String(lotto.special).padStart(2, '0');
+                return `第 ${idx + 1} 組: ${mainStr} + 特別號 ${specStr}`;
+            });
+            const fullText = `✨ 霍格華茲大樂透預測號碼 ✨\n` + lines.join('\n');
+            copyToClipboard(fullText);
+        }
+
+        // Clipboard 輔助函式
+        function copyToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast("複製成功！願幸運與你同在！");
+            } catch (err) {
+                showToast("複製失敗，請手動複製");
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // 提示訊息 Toast
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 2500);
+        }
+
+        // Web Audio API 魔法音效
+        function playMagicSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // 主聲道 Arpeggio 躍音
+                const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51]; // C5, E5, G5, C6, E6
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.06);
+
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime + idx * 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.06 + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(ctx.currentTime + idx * 0.06);
+                    osc.stop(ctx.currentTime + idx * 0.06 + 0.3);
+                });
+            } catch(e) {}
+        }
+
+        /* --- Canvas Lumos Background Effect --- */
+        const canvas = document.getElementById('lumosCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor(x, y, burst = false) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speedX = burst ? (Math.random() - 0.5) * 6 : (Math.random() - 0.5) * 0.8;
+                this.speedY = burst ? (Math.random() - 0.5) * 6 : -Math.random() * 0.6 - 0.2;
+                this.opacity = Math.random() * 0.7 + 0.3;
+                this.fade = burst ? Math.random() * 0.03 + 0.015 : Math.random() * 0.005 + 0.002;
+                this.color = Math.random() > 0.3 ? '#ffd700' : '#ffffff';
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.opacity -= this.fade;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.opacity);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // 初始化背景常駐微粒
+        function initParticles() {
+            for (let i = 0; i < 60; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function triggerBurstSparkles() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 3;
+            for (let i = 0; i < 40; i++) {
+                particles.push(new Particle(centerX, centerY, true));
+            }
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 維持數量
+            if (particles.length < 60) {
+                particles.push(new Particle());
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+
+                if (particles[i].opacity <= 0 || particles[i].y < 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+    </script>
+</body>
+</html>

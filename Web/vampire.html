@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>夜行者的暗影：吸血鬼傳說全書 (Vampire Myth)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cinzel & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        gothic: ['Cinzel', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        blood: {
+                            500: '#991b1b',
+                            600: '#7f1d1d',
+                            700: '#4c0519',
+                            800: '#2c040d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0b0e;
+            color: #e2e8f0;
+        }
+        .font-gothic {
+            font-family: 'Cinzel', serif;
+        }
+        .blood-glow {
+            text-shadow: 0 0 15px rgba(225, 29, 72, 0.6);
+        }
+        .blood-border {
+            box-shadow: 0 0 20px rgba(153, 27, 27, 0.25);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f1015;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4c0519;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #991b1b;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 antialiased selection:bg-red-900 selection:text-white min-h-screen">
+
+    <!-- Header Navigation -->
+    <header class="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-md border-b border-red-950/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-3 group">
+                <i class="fa-solid fa-spaghetti-monster-flying text-2xl text-red-600 group-hover:scale-110 transition-transform"></i>
+                <span class="font-gothic text-xl sm:text-2xl font-bold tracking-widest text-slate-100 group-hover:text-red-500 transition-colors">VAMPIRE MYTH</span>
+            </a>
+            
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium tracking-wide">
+                <a href="#origin" class="hover:text-red-500 transition-colors">起源演變</a>
+                <a href="#figures" class="hover:text-red-500 transition-colors">經典人物</a>
+                <a href="#weaknesses" class="hover:text-red-500 transition-colors">弱點與禁忌</a>
+                <a href="#popculture" class="hover:text-red-500 transition-colors">大眾文化</a>
+                <a href="#quiz" class="hover:text-red-500 transition-colors">傳說測驗</a>
+            </nav>
+
+            <a href="#quiz" class="px-4 py-2 rounded-lg bg-red-900/40 border border-red-700/50 text-red-200 text-xs sm:text-sm font-semibold hover:bg-red-800/60 hover:border-red-500 transition-all shadow-lg shadow-red-950/50">
+                <i class="fa-solid fa-skull mr-1.5"></i> 血族知識測試
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden flex items-center justify-center min-h-screen">
+        <!-- Background Overlay & Atmosphere -->
+        <div class="absolute inset-0 bg-gradient-to-b from-red-950/20 via-slate-950/80 to-slate-950 z-10"></div>
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1920')] bg-cover bg-center opacity-25 filter grayscale contrast-125"></div>
+
+        <div class="relative z-20 max-w-4xl mx-auto px-4 text-center">
+            <span class="inline-block px-3 py-1 rounded-full bg-red-950/60 border border-red-800/40 text-red-400 text-xs tracking-widest uppercase mb-4">
+                The Eternal Night Legend
+            </span>
+            <h1 class="font-gothic text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 blood-glow">
+                永夜的代價：<br>吸血鬼傳說的全貌
+            </h1>
+            <p class="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                從民間故事中嗜血的復生屍體，到文學作品中優雅高貴的暗夜貴族。探索穿越數個世紀、融合恐懼與誘惑的永生迷思。
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#origin" class="px-8 py-3.5 rounded-xl bg-red-800 hover:bg-red-700 text-white font-semibold shadow-lg shadow-red-900/40 transition flex items-center justify-center gap-2">
+                    探索傳說起源 <i class="fa-solid fa-arrow-down text-sm"></i>
+                </a>
+                <a href="#figures" class="px-8 py-3.5 rounded-xl bg-slate-900/80 border border-slate-700 hover:bg-slate-800 text-slate-200 font-semibold transition flex items-center justify-center gap-2">
+                    認識傳奇人物
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 1: Origin & Evolution -->
+    <section id="origin" class="py-20 border-t border-slate-900 bg-slate-950">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="font-gothic text-3xl sm:text-4xl font-bold text-white mb-4">歷史脈絡與演化</h2>
+                <div class="w-16 h-1 bg-red-700 mx-auto mb-4"></div>
+                <p class="text-slate-400 text-sm sm:text-base">吸血鬼形象並非一日形成，而是歷經民間傳說、瘟疫恐懼與浪漫主義文學的揉合演變。</p>
+            </div>
+
+            <!-- Timeline -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 hover:border-red-900/60 transition-all blood-border">
+                    <div class="w-12 h-12 rounded-xl bg-red-950/60 border border-red-800/40 flex items-center justify-center text-red-500 font-bold text-lg mb-4">
+                        1
+                    </div>
+                    <span class="text-xs text-red-400 font-semibold tracking-wider uppercase">古代與中世紀</span>
+                    <h3 class="font-gothic text-xl font-bold text-white mt-1 mb-3">民間惡魔與疾病象徵</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        早期民俗中（如東歐與斯拉夫地區），吸血鬼被視為未獲善終或感染瘟疫的走肉。人們將無法解釋的屍體腐爛過程（如發脹、流血）歸咎於「吸血怪獸」。
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 hover:border-red-900/60 transition-all blood-border">
+                    <div class="w-12 h-12 rounded-xl bg-red-950/60 border border-red-800/40 flex items-center justify-center text-red-500 font-bold text-lg mb-4">
+                        2
+                    </div>
+                    <span class="text-xs text-red-400 font-semibold tracking-wider uppercase">19世紀 哥德文學</span>
+                    <h3 class="font-gothic text-xl font-bold text-white mt-1 mb-3">貴族化與迷人誘惑</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        約翰·波里道利的小說《吸血鬼》(1819) 與布萊姆·斯托克的《德古拉》(1897) 徹底翻轉形象，將其塑造成身穿披風、舉止優雅且具強烈魅惑力的闇夜貴族。
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-6 hover:border-red-900/60 transition-all blood-border">
+                    <div class="w-12 h-12 rounded-xl bg-red-950/60 border border-red-800/40 flex items-center justify-center text-red-500 font-bold text-lg mb-4">
+                        3
+                    </div>
+                    <span class="text-xs text-red-400 font-semibold tracking-wider uppercase">20-21世紀 Pop Culture</span>
+                    <h3 class="font-gothic text-xl font-bold text-white mt-1 mb-3">人性化與反英雄化</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        從《夜訪吸血鬼》到《暮光之城》，吸血鬼逐漸擁有了道德掙扎與情慾張力，從單純的恐怖怪物轉變為孤獨、浪漫甚至具有反英雄特质的經典符號。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: Famous Figures -->
+    <section id="figures" class="py-20 bg-slate-900/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="font-gothic text-3xl sm:text-4xl font-bold text-white mb-4">傳奇原型人物</h2>
+                <div class="w-16 h-1 bg-red-700 mx-auto mb-4"></div>
+                <p class="text-slate-400 text-sm sm:text-base">究竟是真實歷史人物的殘暴事蹟，還是經典小說家筆下的幻想故事？</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Dracula -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden flex flex-col sm:flex-row group hover:border-red-800 transition">
+                    <div class="sm:w-2/5 relative h-56 sm:h-auto overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800" alt="Dracula" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80">
+                        <div class="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-slate-950 via-transparent to-transparent"></div>
+                    </div>
+                    <div class="sm:w-3/5 p-6 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs text-red-400 font-semibold tracking-wider">Vlad the Impaler</span>
+                            <h3 class="font-gothic text-2xl font-bold text-white mt-1 mb-2">德古拉伯爵 (Count Dracula)</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                                原型取材自 15 世紀瓦拉幾亞大公「穿刺公」弗拉德三世。他以嚴酷刑罰與將敵人穿刺在木樁上聞名，成為布萊姆·斯托克寫下經典小說的靈感來源。
+                            </p>
+                        </div>
+                        <div class="text-xs text-slate-500 font-mono">起源地點: 羅馬尼亞 特蘭西瓦尼亞</div>
+                    </div>
+                </div>
+
+                <!-- Carmilla -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden flex flex-col sm:flex-row group hover:border-red-800 transition">
+                    <div class="sm:w-2/5 relative h-56 sm:h-auto overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1509248961158-e54f6934749c?q=80&w=800" alt="Carmilla" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80">
+                        <div class="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-slate-950 via-transparent to-transparent"></div>
+                    </div>
+                    <div class="sm:w-3/5 p-6 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs text-red-400 font-semibold tracking-wider">Female Vampire Classic</span>
+                            <h3 class="font-gothic text-2xl font-bold text-white mt-1 mb-2">卡蜜拉 (Carmilla)</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                                由約瑟夫·雪利登·勒法努於 1872 年創作，早於《德古拉》26 年。故事描繪女吸血鬼與少女之間的強烈羈絆，開啟了女性吸血鬼與同性浪漫主題的先河。
+                            </p>
+                        </div>
+                        <div class="text-xs text-slate-500 font-mono">起源作品: 《Carmilla》 (1872)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: Weaknesses & Lore -->
+    <section id="weaknesses" class="py-20 border-t border-slate-900 bg-slate-950">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="font-gothic text-3xl sm:text-4xl font-bold text-white mb-4">弱點與避邪禁忌</h2>
+                <div class="w-16 h-1 bg-red-700 mx-auto mb-4"></div>
+                <p class="text-slate-400 text-sm sm:text-base">傳說中如何制伏或抵禦這些暗夜掠食者？幾種廣為人知的禁忌物件。</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Sunlight -->
+                <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl text-center hover:bg-slate-900 transition">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-amber-950/40 border border-amber-600/30 flex items-center justify-center text-amber-500 text-2xl mb-4">
+                        <i class="fa-solid fa-sun"></i>
+                    </div>
+                    <h3 class="font-gothic text-xl font-bold text-white mb-2">日光 (Sunlight)</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        雖然早期的德古拉可在白天活動，但 1922 年電影《不死殭屍—恐慄交響曲》確立了日光能將吸血鬼燒成灰燼的現代設定。
+                    </p>
+                </div>
+
+                <!-- Stake -->
+                <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl text-center hover:bg-slate-900 transition">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-red-950/40 border border-red-600/30 flex items-center justify-center text-red-500 text-2xl mb-4">
+                        <i class="fa-solid fa-gavel"></i>
+                    </div>
+                    <h3 class="font-gothic text-xl font-bold text-white mb-2">木樁釘心 (Wooden Stake)</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        民俗中最著名的除魔方式。用山楂樹、白楊樹或白橡木製成的木樁刺穿心臟，將吸血鬼封印於墓穴之中。
+                    </p>
+                </div>
+
+                <!-- Garlic -->
+                <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl text-center hover:bg-slate-900 transition">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-emerald-950/40 border border-emerald-600/30 flex items-center justify-center text-emerald-500 text-2xl mb-4">
+                        <i class="fa-solid fa-plant-wilt"></i>
+                    </div>
+                    <h3 class="font-gothic text-xl font-bold text-white mb-2">大蒜與聖物 (Garlic & Cross)</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        大蒜具有天然抗菌與強烈氣味，古人認為能驅趕邪靈；十字架與聖水則代表神聖力量對邪惡邪靈的克制。
+                    </p>
+                </div>
+
+                <!-- Invitation -->
+                <div class="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl text-center hover:bg-slate-900 transition">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-purple-950/40 border border-purple-600/30 flex items-center justify-center text-purple-400 text-2xl mb-4">
+                        <i class="fa-solid fa-door-closed"></i>
+                    </div>
+                    <h3 class="font-gothic text-xl font-bold text-white mb-2">邀請入室 (Invitation Needed)</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        吸血鬼若未獲得屋主的口頭邀請，無法跨越人類住宅的門檻。這反映了古老民俗中關於「家園神聖庇護」的觀念。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3.5: Pop Culture & Media -->
+    <section id="popculture" class="py-20 bg-slate-900/30 border-t border-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="font-gothic text-3xl sm:text-4xl font-bold text-white mb-4">現代大眾文化與影視演變</h2>
+                <div class="w-16 h-1 bg-red-700 mx-auto mb-4"></div>
+                <p class="text-slate-400 text-sm sm:text-base">從古老民間怪談走向螢幕與動漫，吸血鬼如何成為流行文化中最具吸引力的永恆符號？</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Literature -->
+                <div class="bg-slate-950 border border-slate-800/80 p-6 rounded-2xl hover:border-red-800 transition group">
+                    <div class="text-red-500 text-3xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-book-skull"></i>
+                    </div>
+                    <h3 class="font-gothic text-xl font-bold text-white mb-2">哥德文學經典</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        《吸血鬼》(1819) 與《德古拉》(1897) 奠定了吸血鬼優雅、高貴且危險的形象，開啟了長達數個世紀的哥德文學風潮。
+                    </p>
+                </div>
+
+                <!-- Cinema -->
+                <div class="bg-slate-950 border border-slate-800/80 p-6 rounded-2xl hover:border-red-800 transition group">
+                    <div class="text-red-500 text-3xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-film"></i>
+                    </div>
+                    <h3 class="font-gothic text-xl font-bold text-white mb-2">影視與好萊塢</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        從 1922 年默片《Nosferatu》到《夜訪吸血鬼》(1994)，電影將血族孤獨、情慾與永生的掙扎表現得淋漓盡致。
+                    </p>
+                </div>
+
+                <!-- Modern Romance -->
+                <div class="bg-slate-950 border border-slate-800/80 p-6 rounded-2xl hover:border-red-800 transition group">
+                    <div class="text-red-500 text-3xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-heart-crack"></i>
+                    </div>
+                    <h3 class="font-gothic text-xl font-bold text-white mb-2">現代浪漫與流行小說</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        《暮光之城》與《噬血真愛》打破恐怖傳統，將吸血鬼重塑為擁有超能力、保護人類且渴望愛情的浪漫主角。
+                    </p>
+                </div>
+
+                <!-- Gaming & Anime -->
+                <div class="bg-slate-950 border border-slate-800/80 p-6 rounded-2xl hover:border-red-800 transition group">
+                    <div class="text-red-500 text-3xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    <h3 class="font-gothic text-xl font-bold text-white mb-2">ACG 動漫與電玩</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        《惡魔城 (Castlevania)》、《Hellsing 惡兆》與《Fate》等作品將血族結合戰鬥、奇幻與神話，開創全新的美學體驗。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: Quiz Section -->
+    <section id="quiz" class="py-20 bg-slate-900/40 border-t border-slate-900">
+        <div class="max-w-3xl mx-auto px-4">
+            <div class="bg-slate-950 border border-red-950/80 rounded-2xl p-6 sm:p-10 blood-border">
+                <div class="text-center mb-8">
+                    <span class="text-xs text-red-500 font-semibold tracking-widest uppercase">Vampire Knowledge Test</span>
+                    <h2 class="font-gothic text-2xl sm:text-3xl font-bold text-white mt-1">暗夜知識小測驗</h2>
+                    <p class="text-slate-400 text-xs sm:text-sm mt-2">測試你對吸血鬼傳說與民俗歷史的瞭解程度！</p>
+                </div>
+
+                <form id="quizForm" onsubmit="handleQuizSubmit(event)">
+                    <div class="space-y-6 text-sm">
+                        <!-- Question 1 -->
+                        <div>
+                            <p class="text-slate-200 font-semibold mb-3">1. 歷史上德古拉伯爵 (Count Dracula) 的靈感原型來自哪一位歷史人物？</p>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-3 p-3 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer hover:bg-slate-850">
+                                    <input type="radio" name="q1" value="A" class="accent-red-600">
+                                    <span>A. 亨利八世 (Henry VIII)</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer hover:bg-slate-850">
+                                    <input type="radio" name="q1" value="B" class="accent-red-600">
+                                    <span>B. 「穿刺公」弗拉德三世 (Vlad III)</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer hover:bg-slate-850">
+                                    <input type="radio" name="q1" value="C" class="accent-red-600">
+                                    <span>C. 查理曼大帝 (Charlemagne)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Question 2 -->
+                        <div>
+                            <p class="text-slate-200 font-semibold mb-3">2. 首部明確確立「吸血鬼暴露於日光會燒成灰燼」設定的電影作品是？</p>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-3 p-3 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer hover:bg-slate-850">
+                                    <input type="radio" name="q2" value="A" class="accent-red-600">
+                                    <span>A. 《不死殭屍—恐慄交響曲》 (Nosferatu, 1922)</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer hover:bg-slate-850">
+                                    <input type="radio" name="q2" value="B" class="accent-red-600">
+                                    <span>B. 《驚情四百年》 (Bram Stoker's Dracula, 1992)</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer hover:bg-slate-850">
+                                    <input type="radio" name="q2" value="C" class="accent-red-600">
+                                    <span>C. 《暮光之城》 (Twilight, 2008)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full mt-8 py-3.5 rounded-xl bg-red-800 hover:bg-red-700 text-white font-semibold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check"></i> 提交答案評分
+                    </button>
+                </form>
+
+                <!-- Result Box -->
+                <div id="quizResult" class="hidden mt-6 p-4 rounded-xl bg-red-950/50 border border-red-800/60 text-center">
+                    <p id="resultText" class="text-white font-semibold"></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-10 border-t border-slate-900 bg-slate-950 text-center text-xs text-slate-600">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="font-gothic text-sm text-slate-400 mb-2">VAMPIRE MYTH ENCYCLOPEDIA</p>
+            <p>© 2026 暗夜傳說探索網頁. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        function handleQuizSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const q1 = form.q1.value;
+            const q2 = form.q2.value;
+
+            if (!q1 || !q2) {
+                alert('請先完成所有題目再提交！');
+                return;
+            }
+
+            let score = 0;
+            if (q1 === 'B') score += 50;
+            if (q2 === 'A') score += 50;
+
+            const resultBox = document.getElementById('quizResult');
+            const resultText = document.getElementById('resultText');
+
+            resultBox.classList.remove('hidden');
+            if (score === 100) {
+                resultText.innerHTML = '🎉 完美！你對吸血鬼傳說瞭如指掌，堪稱暗夜獵人！';
+                resultText.className = 'text-emerald-400 font-semibold';
+            } else {
+                resultText.innerHTML = `得分：${score} 分！再接再厲，細讀頁面介紹能找到正確答案喔。`;
+                resultText.className = 'text-amber-400 font-semibold';
+            }
+        }
+    </script>
+</body>
+</html>

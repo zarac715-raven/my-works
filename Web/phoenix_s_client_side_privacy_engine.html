@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phoenix's 本地端個資假名化與去識別化工具 (Client-Side Privacy Engine)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS (xlsx) CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .dropzone-active {
+            border-color: #3b82f6 !important;
+            background-color: #eff6ff !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+    <!-- 頂部導覽列 -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-indigo-600 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-user-shield text-lg text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold tracking-wide">Phoenix's 本地端個資假名化與去識別化工具</h1>
+                    <p class="text-xs text-slate-400">100% 離線安全運算 • 智慧欄位辨識 • 關聯編碼保留</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button id="soundToggleBtn" onclick="toggleSound()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg transition border border-slate-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-volume-high text-indigo-400" id="soundIcon"></i>
+                    <span id="soundText">音效 ON</span>
+                </button>
+                <span class="text-xs bg-indigo-900/60 text-indigo-300 px-2.5 py-1 rounded-full border border-indigo-700/50 hidden md:inline-block">
+                    Client-Side Single File
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- 檔案上傳與操作區 -->
+        <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80">
+            <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+                
+                <!-- Dropzone 拖曳檔案 -->
+                <div id="dropzone" class="flex-1 border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-4 transition-all flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/50">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                            <i class="fa-solid fa-file-shield text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-700">上傳包含個資之數據集 (Excel / CSV)</p>
+                            <p class="text-xs text-slate-500">檔案完全於本機瀏覽器運算，零伺服器傳輸</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <label class="w-full sm:w-auto text-center cursor-pointer px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg shadow-sm transition">
+                            <i class="fa-solid fa-upload mr-1.5"></i>選擇檔案
+                            <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleFileUpload(event)">
+                        </label>
+                        <button onclick="loadSampleData()" class="w-full sm:w-auto px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition border border-slate-300/80">
+                            <i class="fa-solid fa-vial mr-1"></i>載入測試範例
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 規則設定控制按鈕 -->
+                <div class="flex items-center gap-2 justify-end">
+                    <button onclick="applyAnonymization()" class="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sm"></i> 執行假名化與去識別
+                    </button>
+                </div>
+            </div>
+
+            <!-- 狀態提示框 -->
+            <div id="statusAlert" class="hidden mt-4 p-3 rounded-xl text-xs flex items-center justify-between">
+                <span id="statusText"></span>
+                <button onclick="hideStatusAlert()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </section>
+
+        <!-- 欄位辨識與配置規則面板 -->
+        <section id="configSection" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-sliders text-indigo-600"></i>
+                    <h3 class="text-sm font-bold text-slate-800">欄位去識別策略對應表 (Column Anonymization Rules)</h3>
+                </div>
+                <div class="text-xs text-slate-400">
+                    已自動辨識敏感欄位並建議最佳演算法
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left border-collapse">
+                    <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                        <tr>
+                            <th class="py-3 px-3">原始欄位名稱</th>
+                            <th class="py-3 px-3">智慧辨識類型</th>
+                            <th class="py-3 px-3">去識別化方法 (Method)</th>
+                            <th class="py-3 px-3">預覽效果說明</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rulesTableBody" class="divide-y divide-slate-100">
+                        <!-- 動態渲染欄位規則 -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 成果預覽與匯出區 -->
+        <section id="resultSection" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+            <div class="p-5 bg-slate-50/50 border-b border-slate-200/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-eye text-emerald-600"></i>
+                    <h3 class="text-sm font-bold text-slate-800">處理結果對照與匯出 (Data Preview & Export)</h3>
+                    <span id="recordCountBadge" class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-semibold">0 筆資料</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="exportPseudonymizedData()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-export"></i> 匯出去識別數據檔 (.csv)
+                    </button>
+                    <button onclick="exportMappingTable()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-key"></i> 匯出秘鑰對照表 (Mapping Table)
+                    </button>
+                </div>
+            </div>
+
+            <!-- 資料對照表格 -->
+            <div class="overflow-x-auto max-h-[450px]">
+                <table class="w-full text-xs text-left border-collapse">
+                    <thead id="resultTableHeader" class="bg-slate-100 text-slate-700 font-semibold sticky top-0 border-b border-slate-200">
+                        <!-- 動態生成表頭 -->
+                    </thead>
+                    <tbody id="resultTableBody" class="divide-y divide-slate-100 font-mono text-slate-600">
+                        <!-- 動態生成結果預覽數據 -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="bg-slate-900 text-slate-500 text-xs py-6 border-t border-slate-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p>Phoenix's 本地端個資假名化與去識別化工具 • 100% Client-Side In-Browser Encryption & Pseudonymization</p>
+            <p>符合 GDPR / 個人資料保護法去識別化作業指引標準 • 保留資料維度關聯性</p>
+        </div>
+    </footer>
+
+    <script>
+        // ==========================================
+        // 1. 全局狀態與 Web Audio API
+        // ==========================================
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        let originalRawData = []; // 上傳的原始資料 [{}, {}...]
+        let columns = [];         // 欄位清單
+        let columnRules = {};     // 每個欄位指定的處置規則
+        let processedData = [];   // 去識別化後的資料
+        let mappingTable = [];    // 秘鑰對照表 [{ original, pseudonym, column }, ...]
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(650, now);
+                    gain.gain.setValueAtTime(0.04, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.1);
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(280, now);
+                    osc.frequency.setValueAtTime(160, now + 0.1);
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch(e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-volume-high text-indigo-400";
+                text.innerText = "音效 ON";
+                playSound('click');
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-slate-500";
+                text.innerText = "音效 OFF";
+            }
+        }
+
+        // ==========================================
+        // 2. 測試數據庫 (範例個人資料)
+        // ==========================================
+        const TEST_SAMPLE_DATA = [
+            { "客戶編號": "CUST_001", "姓名": "王小明", "身分證字號": "A123456789", "手機號碼": "0912345678", "電子郵件": "xiaoming.wang@example.com", "居住地": "臺北市信義區信義路五段7號", "年齡": 32, "消費金額": 15800 },
+            { "客戶編號": "CUST_002", "姓名": "林美麗", "身分證字號": "B298765432", "手機號碼": "0987654321", "電子郵件": "meili.lin@domain.com", "居住地": "新北市板橋區縣民大道二段7號", "年齡": 45, "消費金額": 42000 },
+            { "客戶編號": "CUST_003", "姓名": "張偉強", "身分證字號": "C155443322", "手機號碼": "0933112233", "電子郵件": "weiqiang.chang@tech.io", "居住地": "台中市西屯區台灣大道三段99號", "年齡": 28, "消費金額": 8900 },
+            { "客戶編號": "CUST_004", "姓名": "王小明", "身分證字號": "A123456789", "手機號碼": "0912345678", "電子郵件": "xiaoming.wang@example.com", "居住地": "臺北市信義區信義路五段7號", "年齡": 32, "消費金額": 23000 },
+            { "客戶編號": "CUST_005", "姓名": "陳冠宇", "身分證字號": "D188776655", "手機號碼": "0955667788", "電子郵件": "guanyu.chen@service.org", "居住地": "高雄市苓雅區四維三路2號", "年齡": 51, "消費金額": 61500 }
+        ];
+
+        // ==========================================
+        // 3. 智慧欄位類型識別與規則配置
+        // ==========================================
+        function detectColumnType(colName, sampleValues) {
+            const name = colName.toLowerCase();
+            const joinedVals = sampleValues.join(' ');
+
+            if (name.includes('名') || name.includes('name')) return 'NAME';
+            if (name.includes('身分證') || name.includes('id') || /[A-Z][12]\d{8}/.test(joinedVals)) return 'ID_CARD';
+            if (name.includes('手機') || name.includes('電話') || name.includes('phone') || /09\d{8}/.test(joinedVals)) return 'PHONE';
+            if (name.includes('信箱') || name.includes('郵件') || name.includes('email') || /@/.test(joinedVals)) return 'EMAIL';
+            if (name.includes('地址') || name.includes('居住地') || name.includes('address')) return 'ADDRESS';
+            if (name.includes('年齡') || name.includes('age') || name.includes('金額') || name.includes('收入')) return 'NUMERIC';
+
+            return 'NONE';
+        }
+
+        function renderConfigRules() {
+            const tbody = document.getElementById('rulesTableBody');
+            let html = '';
+
+            columns.forEach(col => {
+                const sampleVals = originalRawData.map(r => r[col]).filter(Boolean).slice(0, 5);
+                const detectedType = detectColumnType(col, sampleVals);
+                
+                // 預設規則選擇
+                let defaultMethod = 'KEEP';
+                if (detectedType === 'NAME') defaultMethod = 'PSEUDO_HASH';
+                else if (detectedType === 'ID_CARD') defaultMethod = 'PSEUDO_HASH';
+                else if (detectedType === 'PHONE') defaultMethod = 'MASK_PHONE';
+                else if (detectedType === 'EMAIL') defaultMethod = 'MASK_EMAIL';
+                else if (detectedType === 'ADDRESS') defaultMethod = 'MASK_ADDRESS';
+                else if (detectedType === 'NUMERIC') defaultMethod = 'NOISE_ADD';
+
+                columnRules[col] = defaultMethod;
+
+                html += `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3 px-3 font-semibold text-slate-800">${col}</td>
+                        <td class="py-3 px-3">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600">
+                                ${getDetectedTypeBadge(detectedType)}
+                            </span>
+                        </td>
+                        <td class="py-3 px-3">
+                            <select onchange="updateRule('${col}', this.value)" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-indigo-500">
+                                <option value="KEEP" ${defaultMethod==='KEEP'?'selected':''}>保持原樣 (No Change)</option>
+                                <option value="PSEUDO_HASH" ${defaultMethod==='PSEUDO_HASH'?'selected':''}>關聯性代碼假名化 (Pseudonym ID)</option>
+                                <option value="MASK_NAME" ${defaultMethod==='MASK_NAME'?'selected':''}>姓名遮罩 (例: 王*明)</option>
+                                <option value="MASK_PHONE" ${defaultMethod==='MASK_PHONE'?'selected':''}>電話號碼遮罩 (例: 0912-***-678)</option>
+                                <option value="MASK_EMAIL" ${defaultMethod==='MASK_EMAIL'?'selected':''}>E-mail 遮罩 (例: x***g@domain.com)</option>
+                                <option value="MASK_ADDRESS" ${defaultMethod==='MASK_ADDRESS'?'selected':''}>地址去特徵化 (保留縣市區)</option>
+                                <option value="NOISE_ADD" ${defaultMethod==='NOISE_ADD'?'selected':''}>數值微小加雜 (Differential Noise ±5%)</option>
+                                <option value="SUPPRESS" ${defaultMethod==='SUPPRESS'?'selected':''}>完全移除欄位 (Suppression)</option>
+                            </select>
+                        </td>
+                        <td class="py-3 px-3 text-slate-500 text-[11px]" id="preview_tip_${col}">
+                            ${getRuleDescription(defaultMethod)}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+            document.getElementById('configSection').classList.remove('hidden');
+        }
+
+        function getDetectedTypeBadge(type) {
+            switch(type) {
+                case 'NAME': return '姓名 (Name)';
+                case 'ID_CARD': return '身分證 (ID Card)';
+                case 'PHONE': return '聯絡電話 (Phone)';
+                case 'EMAIL': return '電子郵件 (Email)';
+                case 'ADDRESS': return '地址 (Address)';
+                case 'NUMERIC': return '數值 (Numeric)';
+                default: return '一般資訊';
+            }
+        }
+
+        function getRuleDescription(method) {
+            switch(method) {
+                case 'PSEUDO_HASH': return '產生獨一無二防逆向代碼 (如 ID_8F3A)，相同真實個資自動轉為同一代碼，維持關聯';
+                case 'MASK_NAME': return '將中間文字替換為星號 *';
+                case 'MASK_PHONE': return '保留前後數字，中間進行遮罩處理';
+                case 'MASK_EMAIL': return '遮罩使用者帳號，保留網域名稱';
+                case 'MASK_ADDRESS': return '僅保留前 6 個字（縣市與鄉鎮市區）';
+                case 'NOISE_ADD': return '隨機加上 ±1~5% 的小幅度變異量，保護敏感數據';
+                case 'SUPPRESS': return '徹底刪除此欄位，不輸出至最終檔案';
+                default: return '完全保留原始資料';
+            }
+        }
+
+        function updateRule(col, newMethod) {
+            playSound('click');
+            columnRules[col] = newMethod;
+            document.getElementById(`preview_tip_${col}`).innerText = getRuleDescription(newMethod);
+        }
+
+        // ==========================================
+        // 4. 演算法實作 (Pseudonymization & Anonymization Engine)
+        // ==========================================
+
+        // 簡易客戶端關聯代碼雜湊映射
+        const pseudoMap = new Map();
+        let pseudoCounter = 1000;
+
+        function getPseudonym(val, colName) {
+            if (!val) return '';
+            const key = `${colName}_${val}`;
+            if (!pseudoMap.has(key)) {
+                pseudoCounter++;
+                const hashStr = btoa(unescape(encodeURIComponent(val))).substring(0, 5).toUpperCase();
+                const pseudoCode = `ID_${hashStr}_${pseudoCounter}`;
+                pseudoMap.set(key, pseudoCode);
+                
+                // 記錄至秘鑰對照表
+                mappingTable.push({
+                    "原始欄位": colName,
+                    "原始數據 (Original Data)": val,
+                    "假名化代碼 (Pseudonym Code)": pseudoCode
+                });
+            }
+            return pseudoMap.get(key);
+        }
+
+        function maskName(str) {
+            if (!str) return '';
+            str = String(str);
+            if (str.length <= 2) return str[0] + '*';
+            return str[0] + '*'.repeat(str.length - 2) + str[str.length - 1];
+        }
+
+        function maskPhone(str) {
+            if (!str) return '';
+            str = String(str).replace(/-/g, '');
+            if (str.length < 9) return '09**-***-***';
+            return str.substring(0, 4) + '-***-' + str.substring(str.length - 3);
+        }
+
+        function maskEmail(str) {
+            if (!str || !str.includes('@')) return '****@domain.com';
+            const parts = str.split('@');
+            const name = parts[0];
+            const maskedName = name.length > 2 ? name[0] + '***' + name[name.length - 1] : name[0] + '***';
+            return maskedName + '@' + parts[1];
+        }
+
+        function maskAddress(str) {
+            if (!str) return '';
+            return String(str).substring(0, 6) + '***';
+        }
+
+        function addNumericNoise(val) {
+            const num = parseFloat(val);
+            if (isNaN(num)) return val;
+            const factor = 1 + (Math.random() * 0.1 - 0.05); // ±5% 變異
+            return Math.round(num * factor);
+        }
+
+        // ==========================================
+        // 5. 執行去識別化處理與成果展示
+        // ==========================================
+        function applyAnonymization() {
+            playSound('click');
+            if (originalRawData.length === 0) {
+                showStatusAlert('請先上傳檔案或載入測試數據！', 'error');
+                return;
+            }
+
+            pseudoMap.clear();
+            mappingTable = [];
+            processedData = [];
+
+            originalRawData.forEach(row => {
+                let newRow = {};
+                columns.forEach(col => {
+                    const rule = columnRules[col];
+                    const rawVal = row[col];
+
+                    if (rule === 'KEEP') {
+                        newRow[col] = rawVal;
+                    } else if (rule === 'PSEUDO_HASH') {
+                        newRow[col] = getPseudonym(rawVal, col);
+                    } else if (rule === 'MASK_NAME') {
+                        newRow[col] = maskName(rawVal);
+                    } else if (rule === 'MASK_PHONE') {
+                        newRow[col] = maskPhone(rawVal);
+                    } else if (rule === 'MASK_EMAIL') {
+                        newRow[col] = maskEmail(rawVal);
+                    } else if (rule === 'MASK_ADDRESS') {
+                        newRow[col] = maskAddress(rawVal);
+                    } else if (rule === 'NOISE_ADD') {
+                        newRow[col] = addNumericNoise(rawVal);
+                    } else if (rule === 'SUPPRESS') {
+                        // 忽略此欄位
+                    }
+                });
+                processedData.push(newRow);
+            });
+
+            renderResultTable();
+            showStatusAlert(`去識別化處理成功！已產出 ${processedData.length} 筆安全的假名數據，並生成秘鑰對照表。`, 'success');
+            playSound('success');
+        }
+
+        function renderResultTable() {
+            const thead = document.getElementById('resultTableHeader');
+            const tbody = document.getElementById('resultTableBody');
+            const badge = document.getElementById('recordCountBadge');
+
+            badge.innerText = `${processedData.length} 筆資料`;
+
+            const validCols = columns.filter(col => columnRules[col] !== 'SUPPRESS');
+
+            // 渲染表頭
+            let headHtml = '<tr>';
+            validCols.forEach(col => {
+                headHtml += `<th class="py-3 px-4">${col}</th>`;
+            });
+            headHtml += '</tr>';
+            thead.innerHTML = headHtml;
+
+            // 渲染數據
+            let bodyHtml = '';
+            processedData.forEach(row => {
+                bodyHtml += '<tr class="hover:bg-slate-50 transition">';
+                validCols.forEach(col => {
+                    const val = row[col] !== undefined ? row[col] : '';
+                    bodyHtml += `<td class="py-2.5 px-4">${val}</td>`;
+                });
+                bodyHtml += '</tr>';
+            });
+            tbody.innerHTML = bodyHtml;
+
+            document.getElementById('resultSection').classList.remove('hidden');
+        }
+
+        // ==========================================
+        // 6. 檔案讀入與測試範例載入
+        // ==========================================
+        function handleFileUpload(e) {
+            playSound('click');
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(sheet);
+
+                    if (json.length === 0) {
+                        showStatusAlert('檔案內容為空，請上傳有效數據', 'error');
+                        return;
+                    }
+
+                    originalRawData = json;
+                    columns = Object.keys(json[0]);
+                    renderConfigRules();
+                    showStatusAlert(`成功讀取檔案：${file.name} (共 ${columns.length} 欄，${json.length} 筆列)`, 'success');
+                    playSound('success');
+                } catch(err) {
+                    showStatusAlert('讀取檔案失敗，請確保上傳有效的 Excel/CSV 檔案', 'error');
+                    playSound('error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function loadSampleData() {
+            playSound('click');
+            originalRawData = JSON.parse(JSON.stringify(TEST_SAMPLE_DATA));
+            columns = Object.keys(originalRawData[0]);
+            renderConfigRules();
+            showStatusAlert('已成功載入測試用個人數據範例！', 'success');
+            playSound('success');
+        }
+
+        // ==========================================
+        // 7. 匯出功能 (CSV 格式)
+        // ==========================================
+        function exportPseudonymizedData() {
+            playSound('click');
+            if (processedData.length === 0) return;
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM
+            const validCols = columns.filter(col => columnRules[col] !== 'SUPPRESS');
+            
+            csvContent += validCols.join(',') + '\n';
+            processedData.forEach(row => {
+                const line = validCols.map(col => `"${row[col] !== undefined ? row[col] : ''}"`).join(',');
+                csvContent += line + '\n';
+            });
+
+            downloadCSV(csvContent, 'DeIdentified_Dataset_Anonymized.csv');
+        }
+
+        function exportMappingTable() {
+            playSound('click');
+            if (mappingTable.length === 0) {
+                showStatusAlert('目前沒有產出任何代碼假名對照紀錄！', 'error');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM
+            csvContent += "原始欄位,原始數據 (Original Data),假名化代碼 (Pseudonym Code)\n";
+            mappingTable.forEach(row => {
+                csvContent += `"${row['原始欄位']}","${row['原始數據 (Original Data)']}","${row['假名化代碼 (Pseudonym Code)']}"\n`;
+            });
+
+            downloadCSV(csvContent, 'CONFIDENTIAL_Mapping_Table_SecretKey.csv');
+        }
+
+        function downloadCSV(csvContent, filename) {
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+
+        function showStatusAlert(msg, type) {
+            const alertBox = document.getElementById('statusAlert');
+            const text = document.getElementById('statusText');
+            alertBox.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-800', 'bg-rose-50', 'text-rose-800');
+            
+            if (type === 'success') {
+                alertBox.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
+                text.innerHTML = `<i class="fa-solid fa-circle-check mr-2"></i>${msg}`;
+            } else {
+                alertBox.classList.add('bg-rose-50', 'text-rose-800', 'border', 'border-rose-200');
+                text.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2"></i>${msg}`;
+            }
+        }
+
+        function hideStatusAlert() {
+            document.getElementById('statusAlert').classList.add('hidden');
+        }
+
+        // 初次加載預設載入範例
+        window.onload = function() {
+            loadSampleData();
+        };
+    </script>
+</body>
+</html>

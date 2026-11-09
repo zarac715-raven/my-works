@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日喝開水統計與記錄</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .water-wave {
+            background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+            transition: height 0.5s ease-in-out;
+        }
+    </style>
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global App setup
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'water-tracker-default';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        
+        window.db = null;
+        window.auth = null;
+        window.appId = appId;
+
+        if (firebaseConfig) {
+            const app = initializeApp(firebaseConfig);
+            window.db = getFirestore(app);
+            window.auth = getAuth(app);
+
+            // Auth initiation
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(window.auth, __initial_auth_token).catch(() => signInAnonymously(window.auth));
+            } else {
+                await signInAnonymously(window.auth);
+            }
+        }
+        
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 pb-12">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-6 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-droplet text-3xl text-blue-200"></i>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide">每日飲水紀錄助手</h1>
+                    <p class="text-xs text-blue-100 flex items-center gap-1">
+                        <span id="syncStatus" class="inline-block w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+                        <span id="syncStatusText">同步中...</span>
+                    </p>
+                </div>
+            </div>
+            <button id="settingsBtn" class="p-2 hover:bg-blue-700 rounded-full transition" title="設定目標">
+                <i class="fa-solid fa-gear text-xl"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Left Column: Current Status & Quick Add -->
+        <div class="md:col-span-1 space-y-6">
+            <!-- Progress Card -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-100 flex flex-col items-center text-center">
+                <h2 class="text-sm font-semibold text-slate-500 mb-4">今日飲水進度</h2>
+                
+                <!-- Water Bottle Visual -->
+                <div class="relative w-32 h-48 bg-slate-100 rounded-b-3xl border-4 border-blue-400 overflow-hidden flex flex-col justify-end mb-4 shadow-inner">
+                    <div id="waterLevel" class="water-wave w-full h-0 relative">
+                        <div class="absolute inset-0 opacity-20 bg-white animate-pulse"></div>
+                    </div>
+                    <span id="percentageText" class="absolute inset-0 flex items-center justify-center text-xl font-bold text-slate-700 z-10">0%</span>
+                </div>
+
+                <div class="flex items-baseline space-x-1">
+                    <span id="currentAmount" class="text-3xl font-extrabold text-blue-600">0</span>
+                    <span class="text-slate-500 font-medium">/ <span id="targetAmount">2000</span> ml</span>
+                </div>
+                <p id="remainingText" class="text-xs text-slate-400 mt-1">還差 2000 ml 達標</p>
+            </div>
+
+            <!-- Quick Add Card -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                <h2 class="text-sm font-semibold text-slate-500 mb-4">快速記錄</h2>
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button onclick="addWater(200)" class="flex items-center justify-center space-x-2 bg-blue-50 hover:bg-blue-100 text-blue-700 p-3 rounded-xl border border-blue-200 transition font-medium">
+                        <i class="fa-solid fa-glass-water"></i>
+                        <span>200 ml</span>
+                    </button>
+                    <button onclick="addWater(350)" class="flex items-center justify-center space-x-2 bg-blue-50 hover:bg-blue-100 text-blue-700 p-3 rounded-xl border border-blue-200 transition font-medium">
+                        <i class="fa-solid fa-mug-hot"></i>
+                        <span>350 ml</span>
+                    </button>
+                    <button onclick="addWater(500)" class="flex items-center justify-center space-x-2 bg-blue-50 hover:bg-blue-100 text-blue-700 p-3 rounded-xl border border-blue-200 transition font-medium">
+                        <i class="fa-solid fa-bottle-water"></i>
+                        <span>500 ml</span>
+                    </button>
+                    <button onclick="addWater(700)" class="flex items-center justify-center space-x-2 bg-blue-50 hover:bg-blue-100 text-blue-700 p-3 rounded-xl border border-blue-200 transition font-medium">
+                        <i class="fa-solid fa-flask"></i>
+                        <span>700 ml</span>
+                    </button>
+                </div>
+
+                <!-- Custom Input -->
+                <form id="customForm" class="flex gap-2">
+                    <input type="number" id="customAmount" placeholder="自訂 c.c./ml" min="1" max="3000" required class="flex-1 px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
+                        新增
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Column: History & Charts -->
+        <div class="md:col-span-2 space-y-6">
+            <!-- Chart Section -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-sm font-semibold text-slate-500">近 7 天飲水趨勢</h2>
+                    <span class="text-xs text-slate-400">目標: <span id="chartTargetText">2000</span> ml/天</span>
+                </div>
+                <div class="h-48 w-full">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Today's Logs -->
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-sm font-semibold text-slate-500">今日紀錄</h2>
+                    <button id="clearTodayBtn" class="text-xs text-red-500 hover:text-red-700 transition">清空今日紀錄</button>
+                </div>
+                <div id="logList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    <!-- Logs will be inserted here -->
+                    <p id="emptyLogText" class="text-center text-slate-400 text-sm py-4">今天還沒有飲水紀錄，趕快喝一杯水吧！</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl space-y-4">
+            <h3 class="text-lg font-bold text-slate-800">設定每日目標</h3>
+            <p class="text-xs text-slate-500">建議每日飲水量為：體重 (kg) × 30~40 ml</p>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">目標飲水量 (ml)</label>
+                <input type="number" id="targetInput" min="500" max="10000" step="100" class="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button id="closeModalBtn" class="px-4 py-2 text-slate-500 hover:bg-slate-100 rounded-xl text-sm transition">取消</button>
+                <button id="saveTargetBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition">儲存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Notification replacing alert/confirm -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl space-y-4 text-center">
+            <h3 class="text-lg font-bold text-slate-800">確認操作</h3>
+            <p id="confirmMessage" class="text-sm text-slate-600">確定要清空今天的飲水紀錄嗎？</p>
+            <div class="flex justify-center space-x-3 pt-2">
+                <button id="confirmCancelBtn" class="px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-sm transition">取消</button>
+                <button id="confirmOkBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-medium transition">確定清空</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { doc, setDoc, getDoc, collection, onSnapshot, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Data State
+        let dailyTarget = 2000;
+        let logs = [];
+        let userId = null;
+
+        // Chart Instance
+        let weeklyChart = null;
+
+        // Date Utils
+        const getTodayStr = () => new Date().toISOString().split('T')[0];
+        const formatTime = (isoStr) => {
+            const date = new Date(isoStr);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        };
+
+        // DOM Elements
+        const currentAmountEl = document.getElementById('currentAmount');
+        const targetAmountEl = document.getElementById('targetAmount');
+        const chartTargetTextEl = document.getElementById('chartTargetText');
+        const remainingTextEl = document.getElementById('remainingText');
+        const percentageTextEl = document.getElementById('percentageText');
+        const waterLevelEl = document.getElementById('waterLevel');
+        const logListEl = document.getElementById('logList');
+        const emptyLogTextEl = document.getElementById('emptyLogText');
+        const customForm = document.getElementById('customForm');
+        const customAmountInput = document.getElementById('customAmount');
+        const syncStatus = document.getElementById('syncStatus');
+        const syncStatusText = document.getElementById('syncStatusText');
+        
+        // Modal Elements
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const saveTargetBtn = document.getElementById('saveTargetBtn');
+        const targetInput = document.getElementById('targetInput');
+        const clearTodayBtn = document.getElementById('clearTodayBtn');
+
+        // Confirm Modal Elements
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+        const confirmOkBtn = document.getElementById('confirmOkBtn');
+
+        // Global functions for inline handlers
+        window.addWater = addWater;
+        window.deleteLog = deleteLog;
+
+        window.addEventListener('firebase-ready', () => {
+            if (window.auth) {
+                window.auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        userId = user.uid;
+                        updateSyncState(true);
+                        setupListeners();
+                    }
+                });
+            } else {
+                // Fallback to local memory if Firebase is unavailable
+                updateSyncState(false, "離線模式");
+                initUI();
+            }
+        });
+
+        function updateSyncState(online, text = "雲端儲存同步中") {
+            if (online) {
+                syncStatus.className = "inline-block w-2 h-2 rounded-full bg-green-400";
+                syncStatusText.textContent = text;
+            } else {
+                syncStatus.className = "inline-block w-2 h-2 rounded-full bg-slate-400";
+                syncStatusText.textContent = text;
+            }
+        }
+
+        function setupListeners() {
+            if (!window.db || !userId) return;
+
+            // 1. Listen to Settings (Target)
+            const settingsDocRef = doc(window.db, 'artifacts', window.appId, 'users', userId, 'settings', 'userTarget');
+            onSnapshot(settingsDocRef, (docSnap) => {
+                if (docSnap.exists() && docSnap.data().target) {
+                    dailyTarget = docSnap.data().target;
+                } else {
+                    // Initialize default
+                    setDoc(settingsDocRef, { target: 2000 });
+                }
+                targetAmountEl.textContent = dailyTarget;
+                chartTargetTextEl.textContent = dailyTarget;
+                targetInput.value = dailyTarget;
+                updateUI();
+            }, (error) => {
+                console.error("Settings fetch error:", error);
+            });
+
+            // 2. Listen to Logs Collection
+            const logsColRef = collection(window.db, 'artifacts', window.appId, 'users', userId, 'water_logs');
+            onSnapshot(logsColRef, (snapshot) => {
+                logs = [];
+                snapshot.forEach((doc) => {
+                    logs.push({ id: doc.id, ...doc.data() });
+                });
+                updateUI();
+            }, (error) => {
+                console.error("Logs fetch error:", error);
+            });
+        }
+
+        // Initialize UI Elements
+        function initUI() {
+            targetAmountEl.textContent = dailyTarget;
+            chartTargetTextEl.textContent = dailyTarget;
+            targetInput.value = dailyTarget;
+            
+            updateUI();
+            initChart();
+        }
+
+        // Add Water Log
+        async function addWater(amount) {
+            const newLog = {
+                date: getTodayStr(),
+                timestamp: new Date().toISOString(),
+                amount: amount
+            };
+
+            if (window.db && userId) {
+                const logsColRef = collection(window.db, 'artifacts', window.appId, 'users', userId, 'water_logs');
+                await addDoc(logsColRef, newLog);
+            } else {
+                logs.push({ id: Date.now().toString(), ...newLog });
+                updateUI();
+            }
+        }
+
+        // Delete Water Log
+        async function deleteLog(id) {
+            if (window.db && userId) {
+                const docRef = doc(window.db, 'artifacts', window.appId, 'users', userId, 'water_logs', id);
+                await deleteDoc(docRef);
+            } else {
+                logs = logs.filter(log => log.id !== id);
+                updateUI();
+            }
+        }
+
+        // Clear Today's Logs
+        function clearTodayLogs() {
+            confirmModal.classList.remove('hidden');
+        }
+
+        confirmCancelBtn.addEventListener('click', () => {
+            confirmModal.classList.add('hidden');
+        });
+
+        confirmOkBtn.addEventListener('click', async () => {
+            confirmModal.classList.add('hidden');
+            const today = getTodayStr();
+            const todayLogs = logs.filter(log => log.date === today);
+
+            if (window.db && userId) {
+                for (const log of todayLogs) {
+                    const docRef = doc(window.db, 'artifacts', window.appId, 'users', userId, 'water_logs', log.id);
+                    await deleteDoc(docRef);
+                }
+            } else {
+                logs = logs.filter(log => log.date !== today);
+                updateUI();
+            }
+        });
+
+        // Save Target
+        async function saveTarget() {
+            const val = parseInt(targetInput.value);
+            if (val && val >= 500) {
+                dailyTarget = val;
+                if (window.db && userId) {
+                    const settingsDocRef = doc(window.db, 'artifacts', window.appId, 'users', userId, 'settings', 'userTarget');
+                    await setDoc(settingsDocRef, { target: dailyTarget });
+                }
+                targetAmountEl.textContent = dailyTarget;
+                chartTargetTextEl.textContent = dailyTarget;
+                settingsModal.classList.add('hidden');
+                updateUI();
+            }
+        }
+
+        // Get Today's Total
+        function getTodayTotal() {
+            const today = getTodayStr();
+            return logs
+                .filter(log => log.date === today)
+                .reduce((sum, log) => sum + log.amount, 0);
+        }
+
+        // Update UI Components
+        function updateUI() {
+            const todayTotal = getTodayTotal();
+            currentAmountEl.textContent = todayTotal;
+
+            // Update Progress & Bottle
+            const percentage = Math.min(Math.round((todayTotal / dailyTarget) * 100), 100);
+            waterLevelEl.style.height = `${percentage}%`;
+            percentageTextEl.textContent = `${percentage}%`;
+            
+            if (percentage > 50) {
+                percentageTextEl.classList.remove('text-slate-700');
+                percentageTextEl.classList.add('text-white');
+            } else {
+                percentageTextEl.classList.remove('text-white');
+                percentageTextEl.classList.add('text-slate-700');
+            }
+
+            const remaining = dailyTarget - todayTotal;
+            if (remaining > 0) {
+                remainingTextEl.textContent = `還差 ${remaining} ml 達標`;
+                remainingTextEl.className = 'text-xs text-slate-400 mt-1';
+            } else {
+                remainingTextEl.textContent = '🎉 今日飲水目標已達成！';
+                remainingTextEl.className = 'text-xs text-green-600 font-bold mt-1';
+            }
+
+            // Update Log List
+            renderLogList();
+
+            // Update Chart
+            updateChart();
+        }
+
+        // Render Log List
+        function renderLogList() {
+            const today = getTodayStr();
+            const todayLogs = [...logs]
+                .filter(log => log.date === today)
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            if (todayLogs.length === 0) {
+                logListEl.innerHTML = '';
+                logListEl.appendChild(emptyLogTextEl);
+                emptyLogTextEl.classList.remove('hidden');
+                return;
+            }
+
+            logListEl.innerHTML = '';
+            todayLogs.forEach(log => {
+                const item = document.createElement('div');
+                item.className = 'flex justify-between items-center p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition';
+                item.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                            <i class="fa-solid fa-glass-water text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-700">+ ${log.amount} ml</p>
+                            <p class="text-xs text-slate-400">${formatTime(log.timestamp)}</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteLog('${log.id}')" class="text-slate-400 hover:text-red-500 p-1 transition" title="刪除">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                `;
+                logListEl.appendChild(item);
+            });
+        }
+
+        // Get Last 7 Days Data for Chart
+        function getLast7DaysData() {
+            const days = [];
+            const totals = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const dayName = d.toLocaleDateString('zh-TW', { weekday: 'short' });
+
+                const dayTotal = logs
+                    .filter(log => log.date === dateStr)
+                    .reduce((sum, log) => sum + log.amount, 0);
+
+                days.push(dayName);
+                totals.push(dayTotal);
+            }
+
+            return { days, totals };
+        }
+
+        // Initialize Weekly Chart
+        function initChart() {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            const { days, totals } = getLast7DaysData();
+
+            weeklyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: '飲水量 (ml)',
+                        data: totals,
+                        backgroundColor: totals.map(v => v >= dailyTarget ? '#3b82f6' : '#93c5fd'),
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => ` 飲水量: ${context.raw} ml`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Noto Sans TC' } }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: dailyTarget + 500,
+                            grid: { color: '#f1f5f9' },
+                            ticks: { font: { family: 'Noto Sans TC' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Chart Data
+        function updateChart() {
+            if (!weeklyChart) {
+                initChart();
+                return;
+            }
+            const { days, totals } = getLast7DaysData();
+            weeklyChart.data.labels = days;
+            weeklyChart.data.datasets[0].data = totals;
+            weeklyChart.data.datasets[0].backgroundColor = totals.map(v => v >= dailyTarget ? '#3b82f6' : '#93c5fd');
+            weeklyChart.options.scales.y.suggestedMax = Math.max(...totals, dailyTarget) + 200;
+            weeklyChart.update();
+        }
+
+        // Event Listeners
+        customForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const val = parseInt(customAmountInput.value);
+            if (val > 0) {
+                addWater(val);
+                customAmountInput.value = '';
+            }
+        });
+
+        settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        closeModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+        saveTargetBtn.addEventListener('click', saveTarget);
+        clearTodayBtn.addEventListener('click', clearTodayLogs);
+    </script>
+</body>
+</html>

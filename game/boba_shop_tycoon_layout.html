@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>珍奶店大作戰 Boba Shop Tycoon</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'boba': {
+                            50: '#FAF5EF',
+                            100: '#F5EBE1',
+                            200: '#EBD7C3',
+                            300: '#DEC1A0',
+                            400: '#CE9B67',
+                            500: '#BD7E41',
+                            600: '#9E612B',
+                            700: '#7F4B20',
+                            800: '#5C3312',
+                            900: '#3D200A',
+                            950: '#210F03'
+                        },
+                        'cream': '#FFFBF5',
+                        'tea-green': '#A7C957',
+                        'tea-black': '#8C5424',
+                        'tea-oolong': '#A66E38',
+                        'pearl': '#2B2118',
+                        'taro': '#BDB2FF',
+                        'jelly': '#FFD6A5'
+                    },
+                    fontFamily: {
+                        'game': ['Fredoka', 'Noto Sans TC', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background-color: #F5EBE1;
+            background-image: radial-gradient(#DEC1A0 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+        .btn-tactile {
+            transition: all 0.1s ease;
+            box-shadow: 0px 4px 0px rgba(61, 32, 10, 0.9);
+        }
+        .btn-tactile:active {
+            transform: translateY(3px);
+            box-shadow: 0px 1px 0px rgba(61, 32, 10, 0.9);
+        }
+        .pearl {
+            width: 12px;
+            height: 12px;
+            background-color: #2B2118;
+            border-radius: 50%;
+            border: 1px solid #140E0A;
+            box-shadow: inset -1px -1px 2px rgba(255,255,255,0.3);
+        }
+        .taro-cube {
+            width: 11px;
+            height: 11px;
+            background-color: #BDB2FF;
+            border-radius: 3px;
+            border: 1px solid #7B71C0;
+        }
+        .jelly-cube {
+            width: 10px;
+            height: 10px;
+            background-color: #FFD6A5;
+            border-radius: 2px;
+            border: 1px solid #E0A664;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F5EBE1;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CE9B67;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-2 md:p-4 text-boba-900 select-none">
+
+    <!-- ================= HEADER / TOP BAR ================= -->
+    <header class="bg-white/90 backdrop-blur border-4 border-boba-800 rounded-3xl p-3 md:p-4 shadow-lg mb-4">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- Game Title & Level -->
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-amber-200 border-3 border-boba-800 rounded-2xl flex items-center justify-center text-2xl shadow-sm">
+                    🧋
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl md:text-2xl text-boba-900 leading-tight">珍奶店大作戰</h1>
+                    <p class="text-xs font-black text-boba-600 flex items-center gap-1">
+                        <span>Boba Shop Tycoon</span> • Day <span id="stat-day">1</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="flex flex-wrap items-center gap-2 md:gap-4">
+                
+                <!-- Gold Display -->
+                <div class="bg-amber-100 border-2 border-boba-800 rounded-2xl px-3 py-1.5 flex items-center gap-2 shadow-sm">
+                    <span class="text-lg">💰</span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-boba-700 leading-none">營運金幣</span>
+                        <span class="font-black text-base text-amber-900 leading-tight">$<span id="stat-gold">150</span></span>
+                    </div>
+                </div>
+
+                <!-- Clock / Shift Timer -->
+                <div class="bg-sky-100 border-2 border-boba-800 rounded-2xl px-3 py-1.5 flex items-center gap-2 shadow-sm">
+                    <span class="text-lg">⏰</span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-sky-800 leading-none">打烊倒數</span>
+                        <span class="font-black text-base text-sky-950 font-mono leading-tight" id="stat-time">01:30</span>
+                    </div>
+                </div>
+
+                <!-- Reputation / Hearts -->
+                <div class="bg-rose-100 border-2 border-boba-800 rounded-2xl px-3 py-1.5 flex items-center gap-2 shadow-sm">
+                    <span class="text-lg">❤️</span>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-bold text-rose-800 leading-none">商譽聲譽</span>
+                        <span class="font-black text-base text-rose-950 leading-tight" id="stat-reputation">100 / 100</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Controls (Shift Start & Sound Toggle) -->
+            <div class="flex items-center gap-2">
+                <button id="btn-shift" onclick="toggleGameShift()" class="btn-tactile bg-emerald-400 hover:bg-emerald-300 border-2 border-boba-800 text-boba-900 px-3 h-10 rounded-xl font-extrabold text-xs flex items-center gap-1.5">
+                    <i id="shift-icon" class="fa-solid fa-play"></i>
+                    <span id="shift-label">開始營業</span>
+                </button>
+                <button onclick="openMenuModal()" title="菜單手冊" class="btn-tactile bg-amber-200 hover:bg-amber-300 border-2 border-boba-800 text-boba-900 w-10 h-10 rounded-xl font-bold text-sm flex items-center justify-center">
+                    📖
+                </button>
+                <button id="btn-audio" onclick="toggleAudio()" title="切換音效" class="btn-tactile bg-stone-200 hover:bg-stone-300 border-2 border-boba-800 text-boba-900 w-10 h-10 rounded-xl font-bold text-sm flex items-center justify-center">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- ================= MAIN GAME DASHBOARD (3-COLUMN LAYOUT) ================= -->
+    <main class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow">
+
+        <!-- ================= LEFT COLUMN: CUSTOMER ORDERS (3/12) ================= -->
+        <section class="lg:col-span-3 bg-white/80 backdrop-blur border-4 border-boba-800 rounded-3xl p-4 shadow-md flex flex-col gap-3 h-full">
+            
+            <!-- Section Title & Debug Trigger -->
+            <div class="flex items-center justify-between border-b-2 border-boba-200 pb-2">
+                <h2 class="font-extrabold text-lg text-boba-900 flex items-center gap-2">
+                    <i class="fa-solid fa-users text-boba-500"></i> 顧客點單區
+                </h2>
+                <div class="flex items-center gap-1">
+                    <button onclick="spawnCustomer(true)" title="測試：召喚顧客" class="btn-tactile bg-amber-200 hover:bg-amber-300 border border-boba-800 text-boba-900 text-[10px] px-2 py-0.5 rounded-lg font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-user-plus"></i> +1 客人
+                    </button>
+                    <span id="order-count-badge" class="bg-boba-800 text-white text-xs px-2 py-0.5 rounded-full font-bold">0 人</span>
+                </div>
+            </div>
+
+            <!-- Customer Cards Container -->
+            <div id="orders-list-container" class="flex flex-col gap-3 overflow-y-auto max-h-[600px] min-h-[300px] pr-1">
+                <div id="shop-closed-placeholder" class="h-full min-h-[250px] flex flex-col items-center justify-center text-center p-4 bg-boba-50/50 rounded-2xl border-2 border-dashed border-boba-300">
+                    <div class="text-4xl mb-2">🏪</div>
+                    <p class="font-bold text-boba-800 text-sm">店鋪休息中</p>
+                    <p class="text-xs text-boba-600 mt-1">點擊右上角「開始營業」以開啟今日顧客生成！</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= MIDDLE COLUMN: PREPARATION WORKSTATION (5/12) ================= -->
+        <section class="lg:col-span-5 bg-white/80 backdrop-blur border-4 border-boba-800 rounded-3xl p-4 shadow-md flex flex-col gap-4">
+            
+            <div class="flex items-center justify-between border-b-2 border-boba-200 pb-2">
+                <h2 class="font-extrabold text-lg text-boba-900 flex items-center gap-2">
+                    <i class="fa-solid fa-blender text-boba-500"></i> 調配工作臺
+                </h2>
+                <span class="text-xs text-boba-600 font-bold bg-boba-100 px-2 py-1 rounded-full border border-boba-300">
+                    <i class="fa-solid fa-hand-pointer text-amber-600"></i> 點擊選單組合珍奶
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                <!-- Visual Cup Preview -->
+                <div class="md:col-span-5 flex flex-col items-center justify-center bg-cream/70 border-2 border-boba-300 rounded-2xl p-4 relative min-h-[280px]">
+                    
+                    <div id="boba-cup-wrapper" class="relative w-28 h-44 border-4 border-boba-900 rounded-b-3xl rounded-t-lg bg-white/40 overflow-hidden shadow-inner flex flex-col justify-end transition-transform duration-200">
+                        <!-- Foam Layer -->
+                        <div id="cup-foam-layer" class="absolute top-0 left-0 right-0 h-0 bg-amber-50/90 border-b border-amber-200 transition-all duration-300 z-10"></div>
+                        
+                        <!-- Ice Layer -->
+                        <div id="cup-ice-cubes" class="absolute inset-0 hidden z-10 pointer-events-none flex flex-wrap gap-1 p-2 justify-center items-center opacity-80">
+                            <div class="w-4 h-4 bg-cyan-100/80 border border-cyan-300 rounded-sm"></div>
+                            <div class="w-4 h-4 bg-cyan-100/80 border border-cyan-300 rounded-sm"></div>
+                            <div class="w-4 h-4 bg-cyan-100/80 border border-cyan-300 rounded-sm"></div>
+                        </div>
+
+                        <!-- Liquid Layer -->
+                        <div id="cup-liquid-layer" class="w-full h-0 transition-all duration-500 relative flex items-end justify-center">
+                            <!-- Toppings Container -->
+                            <div id="cup-toppings-layer" class="w-full h-12 relative flex flex-wrap gap-1 p-1 justify-center items-end overflow-hidden z-0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Straw -->
+                    <div class="absolute top-2 w-3 h-12 bg-rose-400 border-2 border-boba-900 -rotate-12 rounded-t-md pointer-events-none z-20"></div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2 mt-4 w-full">
+                        <button onclick="resetCup()" class="btn-tactile flex-1 bg-stone-200 hover:bg-stone-300 border-2 border-boba-800 text-stone-800 text-xs font-extrabold py-2 rounded-xl flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-rotate-left"></i> 清空
+                        </button>
+                        <button onclick="serveOrder()" class="btn-tactile flex-1 bg-emerald-400 hover:bg-emerald-300 border-2 border-boba-800 text-boba-900 text-xs font-extrabold py-2 rounded-xl flex items-center justify-center gap-1 shadow-sm">
+                            <i class="fa-solid fa-circle-check"></i> 出餐！
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recipe Summary & Ingredient Selectors -->
+                <div class="md:col-span-7 flex flex-col gap-3">
+                    
+                    <!-- Recipe Tags Summary -->
+                    <div class="bg-amber-50/80 border-2 border-amber-300 rounded-2xl p-2.5">
+                        <span class="text-[11px] font-bold text-amber-800 block mb-1">📋 當前杯內配方：</span>
+                        <div id="recipe-summary-tags" class="flex flex-wrap gap-1 min-h-[26px] items-center">
+                            <span class="text-xs text-stone-400 italic">尚未加入任何原料...</span>
+                        </div>
+                    </div>
+
+                    <!-- 1. Tea Base -->
+                    <div>
+                        <label class="text-xs font-black text-boba-800 block mb-1">1. 選擇茶底 <span class="text-rose-500">*</span></label>
+                        <div class="grid grid-cols-3 gap-1.5" id="group-tea">
+                            <button onclick="addIngredient('tea', '伯爵紅茶', '#8C5424', this)" class="btn-ingredient btn-tactile bg-amber-100 hover:bg-amber-200 border border-boba-800 text-amber-900 text-xs py-1.5 px-2 rounded-xl font-bold truncate">
+                                🍂 紅茶
+                            </button>
+                            <button onclick="addIngredient('tea', '四季春綠茶', '#7EA172', this)" class="btn-ingredient btn-tactile bg-emerald-100 hover:bg-emerald-200 border border-boba-800 text-emerald-900 text-xs py-1.5 px-2 rounded-xl font-bold truncate">
+                                🍃 綠茶
+                            </button>
+                            <button onclick="addIngredient('tea', '極品烏龍茶', '#A66E38', this)" class="btn-ingredient btn-tactile bg-amber-200 hover:bg-amber-300 border border-boba-800 text-amber-950 text-xs py-1.5 px-2 rounded-xl font-bold truncate">
+                                🌾 烏龍茶
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. Milk Options -->
+                    <div>
+                        <label class="text-xs font-black text-boba-800 block mb-1">2. 鮮奶 / 奶精 <span class="text-rose-500">*</span></label>
+                        <div class="grid grid-cols-3 gap-1.5" id="group-milk">
+                            <button onclick="addIngredient('milk', '優質鮮奶', '#FFFBF5', this)" class="btn-ingredient btn-tactile bg-stone-100 hover:bg-stone-200 border border-boba-800 text-stone-900 text-xs py-1.5 px-2 rounded-xl font-bold truncate">
+                                🥛 鮮奶
+                            </button>
+                            <button onclick="addIngredient('milk', '濃香燕麥奶', '#F4E8D8', this)" class="btn-ingredient btn-tactile bg-amber-50 hover:bg-amber-100 border border-boba-800 text-amber-900 text-xs py-1.5 px-2 rounded-xl font-bold truncate">
+                                🌾 燕麥奶
+                            </button>
+                            <button onclick="addIngredient('milk', '純茶 (無奶)', 'transparent', this)" class="btn-ingredient btn-tactile bg-stone-200 hover:bg-stone-300 border border-boba-800 text-stone-800 text-xs py-1.5 px-2 rounded-xl font-bold truncate">
+                                🚫 無奶
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. Sweetness & Ice -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs font-black text-boba-800 block mb-1">3. 甜度</label>
+                            <div class="grid grid-cols-2 gap-1" id="group-sugar">
+                                <button onclick="addIngredient('sugar', '全糖', null, this)" class="btn-ingredient btn-tactile bg-orange-100 border border-boba-800 text-xs py-1 rounded-lg font-bold">全糖</button>
+                                <button onclick="addIngredient('sugar', '半糖', null, this)" class="btn-ingredient btn-tactile bg-orange-100 border border-boba-800 text-xs py-1 rounded-lg font-bold">半糖</button>
+                                <button onclick="addIngredient('sugar', '微糖', null, this)" class="btn-ingredient btn-tactile bg-orange-100 border border-boba-800 text-xs py-1 rounded-lg font-bold">微糖</button>
+                                <button onclick="addIngredient('sugar', '無糖', null, this)" class="btn-ingredient btn-tactile bg-orange-100 border border-boba-800 text-xs py-1 rounded-lg font-bold">無糖</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-black text-boba-800 block mb-1">4. 冰塊</label>
+                            <div class="grid grid-cols-2 gap-1" id="group-ice">
+                                <button onclick="addIngredient('ice', '正常冰', null, this)" class="btn-ingredient btn-tactile bg-cyan-100 border border-boba-800 text-xs py-1 rounded-lg font-bold">正常冰</button>
+                                <button onclick="addIngredient('ice', '少冰', null, this)" class="btn-ingredient btn-tactile bg-cyan-100 border border-boba-800 text-xs py-1 rounded-lg font-bold">少冰</button>
+                                <button onclick="addIngredient('ice', '去冰', null, this)" class="btn-ingredient btn-tactile bg-cyan-100 border border-boba-800 text-xs py-1 rounded-lg font-bold">去冰</button>
+                                <button onclick="addIngredient('ice', '熱飲', null, this)" class="btn-ingredient btn-tactile bg-red-100 border border-boba-800 text-xs py-1 rounded-lg font-bold">熱飲</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Toppings -->
+                    <div>
+                        <label class="text-xs font-black text-boba-800 block mb-1">5. 加料 (最多 3 種)</label>
+                        <div class="grid grid-cols-4 gap-1.5" id="group-toppings">
+                            <button id="topping-btn-pearl" onclick="addIngredient('topping', '波霸珍珠', 'pearl', this)" class="btn-tactile bg-stone-800 text-white border border-boba-900 text-xs py-1.5 rounded-xl font-bold">🧋 珍珠</button>
+                            <button id="topping-btn-taro" disabled onclick="addIngredient('topping', '芋圓', 'taro', this)" class="btn-tactile bg-stone-300 border border-stone-400 text-stone-500 text-xs py-1.5 rounded-xl font-bold opacity-60 cursor-not-allowed">🔒 芋圓</button>
+                            <button id="topping-btn-jelly" disabled onclick="addIngredient('topping', '椰果', 'jelly', this)" class="btn-tactile bg-stone-300 border border-stone-400 text-stone-500 text-xs py-1.5 rounded-xl font-bold opacity-60 cursor-not-allowed">🔒 椰果</button>
+                            <button id="topping-btn-foam" disabled onclick="addIngredient('topping', '芝士奶蓋', 'foam', this)" class="btn-tactile bg-stone-300 border border-stone-400 text-stone-500 text-xs py-1.5 rounded-xl font-bold opacity-60 cursor-not-allowed">🔒 奶蓋</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= RIGHT COLUMN: SHOP UPGRADES & ECONOMY (4/12) ================= -->
+        <section class="lg:col-span-4 bg-white/80 backdrop-blur border-4 border-boba-800 rounded-3xl p-4 shadow-md flex flex-col gap-3 h-full">
+            <div class="flex items-center justify-between border-b-2 border-boba-200 pb-2">
+                <h2 class="font-extrabold text-lg text-boba-900 flex items-center gap-2">
+                    <i class="fa-solid fa-store text-amber-500"></i> 店鋪升級商店
+                </h2>
+                <span class="text-xs font-black text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full border border-emerald-300">
+                    💰 $<span id="shop-gold-display">150</span>
+                </span>
+            </div>
+
+            <div class="space-y-3 overflow-y-auto max-h-[600px] pr-1">
+                
+                <!-- Category 1: Ingredient Unlocks -->
+                <div>
+                    <h3 class="text-xs font-black text-boba-700 uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <i class="fa-solid fa-cookie-bite"></i> 新配料解鎖
+                    </h3>
+                    <div class="space-y-2">
+                        <!-- Taro Upgrade Card -->
+                        <div id="shop-item-taro" class="bg-purple-50 border-2 border-purple-200 rounded-2xl p-2.5 flex items-center justify-between shadow-sm">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 bg-purple-200 rounded-xl flex items-center justify-center text-lg border border-purple-400">🍠</div>
+                                <div>
+                                    <h4 class="font-bold text-xs text-purple-950">解鎖 芋圓</h4>
+                                    <p class="text-[10px] text-purple-700">開放在工作臺使用芋圓加料</p>
+                                </div>
+                            </div>
+                            <button id="buy-btn-taro" onclick="buyUpgrade('taro')" class="btn-tactile bg-emerald-400 hover:bg-emerald-300 border-2 border-boba-800 text-boba-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-sm">
+                                $80
+                            </button>
+                        </div>
+
+                        <!-- Coconut Jelly Upgrade Card -->
+                        <div id="shop-item-jelly" class="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-2.5 flex items-center justify-between shadow-sm">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 bg-yellow-200 rounded-xl flex items-center justify-center text-lg border border-yellow-400">🥥</div>
+                                <div>
+                                    <h4 class="font-bold text-xs text-yellow-950">解鎖 Q彈椰果</h4>
+                                    <p class="text-[10px] text-yellow-700">解鎖椰果，吸引更多高單價客人</p>
+                                </div>
+                            </div>
+                            <button id="buy-btn-jelly" onclick="buyUpgrade('jelly')" class="btn-tactile bg-emerald-400 hover:bg-emerald-300 border-2 border-boba-800 text-boba-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-sm">
+                                $120
+                            </button>
+                        </div>
+
+                        <!-- Foam Upgrade Card -->
+                        <div id="shop-item-foam" class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-2.5 flex items-center justify-between shadow-sm">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 bg-amber-200 rounded-xl flex items-center justify-center text-lg border border-amber-400">🧀</div>
+                                <div>
+                                    <h4 class="font-bold text-xs text-amber-950">解鎖 芝士奶蓋</h4>
+                                    <p class="text-[10px] text-amber-700">熱門強勢加料，提高點單收益</p>
+                                </div>
+                            </div>
+                            <button id="buy-btn-foam" onclick="buyUpgrade('foam')" class="btn-tactile bg-emerald-400 hover:bg-emerald-300 border-2 border-boba-800 text-boba-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-sm">
+                                $160
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category 2: Machine & Efficiency Upgrades -->
+                <div>
+                    <h3 class="text-xs font-black text-boba-700 uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <i class="fa-solid fa-gears"></i> 設備與宣傳升級
+                    </h3>
+                    <div class="space-y-2">
+                        <!-- Automatic Tea Brewer -->
+                        <div id="shop-item-brewer" class="bg-cyan-50 border-2 border-cyan-200 rounded-2xl p-2.5 flex items-center justify-between shadow-sm">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 bg-cyan-200 rounded-xl flex items-center justify-center text-lg border border-cyan-400">⚙️</div>
+                                <div>
+                                    <h4 class="font-bold text-xs text-cyan-950">自動萃茶機</h4>
+                                    <p class="text-[10px] text-cyan-700">顧客耐心值上限 +20% (延伸等待時長)</p>
+                                </div>
+                            </div>
+                            <button id="buy-btn-brewer" onclick="buyUpgrade('brewer')" class="btn-tactile bg-emerald-400 hover:bg-emerald-300 border-2 border-boba-800 text-boba-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-sm">
+                                $200
+                            </button>
+                        </div>
+
+                        <!-- Shop Decor -->
+                        <div id="shop-item-decor" class="bg-rose-50 border-2 border-rose-200 rounded-2xl p-2.5 flex items-center justify-between shadow-sm">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 bg-rose-200 rounded-xl flex items-center justify-center text-lg border border-rose-400">🪴</div>
+                                <div>
+                                    <h4 class="font-bold text-xs text-rose-950">網美風網紅裝潢</h4>
+                                    <p class="text-[10px] text-rose-700">顧客整體打賞小費 +$5</p>
+                                </div>
+                            </div>
+                            <button id="buy-btn-decor" onclick="buyUpgrade('decor')" class="btn-tactile bg-emerald-400 hover:bg-emerald-300 border-2 border-boba-800 text-boba-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-sm">
+                                $250
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal: Recipe Manual -->
+    <div id="recipe-modal" class="fixed inset-0 bg-boba-950/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cream border-4 border-boba-900 rounded-3xl max-w-md w-full p-5 shadow-2xl relative animate-scale-up">
+            <button onclick="closeMenuModal()" class="absolute top-4 right-4 w-8 h-8 bg-rose-200 hover:bg-rose-300 border-2 border-boba-800 rounded-full text-boba-900 font-bold flex items-center justify-center">✕</button>
+            <h3 class="font-extrabold text-lg text-boba-900 mb-3 flex items-center gap-2">
+                📖 經典珍珠奶茶配方手冊
+            </h3>
+            <div class="space-y-3 text-xs text-boba-900">
+                <div class="bg-white p-3 rounded-2xl border-2 border-boba-200">
+                    <p class="font-bold text-amber-900">🧋 珍珠奶茶 (Classic Boba Milk Tea)</p>
+                    <p class="text-boba-700 mt-1">伯爵紅茶 + 優質鮮奶 + 全糖 + 正常冰 + 波霸珍珠</p>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border-2 border-boba-200">
+                    <p class="font-bold text-emerald-900">🍃 奶蓋綠茶 (Cheese Foam Green Tea)</p>
+                    <p class="text-boba-700 mt-1">四季春綠茶 + 純茶 (無奶) + 半糖 + 少冰 + 芝士奶蓋</p>
+                </div>
+                <div class="bg-white p-3 rounded-2xl border-2 border-boba-200">
+                    <p class="font-bold text-purple-900">🍠 雙圓烏龍奶 (Double Topping Oolong Milk Tea)</p>
+                    <p class="text-boba-700 mt-1">極品烏龍茶 + 濃香燕麥奶 + 微糖 + 去冰 + 珍珠 + 芋圓</p>
+                </div>
+            </div>
+            <button onclick="closeMenuModal()" class="mt-4 w-full btn-tactile bg-boba-800 hover:bg-boba-700 text-white font-extrabold py-2.5 rounded-xl">瞭解！關閉手冊</button>
+        </div>
+    </div>
+
+    <!-- STEP 5: DAILY SETTLEMENT SUMMARY MODAL -->
+    <div id="settlement-modal" class="fixed inset-0 bg-boba-950/70 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cream border-4 border-boba-900 rounded-3xl max-w-md w-full p-6 shadow-2xl relative text-center">
+            <div class="w-16 h-16 bg-amber-200 border-3 border-boba-900 rounded-full flex items-center justify-center text-3xl mx-auto -mt-12 mb-3 shadow-md">
+                📊
+            </div>
+            <h2 id="settlement-title" class="font-black text-2xl text-boba-900 mb-1">第 1 天營業結算</h2>
+            <p id="settlement-subtitle" class="text-xs font-bold text-boba-600 mb-4">今天的辛苦得到了滿滿的回報！</p>
+
+            <div class="bg-white border-2 border-boba-300 rounded-2xl p-4 space-y-2 mb-4 text-xs">
+                <div class="flex justify-between items-center text-boba-800">
+                    <span>👥 服務顧客總數：</span>
+                    <span id="settle-customers" class="font-black text-sm">0 人</span>
+                </div>
+                <div class="flex justify-between items-center text-boba-800">
+                    <span>💵 營業總收入 (含小費)：</span>
+                    <span id="settle-revenue" class="font-black text-sm text-emerald-600">+$0</span>
+                </div>
+                <div class="flex justify-between items-center text-boba-800">
+                    <span>🏠 店面扣除租金與營運成本：</span>
+                    <span id="settle-expenses" class="font-black text-sm text-rose-500">-$50</span>
+                </div>
+                <hr class="border-boba-200">
+                <div class="flex justify-between items-center font-black text-sm text-boba-950">
+                    <span>💰 今日淨利潤：</span>
+                    <span id="settle-net" class="text-base text-emerald-600">+$0</span>
+                </div>
+            </div>
+
+            <!-- Target Goal Progress -->
+            <div id="settle-goal-box" class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-3 mb-5 text-left">
+                <div class="flex justify-between text-xs font-bold text-amber-900 mb-1">
+                    <span>🎯 關卡目標金額：</span>
+                    <span id="settle-goal-text" class="font-mono">$150 / $150</span>
+                </div>
+                <div class="w-full bg-stone-200 h-3 rounded-full border border-amber-800 overflow-hidden">
+                    <div id="settle-goal-bar" class="bg-amber-400 h-full rounded-full transition-all duration-500" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button id="settle-action-btn" onclick="advanceToNextDay()" class="btn-tactile flex-1 bg-emerald-400 hover:bg-emerald-300 border-2 border-boba-900 text-boba-950 font-black py-3 rounded-2xl shadow-md text-sm">
+                    進入第 2 天營業 ➔
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 5: GAME OVER / BANKRUPT MODAL -->
+    <div id="gameover-modal" class="fixed inset-0 bg-boba-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-rose-50 border-4 border-boba-900 rounded-3xl max-w-md w-full p-6 shadow-2xl relative text-center">
+            <div class="w-16 h-16 bg-rose-200 border-3 border-boba-900 rounded-full flex items-center justify-center text-3xl mx-auto -mt-12 mb-3 shadow-md">
+                💔
+            </div>
+            <h2 id="gameover-title" class="font-black text-2xl text-rose-950 mb-1">店鋪宣告倒閉！</h2>
+            <p id="gameover-reason" class="text-xs font-bold text-rose-700 mb-4">顧客滿意度極低，小店無法繼續經營...</p>
+
+            <button onclick="restartEntireGame()" class="w-full btn-tactile bg-rose-400 hover:bg-rose-300 border-2 border-boba-900 text-boba-950 font-black py-3 rounded-2xl shadow-md text-sm">
+                🔄 重新開張珍奶店
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating Cash FX Container -->
+    <div id="floating-cash-container" class="fixed inset-0 pointer-events-none z-40"></div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 flex flex-col gap-2 z-50 pointer-events-none"></div>
+
+    <!-- ================= GAME SCRIPT LOGIC ================= -->
+    <script>
+        // Game Configuration & Constants
+        const CONFIG = {
+            DAY_DURATION: 90, // seconds per business day
+            MAX_ORDERS: 4,
+            SPAWN_INTERVAL_MIN: 4, // seconds
+            SPAWN_INTERVAL_MAX: 7,
+            PATIENCE_MAX: 25, // seconds for customer patience
+            DAY_RENT: 40,
+            TARGET_GOLD_PER_DAY: 120
+        };
+
+        const CUSTOMER_POOL = [
+            { name: '小花 (學生)', avatar: '👧', bonusTip: 5 },
+            { name: '阿強 (上班族)', avatar: '🧔', bonusTip: 10 },
+            { name: '莉莉 (主管)', avatar: '👩‍💼', bonusTip: 15 },
+            { name: '老張 (街坊)', avatar: '👴', bonusTip: 8 },
+            { name: '小明 (外送員)', avatar: '🛵', bonusTip: 12 },
+            { name: '酷妹 (網美)', avatar: '🕶️', bonusTip: 20 },
+        ];
+
+        const RECIPE_DATA = {
+            teas: [
+                { name: '伯爵紅茶', color: '#8C5424' },
+                { name: '四季春綠茶', color: '#7EA172' },
+                { name: '極品烏龍茶', color: '#A66E38' }
+            ],
+            milks: [
+                { name: '優質鮮奶', color: '#FFFBF5' },
+                { name: '濃香燕麥奶', color: '#F4E8D8' },
+                { name: '純茶 (無奶)', color: 'transparent' }
+            ],
+            sugars: ['全糖', '半糖', '微糖', '無糖'],
+            ices: ['正常冰', '少冰', '去冰', '熱飲'],
+            toppings: [
+                { name: '波霸珍珠', type: 'pearl', locked: false }
+            ]
+        };
+
+        const SHOP_ITEMS = {
+            taro: { name: '解鎖 芋圓', cost: 80, unlocked: false, type: 'topping', toppingObj: { name: '芋圓', type: 'taro' } },
+            jelly: { name: '解鎖 Q彈椰果', cost: 120, unlocked: false, type: 'topping', toppingObj: { name: '椰果', type: 'jelly' } },
+            foam: { name: '解鎖 芝士奶蓋', cost: 160, unlocked: false, type: 'topping', toppingObj: { name: '芝士奶蓋', type: 'foam' } },
+            brewer: { name: '自動萃茶機', cost: 200, unlocked: false, type: 'buff' },
+            decor: { name: '網紅網美裝潢', cost: 250, unlocked: false, type: 'buff' }
+        };
+
+        // Game State Engine
+        const gameState = {
+            day: 1,
+            timeRemaining: CONFIG.DAY_DURATION,
+            gold: 150,
+            reputation: 100,
+            maxReputation: 100,
+            isShiftActive: false,
+            activeOrders: [],
+            orderIdCounter: 1,
+            timerLoop: null,
+            spawnTimer: null,
+            // Stats Tracking
+            patienceMultiplier: 1.0,
+            decorTipBonus: 0,
+            dailyCustomersServed: 0,
+            dailyRevenueEarned: 0
+        };
+
+        // Current Drink In Cup
+        const currentCupState = {
+            tea: null,
+            milk: null,
+            sugar: null,
+            ice: null,
+            toppings: []
+        };
+
+        // WEB AUDIO API SYNTHESIZER
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let audioOn = true;
+
+        function playSound(type) {
+            if (!audioOn || !audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+                } else if (type === 'serve') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'cash') {
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(987.77, now); // B5
+                    osc.frequency.setValueAtTime(1318.51, now + 0.06); // E6
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'fail') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch (e) {}
+        }
+
+        // ================= TIMER & GAME LOOP =================
+        function toggleGameShift() {
+            playSound('click');
+            if (gameState.isShiftActive) {
+                pauseShift();
+            } else {
+                startShift();
+            }
+        }
+
+        function startShift() {
+            gameState.isShiftActive = true;
+            
+            const btn = document.getElementById('btn-shift');
+            btn.className = "btn-tactile bg-amber-400 hover:bg-amber-300 border-2 border-boba-800 text-boba-900 px-3 h-10 rounded-xl font-extrabold text-xs flex items-center gap-1.5";
+            document.getElementById('shift-icon').className = "fa-solid fa-pause";
+            document.getElementById('shift-label').innerText = "暫停營業";
+
+            const placeholder = document.getElementById('shop-closed-placeholder');
+            if (placeholder) placeholder.remove();
+
+            showToast('🏪 開始營業！顧客陸續上門中...', 'success');
+
+            if (gameState.activeOrders.length === 0) {
+                spawnCustomer();
+            }
+
+            clearInterval(gameState.timerLoop);
+            gameState.timerLoop = setInterval(gameTick, 1000);
+
+            scheduleNextCustomerSpawn();
+        }
+
+        function pauseShift() {
+            gameState.isShiftActive = false;
+            clearInterval(gameState.timerLoop);
+            clearTimeout(gameState.spawnTimer);
+
+            const btn = document.getElementById('btn-shift');
+            btn.className = "btn-tactile bg-emerald-400 hover:bg-emerald-300 border-2 border-boba-800 text-boba-900 px-3 h-10 rounded-xl font-extrabold text-xs flex items-center gap-1.5";
+            document.getElementById('shift-icon').className = "fa-solid fa-play";
+            document.getElementById('shift-label').innerText = "繼續營業";
+
+            showToast('⏸️ 營業已暫停', 'info');
+        }
+
+        function gameTick() {
+            if (!gameState.isShiftActive) return;
+
+            if (gameState.timeRemaining > 0) {
+                gameState.timeRemaining--;
+                updateClockDisplay();
+            } else {
+                endBusinessDay();
+                return;
+            }
+
+            for (let i = gameState.activeOrders.length - 1; i >= 0; i--) {
+                const order = gameState.activeOrders[i];
+                order.patienceTimer--;
+
+                if (order.patienceTimer <= 0) {
+                    expireOrder(order.id);
+                }
+            }
+
+            renderOrders();
+        }
+
+        function updateClockDisplay() {
+            const mins = Math.floor(gameState.timeRemaining / 60);
+            const secs = gameState.timeRemaining % 60;
+            const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            document.getElementById('stat-time').innerText = formatted;
+        }
+
+        // DAY END SETTLEMENT & CLEAR CONDITIONS
+        function endBusinessDay() {
+            pauseShift();
+            playSound('cash');
+
+            const netRevenue = gameState.dailyRevenueEarned - CONFIG.DAY_RENT;
+
+            document.getElementById('settlement-title').innerText = `第 ${gameState.day} 天營業結算`;
+            document.getElementById('settle-customers').innerText = `${gameState.dailyCustomersServed} 人`;
+            document.getElementById('settle-revenue').innerText = `+$${gameState.dailyRevenueEarned}`;
+            document.getElementById('settle-expenses').innerText = `-$${CONFIG.DAY_RENT}`;
+            document.getElementById('settle-net').innerText = (netRevenue >= 0 ? `+$${netRevenue}` : `-$${Math.abs(netRevenue)}`);
+
+            const target = CONFIG.TARGET_GOLD_PER_DAY * gameState.day;
+            document.getElementById('settle-goal-text').innerText = `$${gameState.gold} / $${target}`;
+            const pct = Math.min(100, Math.round((gameState.gold / target) * 100));
+            document.getElementById('settle-goal-bar').style.width = `${pct}%`;
+
+            const actionBtn = document.getElementById('settle-action-btn');
+
+            if (gameState.gold >= target) {
+                document.getElementById('settlement-subtitle').innerText = "🎉 達成營業目標！小店經營有成，準備迎向新的一天！";
+                actionBtn.className = "btn-tactile flex-1 bg-emerald-400 hover:bg-emerald-300 border-2 border-boba-900 text-boba-950 font-black py-3 rounded-2xl shadow-md text-sm";
+                actionBtn.innerText = `進入第 ${gameState.day + 1} 天營業 ➔`;
+                actionBtn.onclick = advanceToNextDay;
+            } else {
+                document.getElementById('settlement-subtitle').innerText = "⚠️ 未達到今日目標營收！經營陷入危機。";
+                actionBtn.className = "btn-tactile flex-1 bg-rose-400 hover:bg-rose-300 border-2 border-boba-900 text-boba-950 font-black py-3 rounded-2xl shadow-md text-sm";
+                actionBtn.innerText = "宣告破產重新開店";
+                actionBtn.onclick = triggerGameOver;
+            }
+
+            document.getElementById('settlement-modal').classList.remove('hidden');
+        }
+
+        function advanceToNextDay() {
+            document.getElementById('settlement-modal').classList.add('hidden');
+            gameState.day++;
+            gameState.timeRemaining = CONFIG.DAY_DURATION;
+            gameState.dailyCustomersServed = 0;
+            gameState.dailyRevenueEarned = 0;
+            
+            document.getElementById('stat-day').innerText = gameState.day;
+            updateClockDisplay();
+            showToast(`🌅 第 ${gameState.day} 天開店！加油達成新目標！`, 'success');
+        }
+
+        function triggerGameOver() {
+            playSound('fail');
+            document.getElementById('settlement-modal').classList.add('hidden');
+            document.getElementById('gameover-modal').classList.remove('hidden');
+        }
+
+        function restartEntireGame() {
+            location.reload();
+        }
+
+        // ================= ORDER GENERATION SYSTEM =================
+        function scheduleNextCustomerSpawn() {
+            if (!gameState.isShiftActive) return;
+            const randomDelay = (Math.floor(Math.random() * (CONFIG.SPAWN_INTERVAL_MAX - CONFIG.SPAWN_INTERVAL_MIN + 1)) + CONFIG.SPAWN_INTERVAL_MIN) * 1000;
+            
+            clearTimeout(gameState.spawnTimer);
+            gameState.spawnTimer = setTimeout(() => {
+                if (gameState.isShiftActive) {
+                    spawnCustomer();
+                    scheduleNextCustomerSpawn();
+                }
+            }, randomDelay);
+        }
+
+        function spawnCustomer(isManual = false) {
+            if (gameState.activeOrders.length >= CONFIG.MAX_ORDERS) {
+                if (isManual) showToast('店內排隊人數已滿 (最多4人)！', 'warning');
+                return;
+            }
+
+            const persona = CUSTOMER_POOL[Math.floor(Math.random() * CUSTOMER_POOL.length)];
+            
+            const randomTea = RECIPE_DATA.teas[Math.floor(Math.random() * RECIPE_DATA.teas.length)];
+            const randomMilk = RECIPE_DATA.milks[Math.floor(Math.random() * RECIPE_DATA.milks.length)];
+            const randomSugar = RECIPE_DATA.sugars[Math.floor(Math.random() * RECIPE_DATA.sugars.length)];
+            const randomIce = RECIPE_DATA.ices[Math.floor(Math.random() * RECIPE_DATA.ices.length)];
+            
+            const toppingCount = Math.floor(Math.random() * 2) + 1;
+            const shuffledToppings = [...RECIPE_DATA.toppings].sort(() => 0.5 - Math.random());
+            const selectedToppings = shuffledToppings.slice(0, toppingCount);
+
+            const basePrice = 30 + (selectedToppings.length * 10);
+            const calculatedPatience = Math.round(CONFIG.PATIENCE_MAX * gameState.patienceMultiplier);
+
+            const newOrder = {
+                id: gameState.orderIdCounter++,
+                customerName: persona.name,
+                avatar: persona.avatar,
+                price: basePrice,
+                bonusTip: persona.bonusTip + gameState.decorTipBonus,
+                tea: randomTea,
+                milk: randomMilk,
+                sugar: randomSugar,
+                ice: randomIce,
+                toppings: selectedToppings,
+                patienceMax: calculatedPatience,
+                patienceTimer: calculatedPatience
+            };
+
+            gameState.activeOrders.push(newOrder);
+            renderOrders();
+
+            if (isManual) showToast(`🙋 ${persona.name} 上門點單了！`, 'info');
+        }
+
+        function expireOrder(orderId) {
+            const index = gameState.activeOrders.findIndex(o => o.id === orderId);
+            if (index !== -1) {
+                const order = gameState.activeOrders[index];
+                gameState.activeOrders.splice(index, 1);
+                
+                playSound('fail');
+                deductReputation(5);
+                showToast(`😤 ${order.customerName} 等太久氣跑了！(-5 聲譽)`, 'warning');
+                renderOrders();
+            }
+        }
+
+        function deductReputation(pts) {
+            gameState.reputation = Math.max(0, gameState.reputation - pts);
+            document.getElementById('stat-reputation').innerText = `${gameState.reputation} / ${gameState.maxReputation}`;
+            
+            if (gameState.reputation === 0) {
+                pauseShift();
+                triggerGameOver();
+            }
+        }
+
+        // ================= RENDER ORDER CARDS =================
+        function renderOrders() {
+            const container = document.getElementById('orders-list-container');
+            document.getElementById('order-count-badge').innerText = `${gameState.activeOrders.length} 人`;
+
+            if (gameState.activeOrders.length === 0) {
+                if (!gameState.isShiftActive) {
+                    container.innerHTML = `
+                        <div id="shop-closed-placeholder" class="h-full min-h-[250px] flex flex-col items-center justify-center text-center p-4 bg-boba-50/50 rounded-2xl border-2 border-dashed border-boba-300">
+                            <div class="text-4xl mb-2">🏪</div>
+                            <p class="font-bold text-boba-800 text-sm">店鋪休息中</p>
+                            <p class="text-xs text-boba-600 mt-1">點擊右上角「開始營業」以開啟今日顧客生成！</p>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="h-full min-h-[250px] flex flex-col items-center justify-center text-center p-4 bg-boba-50/30 rounded-2xl border-2 border-dashed border-boba-200">
+                            <div class="text-3xl mb-2 animate-bounce">👀</div>
+                            <p class="font-bold text-boba-700 text-xs">目前沒有顧客排隊</p>
+                            <p class="text-[11px] text-boba-500 mt-1">新顧客正在路上...</p>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            container.innerHTML = '';
+
+            gameState.activeOrders.forEach(order => {
+                const patiencePercent = Math.max(0, Math.round((order.patienceTimer / order.patienceMax) * 100));
+                
+                let barColorClass = 'bg-emerald-500';
+                let statusText = '耐心等待中';
+                if (patiencePercent < 60 && patiencePercent >= 30) {
+                    barColorClass = 'bg-amber-500';
+                    statusText = '稍顯不耐煩';
+                } else if (patiencePercent < 30) {
+                    barColorClass = 'bg-rose-500 animate-pulse';
+                    statusText = '快要生氣離開！';
+                }
+
+                const toppingsHtml = order.toppings.map(t => 
+                    `<span class="bg-stone-200 text-stone-900 px-1.5 py-0.5 rounded border border-stone-400 font-bold text-[10px]">${t.name}</span>`
+                ).join(' ');
+
+                const drinkTitle = `${order.tea.name.replace(/(伯爵|四季春|極品)/,'')}${order.milk.name !== '純茶 (無奶)' ? '奶茶' : '茶'}`;
+
+                const cardHtml = `
+                    <div id="order-card-${order.id}" class="bg-cream border-3 border-boba-800 rounded-2xl p-3 shadow-sm relative overflow-hidden transition-all duration-300 hover:translate-y-[-2px]">
+                        <div class="flex items-start gap-3">
+                            <div class="w-12 h-12 bg-boba-100 border-2 border-boba-800 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 shadow-sm">
+                                ${order.avatar}
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="font-bold text-xs text-boba-900 truncate">${order.customerName}</span>
+                                    <span class="text-xs font-black text-emerald-600 bg-emerald-50 border border-emerald-300 px-1.5 py-0.5 rounded-md">+$${order.price}</span>
+                                </div>
+                                <h3 class="font-black text-boba-700 text-xs mb-1.5">${drinkTitle}</h3>
+                                
+                                <div class="flex flex-wrap gap-1 text-[10px] mb-2">
+                                    <span class="bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded border border-amber-300 font-medium">${order.tea.name}</span>
+                                    <span class="bg-blue-100 text-blue-900 px-1.5 py-0.5 rounded border border-blue-300 font-medium">${order.milk.name}</span>
+                                    <span class="bg-orange-100 text-orange-900 px-1.5 py-0.5 rounded border border-orange-300 font-medium">${order.sugar}</span>
+                                    <span class="bg-cyan-100 text-cyan-900 px-1.5 py-0.5 rounded border border-cyan-300 font-medium">${order.ice}</span>
+                                    ${toppingsHtml}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-1">
+                            <div class="flex justify-between text-[10px] font-bold text-boba-600 mb-0.5">
+                                <span>${statusText}</span>
+                                <span class="font-mono">${order.patienceTimer}s (${patiencePercent}%)</span>
+                            </div>
+                            <div class="w-full bg-stone-200 h-2.5 rounded-full border border-boba-800 overflow-hidden">
+                                <div class="${barColorClass} h-full rounded-full transition-all duration-300" style="width: ${patiencePercent}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML += cardHtml;
+            });
+        }
+
+        // ================= WORKSPACE & DRINK MATCHING LOGIC =================
+        function addIngredient(type, name, value, elementBtn) {
+            playSound('click');
+            if (type === 'tea') {
+                currentCupState.tea = { name, color: value };
+                highlightActiveOption('group-tea', elementBtn);
+            } else if (type === 'milk') {
+                currentCupState.milk = { name, color: value };
+                highlightActiveOption('group-milk', elementBtn);
+            } else if (type === 'sugar') {
+                currentCupState.sugar = name;
+                highlightActiveOption('group-sugar', elementBtn);
+            } else if (type === 'ice') {
+                currentCupState.ice = name;
+                highlightActiveOption('group-ice', elementBtn);
+            } else if (type === 'topping') {
+                if (currentCupState.toppings.length < 3) {
+                    currentCupState.toppings.push({ name, type: value });
+                } else {
+                    showToast('⚠️ 杯子配料已滿 (最多3種)！', 'warning');
+                    return;
+                }
+            }
+
+            renderCupPreview();
+        }
+
+        function highlightActiveOption(groupId, activeBtn) {
+            if (!activeBtn) return;
+            const container = document.getElementById(groupId);
+            if (!container) return;
+            
+            const buttons = container.querySelectorAll('.btn-ingredient');
+            buttons.forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-boba-800', 'scale-105');
+            });
+
+            activeBtn.classList.add('ring-4', 'ring-boba-800', 'scale-105');
+        }
+
+        function resetCupHighlights() {
+            document.querySelectorAll('.btn-ingredient').forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-boba-800', 'scale-105');
+            });
+        }
+
+        function renderCupPreview() {
+            const liquidLayer = document.getElementById('cup-liquid-layer');
+            const foamLayer = document.getElementById('cup-foam-layer');
+            const toppingsLayer = document.getElementById('cup-toppings-layer');
+            const iceCubes = document.getElementById('cup-ice-cubes');
+            const tagsContainer = document.getElementById('recipe-summary-tags');
+
+            if (currentCupState.tea) {
+                liquidLayer.style.height = '75%';
+                if (currentCupState.milk && currentCupState.milk.color !== 'transparent') {
+                    liquidLayer.style.backgroundColor = currentCupState.tea.color;
+                    liquidLayer.style.backgroundImage = 'linear-gradient(to top, ' + currentCupState.tea.color + ', #FFFBF5)';
+                } else {
+                    liquidLayer.style.backgroundColor = currentCupState.tea.color;
+                    liquidLayer.style.backgroundImage = 'none';
+                }
+            } else {
+                liquidLayer.style.height = '0%';
+            }
+
+            if (currentCupState.ice && currentCupState.ice !== '去冰' && currentCupState.ice !== '熱飲') {
+                iceCubes.classList.remove('hidden');
+            } else {
+                iceCubes.classList.add('hidden');
+            }
+
+            toppingsLayer.innerHTML = '';
+            foamLayer.style.height = '0%';
+
+            currentCupState.toppings.forEach(top => {
+                if (top.type === 'pearl') {
+                    for(let i=0; i<6; i++) {
+                        const pearl = document.createElement('div');
+                        pearl.className = 'pearl';
+                        toppingsLayer.appendChild(pearl);
+                    }
+                } else if (top.type === 'taro') {
+                    for(let i=0; i<5; i++) {
+                        const taro = document.createElement('div');
+                        taro.className = 'taro-cube';
+                        toppingsLayer.appendChild(taro);
+                    }
+                } else if (top.type === 'jelly') {
+                    for(let i=0; i<5; i++) {
+                        const jelly = document.createElement('div');
+                        jelly.className = 'jelly-cube';
+                        toppingsLayer.appendChild(jelly);
+                    }
+                } else if (top.type === 'foam') {
+                    foamLayer.style.height = '15%';
+                }
+            });
+
+            tagsContainer.innerHTML = '';
+            let hasItem = false;
+
+            if (currentCupState.tea) {
+                appendTag(tagsContainer, currentCupState.tea.name, 'bg-amber-100 text-amber-900 border-amber-300');
+                hasItem = true;
+            }
+            if (currentCupState.milk) {
+                appendTag(tagsContainer, currentCupState.milk.name, 'bg-blue-100 text-blue-900 border-blue-300');
+                hasItem = true;
+            }
+            if (currentCupState.sugar) {
+                appendTag(tagsContainer, currentCupState.sugar, 'bg-orange-100 text-orange-900 border-orange-300');
+                hasItem = true;
+            }
+            if (currentCupState.ice) {
+                appendTag(tagsContainer, currentCupState.ice, 'bg-cyan-100 text-cyan-900 border-cyan-300');
+                hasItem = true;
+            }
+            currentCupState.toppings.forEach(top => {
+                appendTag(tagsContainer, top.name, 'bg-stone-200 text-stone-900 border-stone-400');
+                hasItem = true;
+            });
+
+            if (!hasItem) {
+                tagsContainer.innerHTML = '<span class="text-xs text-stone-400 italic">尚未加入任何原料...</span>';
+            }
+        }
+
+        function appendTag(container, text, colorClass) {
+            const span = document.createElement('span');
+            span.className = `text-xs px-2 py-0.5 rounded-md border font-bold ${colorClass}`;
+            span.innerText = text;
+            container.appendChild(span);
+        }
+
+        function resetCup() {
+            playSound('click');
+            currentCupState.tea = null;
+            currentCupState.milk = null;
+            currentCupState.sugar = null;
+            currentCupState.ice = null;
+            currentCupState.toppings = [];
+            
+            document.getElementById('cup-foam-layer').style.height = '0%';
+            resetCupHighlights();
+            renderCupPreview();
+        }
+
+        // ================= MATCHING & SERVING LOGIC =================
+        function serveOrder() {
+            if (!currentCupState.tea) {
+                playSound('fail');
+                shakeCup();
+                showToast('❌ 這是一杯空杯子！請先選擇茶底', 'warning');
+                return;
+            }
+            if (!currentCupState.milk) {
+                playSound('fail');
+                shakeCup();
+                showToast('❌ 請選擇鮮奶/奶精選項 (無奶請選純茶)', 'warning');
+                return;
+            }
+            if (!currentCupState.sugar) {
+                playSound('fail');
+                shakeCup();
+                showToast('❌ 請選擇甜度！', 'warning');
+                return;
+            }
+            if (!currentCupState.ice) {
+                playSound('fail');
+                shakeCup();
+                showToast('❌ 請選擇冰塊！', 'warning');
+                return;
+            }
+
+            if (gameState.activeOrders.length === 0) {
+                playSound('fail');
+                shakeCup();
+                showToast('❌ 目前沒有等待中的顧客點單！', 'warning');
+                return;
+            }
+
+            let matchedOrderIndex = -1;
+            let matchReason = '';
+
+            for (let i = 0; i < gameState.activeOrders.length; i++) {
+                const order = gameState.activeOrders[i];
+                
+                if (order.tea.name !== currentCupState.tea.name) {
+                    matchReason = `茶底不符 (顧客要 ${order.tea.name})`;
+                    continue;
+                }
+                if (order.milk.name !== currentCupState.milk.name) {
+                    matchReason = `奶類不符 (顧客要 ${order.milk.name})`;
+                    continue;
+                }
+                if (order.sugar !== currentCupState.sugar) {
+                    matchReason = `甜度不符 (顧客要 ${order.sugar})`;
+                    continue;
+                }
+                if (order.ice !== currentCupState.ice) {
+                    matchReason = `冰塊不符 (顧客要 ${order.ice})`;
+                    continue;
+                }
+
+                const reqToppingNames = order.toppings.map(t => t.name).sort();
+                const curToppingNames = currentCupState.toppings.map(t => t.name).sort();
+
+                if (JSON.stringify(reqToppingNames) !== JSON.stringify(curToppingNames)) {
+                    matchReason = `加料不符 (顧客要 ${reqToppingNames.join(',') || '無'})`;
+                    continue;
+                }
+
+                matchedOrderIndex = i;
+                break;
+            }
+
+            if (matchedOrderIndex !== -1) {
+                // Exact Match Success!
+                const order = gameState.activeOrders[matchedOrderIndex];
+                
+                const patienceRatio = order.patienceTimer / order.patienceMax;
+                const speedBonus = patienceRatio > 0.5 ? order.bonusTip : 0;
+                const totalEarned = order.price + speedBonus;
+
+                gameState.dailyCustomersServed++;
+                gameState.dailyRevenueEarned += totalEarned;
+
+                updateGold(totalEarned);
+                playSound('serve');
+                setTimeout(() => playSound('cash'), 150);
+
+                gameState.activeOrders.splice(matchedOrderIndex, 1);
+                renderOrders();
+
+                spawnFloatingCash(`+$${totalEarned}`);
+                showToast(`🎉 出餐成功！滿意送達給 ${order.customerName} (${speedBonus > 0 ? '小費 +$' + speedBonus : '無小費'})`, 'success');
+                
+                resetCup();
+            } else {
+                playSound('fail');
+                shakeCup();
+                showToast(`❌ 出餐失敗！無配對訂單 (${matchReason})`, 'warning');
+            }
+        }
+
+        // ================= SHOP & ECONOMY SYSTEM =================
+        function updateGold(amount) {
+            gameState.gold += amount;
+            document.getElementById('stat-gold').innerText = gameState.gold;
+            document.getElementById('shop-gold-display').innerText = gameState.gold;
+            refreshShopUI();
+        }
+
+        function buyUpgrade(itemId) {
+            playSound('click');
+            const item = SHOP_ITEMS[itemId];
+            if (!item) return;
+
+            if (item.unlocked) {
+                showToast('已解鎖該項目！', 'info');
+                return;
+            }
+
+            if (gameState.gold < item.cost) {
+                playSound('fail');
+                showToast(`❌ 金幣不足！解鎖「${item.name}」需要 $${item.cost}`, 'warning');
+                return;
+            }
+
+            updateGold(-item.cost);
+            item.unlocked = true;
+            playSound('cash');
+
+            if (item.type === 'topping') {
+                RECIPE_DATA.toppings.push(item.toppingObj);
+                unlockToppingButton(itemId);
+                showToast(`🎉 成功解鎖配料：「${item.toppingObj.name}」！客人開始點購該配料！`, 'success');
+            } else if (itemId === 'brewer') {
+                gameState.patienceMultiplier = 1.2;
+                showToast('⚡ 自動萃茶機已安裝！全顧客耐心值 +20%', 'success');
+            } else if (itemId === 'decor') {
+                gameState.decorTipBonus = 5;
+                showToast('🪴 網美風裝潢完成！所有訂單基本小費 +$5', 'success');
+            }
+
+            refreshShopUI();
+        }
+
+        function unlockToppingButton(toppingKey) {
+            const btn = document.getElementById(`topping-btn-${toppingKey}`);
+            if (!btn) return;
+            
+            btn.removeAttribute('disabled');
+            btn.classList.remove('bg-stone-300', 'border-stone-400', 'text-stone-500', 'opacity-60', 'cursor-not-allowed');
+
+            if (toppingKey === 'taro') {
+                btn.className = "btn-tactile bg-purple-200 border border-boba-800 text-purple-900 text-xs py-1.5 rounded-xl font-bold";
+                btn.innerHTML = '🍠 芋圓';
+            } else if (toppingKey === 'jelly') {
+                btn.className = "btn-tactile bg-yellow-100 border border-boba-800 text-yellow-900 text-xs py-1.5 rounded-xl font-bold";
+                btn.innerHTML = '🥥 椰果';
+            } else if (toppingKey === 'foam') {
+                btn.className = "btn-tactile bg-amber-100 border border-boba-800 text-amber-900 text-xs py-1.5 rounded-xl font-bold";
+                btn.innerHTML = '🧀 奶蓋';
+            }
+        }
+
+        function refreshShopUI() {
+            Object.keys(SHOP_ITEMS).forEach(key => {
+                const item = SHOP_ITEMS[key];
+                const buyBtn = document.getElementById(`buy-btn-${key}`);
+                if (!buyBtn) return;
+
+                if (item.unlocked) {
+                    buyBtn.disabled = true;
+                    buyBtn.className = "bg-stone-200 text-stone-500 border border-stone-300 text-xs font-bold px-2 py-1 rounded-lg cursor-default";
+                    buyBtn.innerText = "已解鎖 ✓";
+                } else {
+                    if (gameState.gold < item.cost) {
+                        buyBtn.className = "btn-tactile bg-stone-200 border border-stone-400 text-stone-600 font-bold text-xs px-3 py-1.5 rounded-xl opacity-75";
+                    } else {
+                        buyBtn.className = "btn-tactile bg-emerald-400 hover:bg-emerald-300 border-2 border-boba-800 text-boba-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-sm";
+                    }
+                }
+            });
+        }
+
+        function shakeCup() {
+            const wrapper = document.getElementById('boba-cup-wrapper');
+            wrapper.classList.add('animate-bounce');
+            setTimeout(() => wrapper.classList.remove('animate-bounce'), 500);
+        }
+
+        function spawnFloatingCash(text) {
+            const container = document.getElementById('floating-cash-container');
+            const floatText = document.createElement('div');
+            floatText.className = 'absolute font-black text-2xl text-emerald-500 drop-shadow-md animate-bounce pointer-events-none transition-all duration-700';
+            floatText.style.left = '50%';
+            floatText.style.top = '40%';
+            floatText.innerText = text;
+            
+            container.appendChild(floatText);
+
+            setTimeout(() => {
+                floatText.style.transform = 'translateY(-60px)';
+                floatText.style.opacity = '0';
+            }, 50);
+
+            setTimeout(() => floatText.remove(), 800);
+        }
+
+        function openMenuModal() {
+            playSound('click');
+            document.getElementById('recipe-modal').classList.remove('hidden');
+        }
+        function closeMenuModal() {
+            playSound('click');
+            document.getElementById('recipe-modal').classList.add('hidden');
+        }
+
+        function toggleAudio() {
+            audioOn = !audioOn;
+            playSound('click');
+            const btn = document.getElementById('btn-audio');
+            btn.innerHTML = audioOn ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark text-rose-500"></i>';
+            showToast(audioOn ? '音效已開啟' : '音效已靜音', 'info');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgClass = 'bg-boba-800 text-white';
+            if (type === 'success') bgClass = 'bg-emerald-600 text-white';
+            if (type === 'warning') bgClass = 'bg-amber-500 text-white';
+
+            toast.className = `${bgClass} border-2 border-boba-900 rounded-xl px-3 py-2 text-xs font-bold shadow-lg transition-all transform translate-y-2 opacity-0 pointer-events-auto flex items-center gap-2`;
+            toast.innerHTML = `<span>${message}</span>`;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+
+        // Initialize view
+        updateClockDisplay();
+        renderOrders();
+        refreshShopUI();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企業營運與獲利分析儀表板 (Offline Business Analytics)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS CDN (Excel / CSV Parser) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .kpi-card { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+        .kpi-card.active { border-color: #6366f1; background-color: #eff6ff; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.15); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Top Header Navigation -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-indigo-600 rounded-xl">
+                    <i data-lucide="bar-chart-3" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">企業營運與獲利診斷儀表板</h1>
+                    <p class="text-xs text-slate-400">100% 本地端記憶體運算 · 零資安外洩風險</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <button id="demoDataBtn" class="inline-flex items-center px-3 py-1.5 border border-slate-700 hover:bg-slate-800 rounded-lg text-xs font-medium text-slate-200 transition">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 mr-1.5 text-amber-400"></i>
+                    載入測試數據 (Demo Data)
+                </button>
+                <div class="hidden sm:flex items-center space-x-2 text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-1.5 rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>離線安全保護中</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+
+        <!-- 1. Upload & Status Dropzone -->
+        <section id="uploadSection" class="bg-white rounded-2xl border-2 border-dashed border-slate-300 p-6 text-center hover:border-indigo-400 transition-colors">
+            <div class="max-w-xl mx-auto flex flex-col items-center">
+                <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-3">
+                    <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                </div>
+                <h3 class="font-bold text-slate-800 text-base mb-1">拖放上傳營運數據 (Excel / CSV)</h3>
+                <p class="text-xs text-slate-500 mb-4">支援欄位包含：日期/年月、區域、產品、銷售量、單價、營收、成本、毛利、目標金額、客戶名稱、業務員</p>
+                
+                <div class="flex flex-wrap justify-center gap-3">
+                    <label class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer shadow-sm transition">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-1.5"></i>
+                        選擇本地檔案
+                        <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="sr-only">
+                    </label>
+                    <button id="exportCsvBtn" class="hidden inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 transition">
+                        <i data-lucide="download" class="w-4 h-4 mr-1.5 text-slate-500"></i>
+                        匯出當前分析 CSV
+                    </button>
+                    <button id="printReportBtn" class="hidden inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 bg-white hover:bg-slate-50 transition">
+                        <i data-lucide="printer" class="w-4 h-4 mr-1.5 text-slate-500"></i>
+                        列印/下載 PDF 報告
+                    </button>
+                </div>
+                <div id="fileInfoDisplay" class="mt-3 text-xs text-emerald-600 font-semibold hidden"></div>
+            </div>
+        </section>
+
+        <!-- Main Dashboard Workspace (Initially Empty or Hidden until data loaded) -->
+        <div id="dashboardContent" class="hidden space-y-6">
+
+            <!-- 2. Primary Clickable KPI Cards Grid (4 Cards) -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- KPI Card 1: Revenue & Target -->
+                <div id="kpiCard1" class="kpi-card active bg-white p-5 rounded-xl border border-slate-200 cursor-pointer shadow-sm relative overflow-hidden" onclick="switchPanel(1)">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500">整體營收與達成率</span>
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                            <i data-lucide="target" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-900 mb-1" id="kpiRevenueVal">$0</div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-500">目標達成率:</span>
+                        <span id="kpiTargetRate" class="font-bold text-indigo-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
+                        <div id="kpiTargetBar" class="bg-indigo-600 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="mt-2 text-[11px] text-slate-400 flex items-center">
+                        <i data-lucide="mouse-pointer-click" class="w-3 h-3 mr-1"></i> 點擊展開「業績達成與區域分析」
+                    </div>
+                </div>
+
+                <!-- KPI Card 2: Profit & Gross Margin % -->
+                <div id="kpiCard2" class="kpi-card bg-white p-5 rounded-xl border border-slate-200 cursor-pointer shadow-sm relative overflow-hidden" onclick="switchPanel(2)">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500">整體毛利與毛利率</span>
+                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                            <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-900 mb-1" id="kpiProfitVal">$0</div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-500">平均毛利率:</span>
+                        <span id="kpiMarginRate" class="font-bold text-emerald-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
+                        <div id="kpiMarginBar" class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="mt-2 text-[11px] text-slate-400 flex items-center">
+                        <i data-lucide="mouse-pointer-click" class="w-3 h-3 mr-1"></i> 點擊展開「產品營收與毛利分析」
+                    </div>
+                </div>
+
+                <!-- KPI Card 3: Customer Pareto 80/20 -->
+                <div id="kpiCard3" class="kpi-card bg-white p-5 rounded-xl border border-slate-200 cursor-pointer shadow-sm relative overflow-hidden" onclick="switchPanel(3)">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500">高價值客戶集中度 (80/20)</span>
+                        <div class="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                            <i data-lucide="users" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-900 mb-1" id="kpiParetoVal">0%</div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-500">前 20% 客戶營收貢獻</span>
+                        <span id="kpiParetoStatus" class="font-bold text-purple-600">集中度算高</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
+                        <div id="kpiParetoBar" class="bg-purple-600 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="mt-2 text-[11px] text-slate-400 flex items-center">
+                        <i data-lucide="mouse-pointer-click" class="w-3 h-3 mr-1"></i> 點擊展開「客戶貢獻與獲利分析」
+                    </div>
+                </div>
+
+                <!-- KPI Card 4: Sales Rep Efficiency -->
+                <div id="kpiCard4" class="kpi-card bg-white p-5 rounded-xl border border-slate-200 cursor-pointer shadow-sm relative overflow-hidden" onclick="switchPanel(4)">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500">業務人均產值與達成</span>
+                        <div class="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                            <i data-lucide="award" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-900 mb-1" id="kpiSalesPerRepVal">$0</div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-500">團隊平均達成率:</span>
+                        <span id="kpiSalesAvgTarget" class="font-bold text-amber-600">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 mt-3 overflow-hidden">
+                        <div id="kpiSalesBar" class="bg-amber-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <div class="mt-2 text-[11px] text-slate-400 flex items-center">
+                        <i data-lucide="mouse-pointer-click" class="w-3 h-3 mr-1"></i> 點擊展開「業務員績效與獲利分析」
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- 3. Dynamic Drill-down Panels Container -->
+            <section id="panelsContainer">
+
+                <!-- PANEL 1: Sales & Regional Performance -->
+                <div id="panel1" class="panel-item space-y-6">
+                    <!-- Filter Toolbar -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+                            <span class="text-xs font-bold text-slate-700">區域與時間篩選：</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <select id="p1RegionSelect" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500" onchange="updatePanel1()">
+                                <option value="ALL">全部銷售區域</option>
+                            </select>
+                            <select id="p1TimeSelect" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500" onchange="updatePanel1()">
+                                <option value="ALL">全部月份/時間</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Revenue vs Target Combo Chart -->
+                        <div class="lg:col-span-7 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 mb-1">月份營收 vs. 目標達成率與 YoY 趨勢</h4>
+                            <p class="text-xs text-slate-400 mb-4">柱狀圖代表實際與目標營收 (左軸)，折線圖代表達成率 (右軸)</p>
+                            <div class="h-72">
+                                <canvas id="chartPanel1Revenue"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Regional Revenue Bar Chart -->
+                        <div class="lg:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 mb-1">各銷售區域營收與達成狀況</h4>
+                            <p class="text-xs text-slate-400 mb-4">檢視各區貢獻度與目標落後區域</p>
+                            <div class="h-72">
+                                <canvas id="chartPanel1Region"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnostics & Formula Explanation Card -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-4 bg-indigo-50/70 border border-indigo-100 rounded-xl p-5">
+                            <h5 class="text-xs font-bold text-indigo-900 uppercase tracking-wider mb-2 flex items-center">
+                                <i data-lucide="calculator" class="w-4 h-4 mr-1.5"></i> 計算公式說明
+                            </h5>
+                            <div class="space-y-3 text-xs text-indigo-950">
+                                <div class="bg-white p-2.5 rounded-lg border border-indigo-100 shadow-2xs">
+                                    <div class="font-semibold text-indigo-800">目標達成率 (%)</div>
+                                    <div class="font-mono text-[11px] text-slate-600 mt-0.5">(實際營收 ÷ 目標營收) × 100%</div>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-lg border border-indigo-100 shadow-2xs">
+                                    <div class="font-semibold text-indigo-800">年增率 YoY (%)</div>
+                                    <div class="font-mono text-[11px] text-slate-600 mt-0.5">[(本期營收 - 去年同期) ÷ 去年同期] × 100%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-8 bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                            <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center text-amber-600">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 mr-1.5"></i> 自動化業績診斷與管理策略建議
+                            </h5>
+                            <div id="p1DiagnosticsContent" class="space-y-3 text-xs">
+                                <!-- Dynamic JS Injection -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL 2: Product Line & Profitability Matrix -->
+                <div id="panel2" class="panel-item space-y-6 hidden">
+                    <!-- Filter Toolbar -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="sliders" class="w-4 h-4 text-slate-400"></i>
+                            <span class="text-xs font-bold text-slate-700">產品線矩陣門檻過濾：</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs text-slate-500">最低毛利率門檻:</span>
+                                <input type="range" id="p2MarginFilter" min="0" max="60" value="0" class="w-32 accent-indigo-600" oninput="document.getElementById('p2MarginVal').innerText = this.value + '%'; updatePanel2();">
+                                <span id="p2MarginVal" class="text-xs font-bold text-indigo-600 w-8">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Product Quadrant Scatter Matrix -->
+                        <div class="lg:col-span-7 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 mb-1">產品獲利四象限陣列 (營收 vs. 毛利率)</h4>
+                            <p class="text-xs text-slate-400 mb-4">右上為「明星品項」，右下為「虛胖高營收低毛利品項」</p>
+                            <div class="h-72">
+                                <canvas id="chartPanel2Matrix"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Top Products Profit Ranking -->
+                        <div class="lg:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 mb-1">各產品線毛利額 Top N 排名</h4>
+                            <p class="text-xs text-slate-400 mb-4">衡量真正獲利貢獻最高的產品</p>
+                            <div class="h-72">
+                                <canvas id="chartPanel2TopRank"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnostics & Advice -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-4 bg-emerald-50/70 border border-emerald-100 rounded-xl p-5">
+                            <h5 class="text-xs font-bold text-emerald-900 uppercase tracking-wider mb-2 flex items-center">
+                                <i data-lucide="calculator" class="w-4 h-4 mr-1.5"></i> 計算公式說明
+                            </h5>
+                            <div class="space-y-3 text-xs text-emerald-950">
+                                <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
+                                    <div class="font-semibold text-emerald-800">毛利 (Gross Profit)</div>
+                                    <div class="font-mono text-[11px] text-slate-600 mt-0.5">實際營收 - 銷貨成本</div>
+                                </div>
+                                <div class="bg-white p-2.5 rounded-lg border border-emerald-100 shadow-2xs">
+                                    <div class="font-semibold text-emerald-800">毛利率 (Margin %)</div>
+                                    <div class="font-mono text-[11px] text-slate-600 mt-0.5">(毛利 ÷ 實際營收) × 100%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-8 bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                            <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center text-emerald-600">
+                                <i data-lucide="package-search" class="w-4 h-4 mr-1.5"></i> 產品線獲利診斷與組合優化建議
+                            </h5>
+                            <div id="p2DiagnosticsContent" class="space-y-3 text-xs">
+                                <!-- Dynamic Injection -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL 3: Customer Pareto 80/20 & Concentration -->
+                <div id="panel3" class="panel-item space-y-6 hidden">
+                    <!-- Filter Toolbar -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="user-check" class="w-4 h-4 text-slate-400"></i>
+                            <span class="text-xs font-bold text-slate-700">客戶分級與過濾：</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <select id="p3CustomerClass" class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500" onchange="updatePanel3()">
+                                <option value="ALL">全部客戶等級</option>
+                                <option value="A">A 級客戶 (前 20% 高貢獻)</option>
+                                <option value="B">B 級客戶 (中間 30%)</option>
+                                <option value="C">C 級客戶 (後 50%)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Pareto Chart -->
+                        <div class="lg:col-span-8 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 mb-1">客戶營收 Pareto 柏拉圖 (80/20 門檻分析)</h4>
+                            <p class="text-xs text-slate-400 mb-4">藍柱為單一客戶營收，紅折線為累積營收佔比 % (80% 虛線為高價值臨界)</p>
+                            <div class="h-72">
+                                <canvas id="chartPanel3Pareto"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Customer Margin Scatter -->
+                        <div class="lg:col-span-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 mb-1">客戶獲利結構與分級圓餅圖</h4>
+                            <p class="text-xs text-slate-400 mb-4">A/B/C 級客戶佔比與集中度</p>
+                            <div class="h-72">
+                                <canvas id="chartPanel3Pie"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnostics & Advice -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-4 bg-purple-50/70 border border-purple-100 rounded-xl p-5">
+                            <h5 class="text-xs font-bold text-purple-900 uppercase tracking-wider mb-2 flex items-center">
+                                <i data-lucide="calculator" class="w-4 h-4 mr-1.5"></i> 計算公式說明
+                            </h5>
+                            <div class="space-y-3 text-xs text-purple-950">
+                                <div class="bg-white p-2.5 rounded-lg border border-purple-100 shadow-2xs">
+                                    <div class="font-semibold text-purple-800">累積營收貢獻度 (%)</div>
+                                    <div class="font-mono text-[11px] text-slate-600 mt-0.5">(前 N 名客戶總營收 ÷ 全公司總營收) × 100%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-8 bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                            <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center text-purple-600">
+                                <i data-lucide="shield-alert" class="w-4 h-4 mr-1.5"></i> 客戶集中度風險診斷與留存維護建議
+                            </h5>
+                            <div id="p3DiagnosticsContent" class="space-y-3 text-xs">
+                                <!-- Dynamic Injection -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PANEL 4: Salesperson Performance & Discount Risk -->
+                <div id="panel4" class="panel-item space-y-6 hidden">
+                    <!-- Filter Toolbar -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center space-x-2">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+                            <span class="text-xs font-bold text-slate-700">業務員搜尋與比較：</span>
+                        </div>
+                        <input type="text" id="p4Search" placeholder="搜尋業務員姓名..." class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 w-48" oninput="updatePanel4()">
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Rep Revenue vs Margin Scatter -->
+                        <div class="lg:col-span-7 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 mb-1">業務員「營收 vs. 平均毛利率」交叉檢視圖</h4>
+                            <p class="text-xs text-slate-400 mb-4">識別高營收卻嚴重削價 (低毛利) 的潛在問題業務</p>
+                            <div class="h-72">
+                                <canvas id="chartPanel4Scatter"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Target Attainment Bar -->
+                        <div class="lg:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <h4 class="text-sm font-bold text-slate-800 mb-1">業務員目標達成率比較</h4>
+                            <p class="text-xs text-slate-400 mb-4">評估團隊個人業績達成達標率 %</p>
+                            <div class="h-72">
+                                <canvas id="chartPanel4Target"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnostics & Advice -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-4 bg-amber-50/70 border border-amber-100 rounded-xl p-5">
+                            <h5 class="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2 flex items-center">
+                                <i data-lucide="calculator" class="w-4 h-4 mr-1.5"></i> 計算公式說明
+                            </h5>
+                            <div class="space-y-3 text-xs text-amber-950">
+                                <div class="bg-white p-2.5 rounded-lg border border-amber-100 shadow-2xs">
+                                    <div class="font-semibold text-amber-800">業務員平均毛利率 (%)</div>
+                                    <div class="font-mono text-[11px] text-slate-600 mt-0.5">(該業務所有訂單總毛利 ÷ 總營收) × 100%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-8 bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                            <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center text-amber-600">
+                                <i data-lucide="badge-alert" class="w-4 h-4 mr-1.5"></i> 業務團隊獲利品質診斷與獎酬制度建議
+                            </h5>
+                            <div id="p4DiagnosticsContent" class="space-y-3 text-xs">
+                                <!-- Dynamic Injection -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <!-- JS Application Core Logic -->
+    <script>
+        // Global Application State
+        let rawData = [];
+        let activePanelId = 1;
+        let chartInstances = {};
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initEventListeners();
+        });
+
+        function initEventListeners() {
+            document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+            document.getElementById('demoDataBtn').addEventListener('click', loadDemoData);
+            document.getElementById('exportCsvBtn').addEventListener('click', exportFilteredCsv);
+            document.getElementById('printReportBtn').addEventListener('click', () => window.print());
+
+            // Drag & drop handlers
+            const dropzone = document.getElementById('uploadSection');
+            dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('border-indigo-500'); });
+            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-indigo-500'));
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('border-indigo-500');
+                if (e.dataTransfer.files.length > 0) {
+                    processFile(e.dataTransfer.files[0]);
+                }
+            });
+        }
+
+        // File Upload Processing via SheetJS
+        function handleFileUpload(e) {
+            if (e.target.files.length > 0) {
+                processFile(e.target.files[0]);
+            }
+        }
+
+        function processFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const json = XLSX.utils.sheet_to_json(worksheet);
+
+                if (json && json.length > 0) {
+                    parseAndStandardizeData(json, file.name);
+                } else {
+                    alert('無法從上傳檔案解析有效資料！');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Standardize Column Mapping from Uploaded JSON
+        function parseAndStandardizeData(jsonRows, sourceName) {
+            rawData = jsonRows.map((r, idx) => {
+                // Flexible keys fallback
+                const date = r['日期'] || r['年月'] || r['Date'] || r['時間'] || `2026-M${(idx % 12) + 1}`;
+                const region = r['銷售區域'] || r['區域'] || r['Region'] || '北部';
+                const product = r['產品名稱'] || r['產品類別'] || r['Product'] || '未分類產品';
+                const qty = parseFloat(r['銷售數量'] || r['數量'] || r['Qty'] || 1);
+                const revenue = parseFloat(r['營收'] || r['營業額'] || r['Revenue'] || r['銷售額'] || 0);
+                const cost = parseFloat(r['成本'] || r['Cost'] || (revenue * 0.6));
+                const profit = r['毛利'] !== undefined ? parseFloat(r['毛利']) : (revenue - cost);
+                const target = parseFloat(r['目標金額'] || r['目標營收'] || r['Target'] || (revenue * 1.1));
+                const customer = r['客戶名稱'] || r['客戶代號'] || r['Customer'] || `客戶 ${String.fromCharCode(65 + (idx % 10))}`;
+                const salesRep = r['業務員名稱'] || r['業務員代號'] || r['業務'] || r['SalesRep'] || `業務員 ${ (idx % 5) + 1 }`;
+
+                return { date, region, product, qty, revenue, cost, profit, target, customer, salesRep };
+            });
+
+            document.getElementById('fileInfoDisplay').textContent = `已成功載入「${sourceName}」，共 ${rawData.length} 筆資料。`;
+            document.getElementById('fileInfoDisplay').classList.remove('hidden');
+            document.getElementById('exportCsvBtn').classList.remove('hidden');
+            document.getElementById('printReportBtn').classList.remove('hidden');
+            document.getElementById('dashboardContent').classList.remove('hidden');
+
+            initFilterDropdowns();
+            renderDashboard();
+        }
+
+        // Generate Mock Demo Data for instantly testing UI
+        function loadDemoData() {
+            const regions = ['北部區域', '中部區域', '南部區域', '東部區域'];
+            const products = ['雲端模組 A', '企業資安授權 B', '軟體訂閱 C', '伺服器硬體 D', '維護服務 E'];
+            const customers = ['台積科技', '聯發資訊', '鴻海製造', '中華金控', '廣達電訊', '緯創系統', '和碩軟體', '大立光學'];
+            const salesReps = ['陳大明', '林小華', '張志豪', '黃雅婷', '許家豪'];
+            const months = ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06'];
+
+            let demoRows = [];
+            for (let i = 0; i < 150; i++) {
+                const rev = Math.floor(Math.random() * 800000) + 100000;
+                // Intentionally make some products/sales low margin for realistic diagnostics
+                const isDiscounted = i % 7 === 0;
+                const marginRate = isDiscounted ? (Math.random() * 0.1) : (Math.random() * 0.45 + 0.15);
+                const profit = Math.floor(rev * marginRate);
+                const cost = rev - profit;
+                const target = Math.floor(rev * (Math.random() * 0.4 + 0.9));
+
+                demoRows.push({
+                    date: months[i % months.length],
+                    region: regions[i % regions.length],
+                    product: products[i % products.length],
+                    qty: Math.floor(Math.random() * 50) + 1,
+                    revenue: rev,
+                    cost: cost,
+                    profit: profit,
+                    target: target,
+                    customer: customers[i % customers.length],
+                    salesRep: salesReps[i % salesReps.length]
+                });
+            }
+
+            parseAndStandardizeData(demoRows, '系統預設展示數據.xlsx');
+        }
+
+        // Populates Filter Dropdowns dynamically based on raw data
+        function initFilterDropdowns() {
+            const regions = Array.from(new Set(rawData.map(d => d.region)));
+            const dates = Array.from(new Set(rawData.map(d => d.date))).sort();
+
+            const p1Reg = document.getElementById('p1RegionSelect');
+            p1Reg.innerHTML = '<option value="ALL">全部銷售區域</option>';
+            regions.forEach(r => p1Reg.innerHTML += `<option value="${r}">${r}</option>`);
+
+            const p1Time = document.getElementById('p1TimeSelect');
+            p1Time.innerHTML = '<option value="ALL">全部月份/時間</option>';
+            dates.forEach(d => p1Time.innerHTML += `<option value="${d}">${d}</option>`);
+        }
+
+        // Master UI Switch function for 4 Top KPI Cards
+        function switchPanel(panelId) {
+            activePanelId = panelId;
+
+            // Highlight Cards
+            for (let i = 1; i <= 4; i++) {
+                const card = document.getElementById(`kpiCard${i}`);
+                const panel = document.getElementById(`panel${i}`);
+                if (i === panelId) {
+                    card.classList.add('active');
+                    panel.classList.remove('hidden');
+                } else {
+                    card.classList.remove('active');
+                    panel.classList.add('hidden');
+                }
+            }
+
+            renderCurrentPanel();
+        }
+
+        // Render Dashboard Calculations
+        function renderDashboard() {
+            calculateOverallKpis();
+            renderCurrentPanel();
+        }
+
+        // Calculate Overall 4 Primary KPI Summary Cards
+        function calculateOverallKpis() {
+            const totalRev = rawData.reduce((s, d) => s + d.revenue, 0);
+            const totalProfit = rawData.reduce((s, d) => s + d.profit, 0);
+            const totalTarget = rawData.reduce((s, d) => s + d.target, 0);
+            
+            const targetRate = totalTarget > 0 ? (totalRev / totalTarget * 100) : 0;
+            const marginRate = totalRev > 0 ? (totalProfit / totalRev * 100) : 0;
+
+            // Customer Pareto (Top 20% Customer Contribution)
+            let custRevMap = {};
+            rawData.forEach(d => {
+                custRevMap[d.customer] = (custRevMap[d.customer] || 0) + d.revenue;
+            });
+            const sortedCusts = Object.values(custRevMap).sort((a, b) => b - a);
+            const top20Count = Math.max(1, Math.ceil(sortedCusts.length * 0.2));
+            const top20Rev = sortedCusts.slice(0, top20Count).reduce((a, b) => a + b, 0);
+            const paretoContribution = totalRev > 0 ? (top20Rev / totalRev * 100) : 0;
+
+            // Sales Rep Efficiency
+            const uniqueReps = Array.from(new Set(rawData.map(d => d.salesRep))).length;
+            const revPerRep = uniqueReps > 0 ? (totalRev / uniqueReps) : 0;
+
+            // Update DOM Cards
+            document.getElementById('kpiRevenueVal').innerText = `$${(totalRev / 10000).toFixed(1)}萬`;
+            document.getElementById('kpiTargetRate').innerText = `${targetRate.toFixed(1)}%`;
+            document.getElementById('kpiTargetBar').style.width = `${Math.min(100, targetRate)}%`;
+
+            document.getElementById('kpiProfitVal').innerText = `$${(totalProfit / 10000).toFixed(1)}萬`;
+            document.getElementById('kpiMarginRate').innerText = `${marginRate.toFixed(1)}%`;
+            document.getElementById('kpiMarginBar').style.width = `${Math.min(100, marginRate)}%`;
+
+            document.getElementById('kpiParetoVal').innerText = `${paretoContribution.toFixed(1)}%`;
+            document.getElementById('kpiParetoBar').style.width = `${Math.min(100, paretoContribution)}%`;
+
+            document.getElementById('kpiSalesPerRepVal').innerText = `$${(revPerRep / 10000).toFixed(1)}萬`;
+            document.getElementById('kpiSalesAvgTarget').innerText = `${targetRate.toFixed(1)}%`;
+            document.getElementById('kpiSalesBar').style.width = `${Math.min(100, targetRate)}%`;
+        }
+
+        function renderCurrentPanel() {
+            if (activePanelId === 1) updatePanel1();
+            else if (activePanelId === 2) updatePanel2();
+            else if (activePanelId === 3) updatePanel3();
+            else if (activePanelId === 4) updatePanel4();
+        }
+
+        // Helper: Safe Chart Destructor
+        function createOrUpdateChart(chartId, config) {
+            if (chartInstances[chartId]) {
+                chartInstances[chartId].destroy();
+            }
+            const ctx = document.getElementById(chartId).getContext('2d');
+            chartInstances[chartId] = new Chart(ctx, config);
+        }
+
+        // ==========================================
+        // PANEL 1: Sales & Regional Performance
+        // ==========================================
+        function updatePanel1() {
+            const regFilter = document.getElementById('p1RegionSelect').value;
+            const timeFilter = document.getElementById('p1TimeSelect').value;
+
+            let filtered = rawData.filter(d => {
+                return (regFilter === 'ALL' || d.region === regFilter) &&
+                       (timeFilter === 'ALL' || d.date === timeFilter);
+            });
+
+            // Group by Date for Dual-Axis Chart
+            let dateMap = {};
+            filtered.forEach(d => {
+                if (!dateMap[d.date]) dateMap[d.date] = { rev: 0, target: 0 };
+                dateMap[d.date].rev += d.revenue;
+                dateMap[d.date].target += d.target;
+            });
+
+            const dateLabels = Object.keys(dateMap).sort();
+            const revData = dateLabels.map(k => dateMap[k].rev);
+            const targetData = dateLabels.map(k => dateMap[k].target);
+            const rateData = dateLabels.map(k => dateMap[k].target > 0 ? (dateMap[k].rev / dateMap[k].target * 100).toFixed(1) : 0);
+
+            // Chart 1: Revenue vs Target Combo Chart
+            createOrUpdateChart('chartPanel1Revenue', {
+                type: 'bar',
+                data: {
+                    labels: dateLabels,
+                    datasets: [
+                        { label: '實際營收', data: revData, backgroundColor: '#3b82f6', yAxisID: 'y' },
+                        { label: '目標營收', data: targetData, backgroundColor: '#cbd5e1', yAxisID: 'y' },
+                        { label: '達成率 (%)', data: rateData, type: 'line', borderColor: '#6366f1', borderWidth: 2, yAxisID: 'y1' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { position: 'left', title: { display: true, text: '金額 ($)' } },
+                        y1: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: '達成率 (%)' } }
+                    }
+                }
+            });
+
+            // Group by Region Chart
+            let regMap = {};
+            filtered.forEach(d => {
+                if (!regMap[d.region]) regMap[d.region] = { rev: 0, target: 0 };
+                regMap[d.region].rev += d.revenue;
+                regMap[d.region].target += d.target;
+            });
+
+            const regLabels = Object.keys(regMap);
+            const regRevData = regLabels.map(k => regMap[k].rev);
+            const regTargetData = regLabels.map(k => regMap[k].target);
+
+            createOrUpdateChart('chartPanel1Region', {
+                type: 'bar',
+                data: {
+                    labels: regLabels,
+                    datasets: [
+                        { label: '實際營收', data: regRevData, backgroundColor: '#10b981' },
+                        { label: '目標營收', data: regTargetData, backgroundColor: '#e2e8f0' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Auto Diagnostics P1
+            const diagContainer = document.getElementById('p1DiagnosticsContent');
+            let lagDates = [];
+            dateLabels.forEach(d => {
+                const rate = dateMap[d].target > 0 ? (dateMap[d].rev / dateMap[d].target * 100) : 100;
+                if (rate < 80) lagDates.push(`${d} (達成率僅 ${rate.toFixed(1)}%)`);
+            });
+
+            diagContainer.innerHTML = `
+                <div class="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                    <span class="font-bold text-amber-800">警示：業績落後月份</span>
+                    <p class="text-slate-600 mt-1">${lagDates.length > 0 ? lagDates.join('；') : '目前選取範圍內無顯著落後 (達成率均 > 80%)'}</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <span class="font-bold text-slate-800">管理策略與優化方針</span>
+                    <ul class="list-disc list-inside text-slate-600 mt-1 space-y-1">
+                        <li>針對達成率低於 80% 的區域，建議重新配置行銷推廣資源，並檢查是否受季節性因素波動影響。</li>
+                        <li>實施季末促銷落後補救計畫，優先關注高權重專案的結案進度。</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // PANEL 2: Product Line & Profitability Matrix
+        // ==========================================
+        function updatePanel2() {
+            const minMargin = parseFloat(document.getElementById('p2MarginFilter').value) || 0;
+
+            let prodMap = {};
+            rawData.forEach(d => {
+                if (!prodMap[d.product]) prodMap[d.product] = { rev: 0, profit: 0, qty: 0 };
+                prodMap[d.product].rev += d.revenue;
+                prodMap[d.product].profit += d.profit;
+                prodMap[d.product].qty += d.qty;
+            });
+
+            let scatterData = [];
+            let filteredProds = [];
+
+            Object.keys(prodMap).forEach(p => {
+                const rev = prodMap[p].rev;
+                const profit = prodMap[p].profit;
+                const margin = rev > 0 ? (profit / rev * 100) : 0;
+                
+                if (margin >= minMargin) {
+                    scatterData.push({ x: rev, y: margin, r: Math.min(25, Math.max(6, prodMap[p].qty / 5)), prodName: p });
+                    filteredProds.push({ name: p, rev, profit, margin });
+                }
+            });
+
+            // Scatter Matrix Chart
+            createOrUpdateChart('chartPanel2Matrix', {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                        label: '產品線 (氣泡大小代表銷量)',
+                        data: scatterData,
+                        backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                        borderColor: '#4f46e5'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.raw.prodName}: 營收 $${ctx.raw.x.toLocaleString()}, 毛利率 ${ctx.raw.y.toFixed(1)}%`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: '營收 ($)' } },
+                        y: { title: { display: true, text: '毛利率 (%)' } }
+                    }
+                }
+            });
+
+            // Top Products Profit Ranking
+            filteredProds.sort((a, b) => b.profit - a.profit);
+            const topProds = filteredProds.slice(0, 7);
+
+            createOrUpdateChart('chartPanel2TopRank', {
+                type: 'bar',
+                data: {
+                    labels: topProds.map(p => p.name),
+                    datasets: [{
+                        label: '總毛利金額 ($)',
+                        data: topProds.map(p => p.profit),
+                        backgroundColor: '#10b981'
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
+            });
+
+            // Diagnostics P2
+            const lowMarginProds = filteredProds.filter(p => p.margin < 15 && p.rev > 200000);
+            const highMarginProds = filteredProds.filter(p => p.margin > 35);
+
+            document.getElementById('p2DiagnosticsContent').innerHTML = `
+                <div class="p-3 bg-red-50 rounded-lg border border-red-200">
+                    <span class="font-bold text-red-800">虛胖品項警示 (高營收、低毛利 < 15%)</span>
+                    <p class="text-slate-600 mt-1">${lowMarginProds.length > 0 ? lowMarginProds.map(p => `${p.name} (毛利率 ${p.margin.toFixed(1)}%)`).join('、') : '目前無顯著高營收且毛利率偏低之品項'}</p>
+                </div>
+                <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                    <span class="font-bold text-emerald-800">明星潛力品項 (高毛利 > 35%)</span>
+                    <p class="text-slate-600 mt-1">${highMarginProds.length > 0 ? highMarginProds.map(p => p.name).join('、') : '無'}</p>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // PANEL 3: Customer Pareto 80/20
+        // ==========================================
+        function updatePanel3() {
+            const classFilter = document.getElementById('p3CustomerClass').value;
+
+            let custMap = {};
+            rawData.forEach(d => {
+                if (!custMap[d.customer]) custMap[d.customer] = { rev: 0, profit: 0 };
+                custMap[d.customer].rev += d.revenue;
+                custMap[d.customer].profit += d.profit;
+            });
+
+            const sortedCusts = Object.keys(custMap).map(k => ({
+                name: k,
+                rev: custMap[k].rev,
+                profit: custMap[k].profit
+            })).sort((a, b) => b.rev - a.rev);
+
+            const totalRev = sortedCusts.reduce((s, c) => s + c.rev, 0);
+
+            let cumSum = 0;
+            sortedCusts.forEach(c => {
+                cumSum += c.rev;
+                c.cumPercent = totalRev > 0 ? (cumSum / totalRev * 100) : 0;
+            });
+
+            // Classify Customers
+            const totalCount = sortedCusts.length;
+            sortedCusts.forEach((c, idx) => {
+                const percentile = (idx + 1) / totalCount;
+                if (percentile <= 0.2) c.class = 'A';
+                else if (percentile <= 0.5) c.class = 'B';
+                else c.class = 'C';
+            });
+
+            let filteredCusts = sortedCusts.filter(c => classFilter === 'ALL' || c.class === classFilter);
+
+            // Pareto Chart
+            createOrUpdateChart('chartPanel3Pareto', {
+                type: 'bar',
+                data: {
+                    labels: filteredCusts.map(c => c.name),
+                    datasets: [
+                        { label: '單一客戶營收', data: filteredCusts.map(c => c.rev), backgroundColor: '#8b5cf6', yAxisID: 'y' },
+                        { label: '累積營收佔比 (%)', data: filteredCusts.map(c => c.cumPercent.toFixed(1)), type: 'line', borderColor: '#ef4444', borderWidth: 2, yAxisID: 'y1' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { position: 'left', title: { display: true, text: '營收 ($)' } },
+                        y1: { position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false }, title: { display: true, text: '累積佔比 (%)' } }
+                    }
+                }
+            });
+
+            // Pie Chart for A/B/C Distribution
+            const aRev = sortedCusts.filter(c => c.class === 'A').reduce((s, c) => s + c.rev, 0);
+            const bRev = sortedCusts.filter(c => c.class === 'B').reduce((s, c) => s + c.rev, 0);
+            const cRev = sortedCusts.filter(c => c.class === 'C').reduce((s, c) => s + c.rev, 0);
+
+            createOrUpdateChart('chartPanel3Pie', {
+                type: 'pie',
+                data: {
+                    labels: ['A 級 (前 20%)', 'B 級 (中間 30%)', 'C 級 (後 50%)'],
+                    datasets: [{
+                        data: [aRev, bRev, cRev],
+                        backgroundColor: ['#8b5cf6', '#a78bfa', '#ddd6fe']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Diagnostics P3
+            const aContribution = totalRev > 0 ? (aRev / totalRev * 100) : 0;
+            document.getElementById('p3DiagnosticsContent').innerHTML = `
+                <div class="p-3 ${aContribution > 70 ? 'bg-purple-50 border-purple-200' : 'bg-slate-50 border-slate-200'} rounded-lg border">
+                    <span class="font-bold text-purple-900">集中度風險評估</span>
+                    <p class="text-slate-600 mt-1">前 20% (A級) 客戶貢獻了總營收的 <strong>${aContribution.toFixed(1)}%</strong>。${aContribution > 70 ? '⚠️ 存在高客戶集中度風險，主要客戶掉單將對營運造成極大衝擊！' : '目前客戶結構分散健全。'}</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <span class="font-bold text-slate-800">VIP 留存與策略建議</span>
+                    <ul class="list-disc list-inside text-slate-600 mt-1 space-y-1">
+                        <li>為 A 級客戶建立高階主管專屬維護對接機制，確保高滿意度與續約率。</li>
+                        <li>對於 C 級低貢獻客戶，建議轉向標準化服務流程以降低營運溝通成本。</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // PANEL 4: Salesperson Performance
+        // ==========================================
+        function updatePanel4() {
+            const searchQuery = document.getElementById('p4Search').value.trim().toLowerCase();
+
+            let repMap = {};
+            rawData.forEach(d => {
+                if (!repMap[d.salesRep]) repMap[d.salesRep] = { rev: 0, profit: 0, target: 0 };
+                repMap[d.salesRep].rev += d.revenue;
+                repMap[d.salesRep].profit += d.profit;
+                repMap[d.salesRep].target += d.target;
+            });
+
+            let repList = Object.keys(repMap).map(k => {
+                const rev = repMap[k].rev;
+                const profit = repMap[k].profit;
+                const target = repMap[k].target;
+                const margin = rev > 0 ? (profit / rev * 100) : 0;
+                const attainment = target > 0 ? (rev / target * 100) : 0;
+                return { name: k, rev, profit, margin, target, attainment };
+            });
+
+            if (searchQuery) {
+                repList = repList.filter(r => r.name.toLowerCase().includes(searchQuery));
+            }
+
+            const teamAvgMargin = repList.reduce((s, r) => s + r.margin, 0) / (repList.length || 1);
+
+            // Scatter Chart
+            createOrUpdateChart('chartPanel4Scatter', {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: '業務員 (營收 vs 毛利率)',
+                        data: repList.map(r => ({ x: r.rev, y: r.margin, repName: r.name })),
+                        backgroundColor: '#f59e0b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.raw.repName}: 營收 $${ctx.raw.x.toLocaleString()}, 毛利率 ${ctx.raw.y.toFixed(1)}%`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: '業務營收 ($)' } },
+                        y: { title: { display: true, text: '平均毛利率 (%)' } }
+                    }
+                }
+            });
+
+            // Target Attainment Bar
+            createOrUpdateChart('chartPanel4Target', {
+                type: 'bar',
+                data: {
+                    labels: repList.map(r => r.name),
+                    datasets: [{
+                        label: '目標達成率 (%)',
+                        data: repList.map(r => r.attainment.toFixed(1)),
+                        backgroundColor: '#3b82f6'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Diagnostics P4
+            const problematicReps = repList.filter(r => r.margin < (teamAvgMargin - 8));
+            document.getElementById('p4DiagnosticsContent').innerHTML = `
+                <div class="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                    <span class="font-bold text-amber-900">削價衝數字警示 (毛利率遠低於團隊平均 ${teamAvgMargin.toFixed(1)}%)</span>
+                    <p class="text-slate-600 mt-1">${problematicReps.length > 0 ? problematicReps.map(r => `${r.name} (毛利率僅 ${r.margin.toFixed(1)}%)`).join('、') : '無顯著過度折扣行為之業務員'}</p>
+                </div>
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <span class="font-bold text-slate-800">獎酬與管理建議</span>
+                    <ul class="list-disc list-inside text-slate-600 mt-1 space-y-1">
+                        <li>調整業務佣金計算機制：由純粹「營收導向」改為依據「毛利率階梯加權」發放獎金。</li>
+                        <li>針對連續過度折讓的業務員，設定單筆訂單最低毛利率審核門檻。</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Export Filtered Data into CSV File
+        function exportFilteredCsv() {
+            if (rawData.length === 0) return;
+            const worksheet = XLSX.utils.json_to_sheet(rawData);
+            const csvOutput = XLSX.utils.sheet_to_csv(worksheet);
+            
+            const blob = new Blob([csvOutput], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `企業分析篩選明細_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

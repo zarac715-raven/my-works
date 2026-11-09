@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>我的網頁與多媒體作品集 | Mobile Portfolio</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --bg-card: #131b2e;
+      --bg-card-sub: #1a243c;
+      --accent: #6366f1;
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+      --accent-glow: rgba(99, 102, 241, 0.28);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(148, 163, 184, 0.15);
+      --api-tag-bg: rgba(99, 102, 241, 0.15);
+      --api-tag-text: #a5b4fc;
+      --scenario-text: #34d399;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding-bottom: 96px;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 30%, rgba(236, 72, 153, 0.12) 0%, transparent 45%);
+      background-attachment: fixed;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* Top Sticky Header */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(9, 13, 22, 0.88);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+    }
+
+    .top-nav-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-size: 1.1rem;
+      font-weight: 800;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 9999px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+    }
+
+    .nav-btn:hover, .nav-btn:active {
+      color: var(--text);
+      background: var(--bg-card-sub);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 32px 12px 24px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      margin-bottom: 12px;
+    }
+
+    .hero h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto 16px;
+    }
+
+    /* Catalog Section */
+    .catalog-section {
+      margin-bottom: 24px;
+      scroll-margin-top: 70px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .count-tag {
+      font-size: 0.8rem;
+      padding: 3px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #a5b4fc;
+      font-weight: 600;
+    }
+
+    /* Search Input */
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .search-wrapper input {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px 0 44px;
+      border-radius: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-wrapper input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Category Filter Pills (Horizontal Scroll) */
+    .filter-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .filter-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-pill {
+      white-space: nowrap;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .filter-pill.active {
+      background: var(--accent-gradient);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    /* Works Grid / Feed */
+    .works-list {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    /* Work Card */
+    .work-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+
+    /* 小圖卡 */
+    .card-thumb {
+      position: relative;
+      width: 100%;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #0d1322;
+    }
+
+    .card-thumb.img-thumb {
+      height: 200px;
+    }
+
+    .card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: transform 0.35s ease;
+    }
+
+    .work-card:hover .card-img {
+      transform: scale(1.04);
+    }
+
+    .thumb-pattern {
+      position: absolute;
+      inset: 0;
+      opacity: 0.18;
+      background-size: 20px 20px;
+      background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+    }
+
+    .thumb-icon-wrap {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      z-index: 2;
+    }
+
+    .card-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      z-index: 2;
+      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #fff;
+    }
+
+    /* Card Body */
+    .card-body {
+      padding: 18px 18px 20px;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    /* 100字簡介 */
+    .card-intro {
+      font-size: 0.92rem;
+      color: #cbd5e1;
+      line-height: 1.65;
+      margin-bottom: 14px;
+      text-align: justify;
+    }
+
+    /* Audio Player in Card */
+    .audio-player-box {
+      margin-bottom: 14px;
+      background: var(--bg-card-sub);
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .audio-player-box audio {
+      width: 100%;
+      height: 38px;
+      outline: none;
+    }
+
+    /* API & 場景區塊 */
+    .meta-box {
+      background: var(--bg-card-sub);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .meta-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .api-tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--api-tag-bg);
+      color: var(--api-tag-text);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+    }
+
+    .scenario-text {
+      font-size: 0.85rem;
+      color: #38bdf8;
+      line-height: 1.45;
+    }
+
+    /* 打開的按鈕 */
+    .open-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      height: 46px;
+      border-radius: 12px;
+      background: var(--accent-gradient);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 4px 14px var(--accent-glow);
+      transition: all 0.2s ease;
+    }
+
+    .open-btn:active {
+      transform: scale(0.98);
+      filter: brightness(1.1);
+    }
+
+    .open-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* About Me Section */
+    .about-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      scroll-margin-top: 70px;
+    }
+
+    .about-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px 20px;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .avatar-wrap {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      padding: 3px;
+      flex-shrink: 0;
+    }
+
+    .avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--bg-card-sub);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+    }
+
+    .profile-info h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .profile-info p {
+      font-size: 0.88rem;
+      color: #818cf8;
+      font-weight: 600;
+    }
+
+    .about-bio {
+      font-size: 0.92rem;
+      color: #cbd5e1;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .skill-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .skill-item {
+      background: var(--bg-card-sub);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .skill-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 4px;
+    }
+
+    .skill-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Bottom Mobile Floating Dock */
+    .bottom-nav {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 440px;
+      height: 58px;
+      background: rgba(19, 27, 46, 0.92);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 9999px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      padding: 0 10px;
+    }
+
+    .bnav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      gap: 3px;
+      flex: 1;
+      transition: color 0.2s ease;
+    }
+
+    .bnav-item.active, .bnav-item:active {
+      color: #818cf8;
+    }
+
+    .bnav-item svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 16px;
+      color: var(--text-muted);
+      display: none;
+    }
+
+    @media (min-width: 640px) {
+      .hero h1 { font-size: 2.8rem; }
+      .card-thumb { height: 160px; }
+      .card-thumb.img-thumb { height: 260px; }
+      .meta-box { flex-direction: row; justify-content: space-between; }
+      .meta-row { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Nav -->
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <div class="brand">
+        <span>✨</span> 我的作品集
+      </div>
+      <div class="nav-links">
+        <a href="#catalog" class="nav-btn">作品目錄</a>
+        <a href="#about" class="nav-btn">關於我</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="app-container">
+
+    <!-- Hero Section -->
+    <header class="hero">
+      <div class="hero-badge">CREATIVE & WEB PORTFOLIO</div>
+      <h1>我的網頁與多媒體作品集</h1>
+      <p class="hero-desc">彙整網頁應用、互動遊戲、數據分析、系統原型、商業 DM、AI 創意影像與原創音樂的全方位作品庫。</p>
+    </header>
+
+    <!-- Catalog Section (作品目錄) -->
+    <section id="catalog" class="catalog-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span>📂</span> 作品目錄
+        </h2>
+        <span class="count-tag" id="worksCount">共 31 個作品</span>
+      </div>
+
+      <!-- Search Input -->
+      <div class="search-wrapper">
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" placeholder="搜尋作品名稱、API、技術或應用場景...">
+      </div>
+
+      <!-- Filter Pills -->
+      <div class="filter-scroll">
+        <button class="filter-pill active" data-filter="all">🌟 全部 (31)</button>
+        <button class="filter-pill" data-filter="web">💻 網頁應用 (10)</button>
+        <button class="filter-pill" data-filter="game">🎮 互動遊戲 (3)</button>
+        <button class="filter-pill" data-filter="prototype">📐 系統原型 (8)</button>
+        <button class="filter-pill" data-filter="dm">🎨 商業 DM (2)</button>
+        <button class="filter-pill" data-filter="photo">🖼️ 創意攝影 (6)</button>
+        <button class="filter-pill" data-filter="audio">🎵 原創音樂 (2)</button>
+      </div>
+    </section>
+
+    <!-- Works Feed -->
+    <div class="works-list" id="worksFeed">
+
+      <!-- ==================== 1. WEB PROJECTS ==================== -->
+
+      <!-- Web 1: 每日喝開水統計與記錄 -->
+      <article class="work-card" data-category="web" data-search="每日喝開水統計與記錄 daily water intake tracker 健康 追蹤 chart canvas">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">網頁應用</span>
+          <div class="thumb-icon-wrap">💧</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">每日喝開水統計與記錄</h3>
+          <p class="card-intro">專為現代人設計的健康補水追蹤工具，以直觀清爽的介面即時記錄每日飲水量。系統能動態換算目標達成百分比，並透過圖表視覺化呈現不同時段的飲水歷程，讓使用者能隨時檢視自身補水進度，輕鬆養成健康喝水規律。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">Chart.js API</span>
+                <span class="api-tag">Canvas API</span>
+                <span class="api-tag">Date API</span>
+                <span class="api-tag">DOM Manipulation</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">久坐上班族每日喝水習慣養成、健身減重飲水量追蹤、日常健康自主管理。</p>
+            </div>
+          </div>
+          <a href="Web/daily_water_intake_tracker.html" target="_blank" class="open-btn">
+            <span>打開作品</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Web 2: 魔法時鐘 -->
+      <article class="work-card" data-category="web" data-search="魔法時鐘 奇幻時間儀式 hogwarts chrono magic clock 特效 audio">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #4338ca 0%, #312e81 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">網頁應用</span>
+          <div class="thumb-icon-wrap">⏳</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">魔法時鐘 - 奇幻時間儀式</h3>
+          <p class="card-intro">將日常時間顯示融入霍格華茲奇幻魔法世界觀，具備星象軌道動態與神秘符文指針。搭配 Web Audio 原生音效合成技術與流暢粒子特效，打造極具儀式感的時間流逝體驗，讓日常讀時與計時轉化為沉浸式魔法探索。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">Web Audio API</span>
+                <span class="api-tag">requestAnimationFrame</span>
+                <span class="api-tag">Canvas 粒子動畫</span>
+                <span class="api-tag">Date API</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">沉浸式工作專注番茄鐘、桌面時鐘動態展示、哈利波特奇幻氛圍營造。</p>
+            </div>
+          </div>
+          <a href="Web/hogwarts_chrono_magic_clock.html" target="_blank" class="open-btn">
+            <span>打開作品</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Web 3: 公開資訊觀測站 - 現金流量表 -->
+      <article class="work-card" data-category="web" data-search="公開資訊觀測站 現金流量表 mops cash flow dashboard 財報 股票 excel">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #047857 0%, #065f46 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">數據分析</span>
+          <div class="thumb-icon-wrap">📈</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">公開資訊觀測站 - 現金流量表儀表板</h3>
+          <p class="card-intro">針對公開資訊觀測站之企業合併現金流量表設計的智慧視覺化分析工具。支援 Excel 財報資料直接解析匯入，自動拆解營業、投資與籌資現金流結構，透過互動圖表即時診斷企業現金週轉健康度，快速掌握營運含金量。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">SheetJS (XLSX) API</span>
+                <span class="api-tag">Chart.js API</span>
+                <span class="api-tag">FileReader API</span>
+                <span class="api-tag">Canvas API</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">上市櫃基本面選股分析、財務長體質診斷、會計師財報審閱評估。</p>
+            </div>
+          </div>
+          <a href="Web/mops_cash_flow_dashboard.html" target="_blank" class="open-btn">
+            <span>打開作品</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Web 4: 楊老大便當店 -->
+      <article class="work-card" data-category="web" data-search="楊老大便當店 mr yang store 點餐 便當 菜單 購物車">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">電商門市</span>
+          <div class="thumb-icon-wrap">🍱</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">楊老大便當店</h3>
+          <p class="card-intro">為在地知名便當店量身打造的形象展示與線上預購頁面。風格豪氣大方、充滿食慾感，提供完整菜單分類瀏覽、招牌主菜特寫以及直覺購物清單總計，大幅簡化上班族團體訂便當與個人外帶點餐流程，創造高滿意度的點餐體驗。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">DOM Manipulation API</span>
+                <span class="api-tag">Responsive Grid/Flex</span>
+                <span class="api-tag">Form Data API</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">辦公室行政秘書團體訂餐統計、餐飲店家形象菜單展示、手機外帶預購。</p>
+            </div>
+          </div>
+          <a href="Web/Mr.Yang's%20Store.html" target="_blank" class="open-btn">
+            <span>打開作品</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Web 5: Phoenix 本地端個資去識別化工具 -->
+      <article class="work-card" data-category="web" data-search="Phoenix privacy engine 資安 隱私 脫敏 去識別化 crypto">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">資安隱私</span>
+          <div class="thumb-icon-wrap">🛡️</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Phoenix 本地端個資去識別化工具</h3>
+          <p class="card-intro">專注於資訊安全與隱私防護的前端純離線去識別化引擎。所有資料比對、姓名與身分假名化、遮罩皆在瀏覽器記憶體端完成，檔案絕不上傳至任何外部伺服器，提供企業與數據分析師零洩漏風險的極致資安保障與合規處理能力。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">Web Crypto API (雜湊)</span>
+                <span class="api-tag">FileReader API</span>
+                <span class="api-tag">SheetJS API</span>
+                <span class="api-tag">Blob / URL API</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">金融醫療機敏數據外發脫敏處理、符合個資法規的離線資料清洗。</p>
+            </div>
+          </div>
+          <a href="Web/phoenix_s_client_side_privacy_engine.html" target="_blank" class="open-btn">
+            <span>打開作品</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Web 6: 寶可夢即時天氣預報 -->
+      <article class="work-card" data-category="web" data-search="寶可夢即時天氣預報 pokemon weather forecast 氣象 溫度 降雨">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">娛樂主題</span>
+          <div class="thumb-icon-wrap">⚡</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">寶可夢即時天氣預報</h3>
+          <p class="card-intro">將真實世界的氣象數據與寶可夢世界觀巧妙結合。根據即時連線取得的溫度、濕度與天候狀態，動態切換相應的寶可夢屬性代表角色與動態天氣背景，讓查看每天氣溫與降雨機率充滿蒐集與探索樂趣，兼具實用與娛樂性。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">Fetch API (Open-Meteo)</span>
+                <span class="api-tag">Geolocation API</span>
+                <span class="api-tag">CSS Keyframes 動畫</span>
+                <span class="api-tag">DOM API</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">日常氣溫降雨出門提醒、寶可夢主題收藏、趣味天氣小工具。</p>
+            </div>
+          </div>
+          <a href="Web/Pokemon%20Weather%20Forecast.html" target="_blank" class="open-btn">
+            <span>打開作品</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Web 7: 明星精美桌布時鐘 -->
+      <article class="work-card" data-category="web" data-search="明星精美桌布時鐘 superstar clock set 桌布 偶像 時鐘 濾鏡">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">個人化</span>
+          <div class="thumb-icon-wrap">🌟</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">明星精美桌布時鐘</h3>
+          <p class="card-intro">結合高畫質偶像寫真與多功能時鐘套件的客製化網頁。使用者可自由切換喜愛的明星背景、時鐘字體排版與色彩濾鏡，並能自動儲存使用者偏好設定於本機端，隨時化身為質感滿分的手機待機桌布時鐘與個人化數位擺件。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">localStorage API</span>
+                <span class="api-tag">CSS Filter Effects</span>
+                <span class="api-tag">Date / Timer API</span>
+                <span class="api-tag">Fullscreen API</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">手機直立充電待機時鐘、平板桌面數位擺飾、偶像粉絲應援展示。</p>
+            </div>
+          </div>
+          <a href="Web/SuperStar%20CLock%20set.html" target="_blank" class="open-btn">
+            <span>打開作品</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Web 8: 夜行者的暗影：吸血鬼傳說全書 -->
+      <article class="work-card" data-category="web" data-search="夜行者的暗影 吸血鬼傳說全書 vampire myth 神話 百科 哥德">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #881337 0%, #4c0519 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">深度導覽</span>
+          <div class="thumb-icon-wrap">🦇</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">夜行者的暗影：吸血鬼傳說全書</h3>
+          <p class="card-intro">深度探索西方吸血鬼歷史與神話源流的沉浸式數位百科。採用低調奢華的暗紅哥德式視覺設計，分章節詳述德古拉起源、吸血鬼弱點傳說與流行文化演進，為奇幻文學與神話考據愛好者打造獨具氛圍的深夜閱讀空間。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">Semantic HTML5</span>
+                <span class="api-tag">CSS Custom Variables</span>
+                <span class="api-tag">Smooth Scroll API</span>
+                <span class="api-tag">DOM Manipulation</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">奇幻文學愛好者主題閱讀、桌遊與跑團世界觀考據、深夜沉浸閱讀。</p>
+            </div>
+          </div>
+          <a href="Web/vampire.html" target="_blank" class="open-btn">
+            <span>打開作品</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Web 9: Kawaii 喵喵一週星座運勢指南 -->
+      <article class="work-card" data-category="web" data-search="Kawaii 喵喵一週星座運勢 weekly horoscope 星座 占卜 貓咪">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">萌系療癒</span>
+          <div class="thumb-icon-wrap">🐱</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Kawaii 喵喵一週星座運勢指南</h3>
+          <p class="card-intro">將十二星座占星運勢化為粉嫩可愛的貓咪插畫互動介面。提供事業、愛情、財運三大維度的週運指數解讀與專屬幸運色指引，搭配靈動的日系萌化動態效果，為使用者每週的開始帶來溫暖又充滿能量的陪伴與滿滿好運。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">SVG Vector Icons</span>
+                <span class="api-tag">CSS 3D Transforms</span>
+                <span class="api-tag">DOM Event Handling</span>
+                <span class="api-tag">Date Weekday Calc</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">週一晨間元氣運勢占卜、社群療癒話題分享、朋友聚會互動消遣。</p>
+            </div>
+          </div>
+          <a href="Web/weekly%20horoscope.html" target="_blank" class="open-btn">
+            <span>打開作品</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Web 10: 企業營運與獲利診斷儀表板 -->
+      <article class="work-card" data-category="web" data-search="企業營運與獲利診斷儀表板 offline business analytics 財報 毛利 經理人">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">商業決策</span>
+          <div class="thumb-icon-wrap">📊</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">企業營運與獲利診斷儀表板</h3>
+          <p class="card-intro">專為企業經理人打造的敏捷商業分析儀表板。具備離線快速載入與多維度財務比率計算能力，可即時繪製毛利率變化、營收趨勢與獲利敏感度圖表，協助管理層迅速洞察營運體質，在最短時間內精準評估商業策略成效。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">Chart.js (v3) API</span>
+                <span class="api-tag">SheetJS XLSX API</span>
+                <span class="api-tag">Lucide Vector Icons</span>
+                <span class="api-tag">HTML5 Canvas</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">高階主管經營決策會議、中小企業損益診斷、毛利率敏感度模擬。</p>
+            </div>
+          </div>
+          <a href="Web/%E4%BC%81%E6%A5%AD%E7%87%9F%E9%81%8B%E8%88%87%E7%8D%B2%E5%88%A9%E8%A8%BA%E6%96%B7%E5%84%80%E8%A1%A8%E6%9D%BF.html" target="_blank" class="open-btn">
+            <span>打開作品</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- ==================== 2. GAME PROJECTS ==================== -->
+
+      <!-- Game 1: 珍奶店大作戰 -->
+      <article class="work-card" data-category="game" data-search="珍奶店大作戰 boba shop tycoon 經營 模擬 遊戲 珍珠 奶茶">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">經營模擬</span>
+          <div class="thumb-icon-wrap">🧋</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">珍奶店大作戰 Boba Shop Tycoon</h3>
+          <p class="card-intro">充滿挑戰性的手搖茶飲店經營模擬網頁遊戲。玩家必須在限時壓力下迅速辨識顧客點單，精準調配茶底、甜度、冰塊與珍珠配料，隨著關卡推進提升名聲與收益，體驗身歷其境的手搖店創業手速大考驗與成就感。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">Web Audio API</span>
+                <span class="api-tag">CSS Grid Layout</span>
+                <span class="api-tag">Timer API (setInterval)</span>
+                <span class="api-tag">DOM State Machine</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">休閒手速紓壓娛樂、手眼協調挑戰、餐飲服務流程趣味概念教學。</p>
+            </div>
+          </div>
+          <a href="game/boba_shop_tycoon_layout.html" target="_blank" class="open-btn">
+            <span>進入遊戲</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Game 2: 霍格華茲大樂透魔法選號機 -->
+      <article class="work-card" data-category="game" data-search="霍格華茲大樂透魔法選號機 hogwarts lottery 魔法 粒子 音效 樂透">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #6b21a8 0%, #3b0764 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">魔幻選號</span>
+          <div class="thumb-icon-wrap">🧙‍♂️</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">霍格華茲大樂透魔法選號機</h3>
+          <p class="card-intro">注入魔法咒語儀式感的彩券號碼預測應用。使用者揮動魔杖觸發燦爛的畫布粒子爆炸特效與神聖音階回響，在四大學院神秘魔法的指引下隨機選出幸運號碼，讓原本單調的抽號過程化為驚喜連連的魔法儀式與破冰話題。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">Canvas Particle FX</span>
+                <span class="api-tag">Web Audio API (咒語合成)</span>
+                <span class="api-tag">Math.random 隨機分佈</span>
+                <span class="api-tag">DOM Manipulation</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">過節樂透號碼趣味抽選、聚會派對魔法主題破冰娛樂、粉絲隨機占卜。</p>
+            </div>
+          </div>
+          <a href="game/hogwarts_lottery_magic_predictor.html" target="_blank" class="open-btn">
+            <span>進入遊戲</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Game 3: 豪華幸運抽籤系統 -->
+      <article class="work-card" data-category="game" data-search="豪華幸運抽籤系統 lucky draw app 抽獎 抽籤 音效 tonejs">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">活動互動</span>
+          <div class="thumb-icon-wrap">🎰</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">豪華幸運抽籤系統</h3>
+          <p class="card-intro">支援自訂名單與豪華視覺效果的現代化抽籤工具。搭載 Tone.js 精心調製的緊張倒數與獲獎打擊音效，配合高流暢度動態視覺展示，無論是尾牙大型抽獎、社群活動名額抽選或課堂互動皆能完美勝任並炒熱全場氣氛。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">Tone.js (Web Audio Synthesis)</span>
+                <span class="api-tag">CSS 3D Transforms</span>
+                <span class="api-tag">Clipboard API</span>
+                <span class="api-tag">DOM State Machine</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">企業尾牙春酒抽獎開獎、社群活動名額抽選、教學課堂隨機抽籤。</p>
+            </div>
+          </div>
+          <a href="game/lucky_draw_app.html" target="_blank" class="open-btn">
+            <span>打開作品</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- ==================== 3. DM (COMMERCIAL DESIGN) ==================== -->
+
+      <!-- DM 1: Luxury Rib DM -->
+      <article class="work-card" data-category="dm" data-search="Luxury Rib DM 牛排 促銷 海報 商業 設計 廣告">
+        <div class="card-thumb img-thumb">
+          <img src="DM/Luxury%20Rib%20DM.png" alt="Luxury Rib DM" loading="lazy" class="card-img" />
+          <span class="card-badge">商業廣告</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Luxury Rib 頂級排餐商業宣傳海報</h3>
+          <p class="card-intro">專為頂級排餐品牌規劃的行銷宣傳海報。以厚重深邃的暗黑色系襯托鮮嫩炙燒的頂級牛排主圖，並透過嚴謹的西式字體排版、光影層次與餐點特色標註，營造奢華尊榮的用餐氛圍，有效刺激顧客食慾與高端消費慾望。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與標準</span>
+              <div class="tag-container">
+                <span class="api-tag">Canvas 2D Rendering</span>
+                <span class="api-tag">High-DPI 色彩階調處理</span>
+                <span class="api-tag">商務平面排版規範</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">頂級西餐廳桌上立牌、社群行銷廣告輪播、高檔排餐節慶促銷 DM。</p>
+            </div>
+          </div>
+          <a href="DM/Luxury%20Rib%20DM.png" target="_blank" class="open-btn">
+            <span>瀏覽高畫質海報</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- DM 2: ThanksGiving Turkey DM -->
+      <article class="work-card" data-category="dm" data-search="ThanksGiving Turkey DM 感恩節 火雞 促銷 DM 廣告">
+        <div class="card-thumb img-thumb">
+          <img src="DM/ThanksGiving%20Turkey%20DM.png" alt="ThanksGiving Turkey DM" loading="lazy" class="card-img" />
+          <span class="card-badge">節慶促銷</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">ThanksGiving Turkey 感恩節火雞盛宴 DM</h3>
+          <p class="card-intro">針對感恩節年度特惠活動量身繪製的促銷宣傳單。融合金黃暖色調與豐富豐收意象，將剛出爐的脆皮火雞作為視覺焦點，搭配清楚醒目的預購早鳥方案與訂購資訊，營造溫馨團聚的佳節儀式感並帶動外帶預訂業績。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與標準</span>
+              <div class="tag-container">
+                <span class="api-tag">色彩心理學暖色渲染</span>
+                <span class="api-tag">向量視覺圖層合成</span>
+                <span class="api-tag">印刷輸出色彩校正</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">節慶團購外帶預約推廣、餐廳店頭張貼海報、LINE 官方帳號促銷推播。</p>
+            </div>
+          </div>
+          <a href="DM/ThanksGiving%20Turkey%20DM.png" target="_blank" class="open-btn">
+            <span>瀏覽高畫質海報</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- ==================== 4. PROTOTYPE & ARCHITECTURE ==================== -->
+
+      <!-- Prototype 1: 個人網站系統架構與技術剖析 -->
+      <article class="work-card" data-category="prototype" data-search="個人網站系統架構與技術剖析 prototype 系統 架構 藍圖 流程圖">
+        <div class="card-thumb img-thumb">
+          <img src="prototype/%E5%80%8B%E4%BA%BA%E7%B6%B2%E7%AB%99%E7%B3%BB%E7%B5%B1%E6%9E%B6%E6%A7%8B%E8%88%87%E6%8A%80%E8%A1%93%E5%89%96%E6%9E%90.png" alt="個人網站系統架構" loading="lazy" class="card-img" />
+          <span class="card-badge">系統架構</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">個人網站系統架構與技術剖析</h3>
+          <p class="card-intro">全站技術架構與前端模組流程的高解析度藍圖。詳細拆解 SPA 路由、狀態管理、離線快取機制與外掛組件之互動關聯，透過標準化流程圖形語言清晰展現資料流向，為現代網頁工程奠定穩固且具擴展性的底層邏輯。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與規範</span>
+              <div class="tag-container">
+                <span class="api-tag">Mermaid / Graphviz API</span>
+                <span class="api-tag">系統拓撲圖設計</span>
+                <span class="api-tag">軟體工程架構標準</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">軟體架構技術評審會議、全端開發規格書交付、系統擴充性評估。</p>
+            </div>
+          </div>
+          <a href="prototype/%E5%80%8B%E4%BA%BA%E7%B6%B2%E7%AB%99%E7%B3%BB%E7%B5%B1%E6%9E%B6%E6%A7%8B%E8%88%87%E6%8A%80%E8%A1%93%E5%89%96%E6%9E%90.png" target="_blank" class="open-btn">
+            <span>檢視架構藍圖</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Prototype 2: 遊戲測試追蹤系統指南 -->
+      <article class="work-card" data-category="prototype" data-search="遊戲測試追蹤系統指南 prototype QA 測試 狀態機 bug tracking">
+        <div class="card-thumb img-thumb">
+          <img src="prototype/%E9%81%8A%E6%88%B2%E6%B8%AC%E8%A9%A6%E8%BF%BD%E8%B9%A4%E7%B3%BB%E7%B5%B1%E6%8C%87%E5%8D%97.png" alt="遊戲測試追蹤系統指南" loading="lazy" class="card-img" />
+          <span class="card-badge">QA 標準</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">遊戲測試追蹤系統指南</h3>
+          <p class="card-intro">為遊戲開發團隊量身定制的完整品質保證 (QA) 與 Bug 追蹤作業標準指南。視覺化呈現測試案例覆蓋率、缺陷生命週期轉換狀態機與嚴重等級分類邏輯，協助測試工程師與企劃團隊建立高效無縫的除錯協作管道。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與規範</span>
+              <div class="tag-container">
+                <span class="api-tag">狀態機模型 (FSM)</span>
+                <span class="api-tag">缺陷生命週期標準</span>
+                <span class="api-tag">ISO/IEC 25010 軟體品質</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">遊戲開發團隊測試標準建立、QA 人員入職培訓手冊、敏捷除錯管線。</p>
+            </div>
+          </div>
+          <a href="prototype/%E9%81%8A%E6%88%B2%E6%B8%AC%E8%A9%A6%E8%BF%BD%E8%B9%A4%E7%B3%BB%E7%B5%B1%E6%8C%87%E5%8D%97.png" target="_blank" class="open-btn">
+            <span>檢視完整指南</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Prototype 3: Game Testing Tracking System Diagram -->
+      <article class="work-card" data-category="prototype" data-search="Game Testing Tracking System Diagram prototype 架構 微服務">
+        <div class="card-thumb img-thumb">
+          <img src="prototype/Game_Testing_Tracking_System_Diagram.png" alt="Game Testing Tracking Diagram" loading="lazy" class="card-img" />
+          <span class="card-badge">後台架構</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Game Testing Tracking System 架構圖</h3>
+          <p class="card-intro">遊戲測試追蹤系統之資料庫實體關係與服務呼叫圖解。從客戶端報錯捕捉、自動化分配模組到即時通知整合，完整規劃現代化遊戲測試平台的微服務邊界，實現缺陷數據的高效流轉與可追溯性。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與規範</span>
+              <div class="tag-container">
+                <span class="api-tag">UML 實體關聯圖 (ERD)</span>
+                <span class="api-tag">微服務架構邊界設計</span>
+                <span class="api-tag">Webhook 自動化通知</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">遊戲營運維護架構規劃、自動化測試管線設計、內部工程團隊規格設計。</p>
+            </div>
+          </div>
+          <a href="prototype/Game_Testing_Tracking_System_Diagram.png" target="_blank" class="open-btn">
+            <span>檢視架構圖</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Prototype 4: Exodus Journey 拼圖聖經遊戲介面 -->
+      <article class="work-card" data-category="prototype" data-search="Exodus Journey 拼圖聖經遊戲介面 prototype UI UX 遊戲介面">
+        <div class="card-thumb img-thumb">
+          <img src="prototype/Exodus%20Journey%20%E6%8B%BC%E5%9C%96%E8%81%96%E7%B6%93%E9%81%8A%E6%88%B2%E4%BB%8B%E9%9D%A2.png" alt="Exodus Journey UI" loading="lazy" class="card-img" />
+          <span class="card-badge">UI 原型</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">出埃及記拼圖聖經遊戲介面原型</h3>
+          <p class="card-intro">以聖經出埃及記為題材之益智拼圖遊戲 UI/UX 原型設計。結合古埃及壁畫風格與現代扁平化互動介面，規劃體力值、星級評分、歷史文物蒐集冊與拼圖解謎盤面，兼顧歷史文化沉浸感與流暢的操作人因工程。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與工具</span>
+              <div class="tag-container">
+                <span class="api-tag">Figma UI Design Kit</span>
+                <span class="api-tag">人因介面佈局 (Ergonomics)</span>
+                <span class="api-tag">遊戲 HUD 動態回饋規範</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">益智教育手遊前期介面提案、遊戲美術與程式切圖依據、募資簡報視覺展示。</p>
+            </div>
+          </div>
+          <a href="prototype/Exodus%20Journey%20%E6%8B%BC%E5%9C%96%E8%81%96%E7%B6%93%E9%81%8A%E6%88%B2%E4%BB%8B%E9%9D%A2.png" target="_blank" class="open-btn">
+            <span>檢視 UI 原型</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Prototype 5: Q版出埃及記拼圖之旅 -->
+      <article class="work-card" data-category="prototype" data-search="Q版出埃及記拼圖之旅 prototype 關卡 地圖 冒險">
+        <div class="card-thumb img-thumb">
+          <img src="prototype/Q%E7%89%88%E5%87%BA%E5%9F%83%E5%8F%8A%E8%A8%98%E6%8B%BC%E5%9C%96%E4%B9%8B%E6%97%85.png" alt="Q版出埃及記拼圖之旅" loading="lazy" class="card-img" />
+          <span class="card-badge">關卡地圖</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Q版出埃及記拼圖之旅關卡地圖</h3>
+          <p class="card-intro">針對全年齡層玩家打造的親和版出埃及記冒險地圖原型。以 Q 版可愛插畫重現紅海奇蹟、西奈半島等經典歷史篇章，設計線性闖關路線與寶箱解鎖機制，大幅降低宗教題材門檻並提升休閒探索樂趣。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與工具</span>
+              <div class="tag-container">
+                <span class="api-tag">向量遊戲角色繪製</span>
+                <span class="api-tag">關卡進度路徑規劃</span>
+                <span class="api-tag">休閒遊戲化 (Gamification)</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">休閒教育手遊宣傳看板、主線冒險地圖選關介面、教學教材插畫整合。</p>
+            </div>
+          </div>
+          <a href="prototype/Q%E7%89%88%E5%87%BA%E5%9F%83%E5%8F%8A%E8%A8%98%E6%8B%BC%E5%9C%96%E4%B9%8B%E6%97%85.png" target="_blank" class="open-btn">
+            <span>檢視冒險地圖</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Prototype 6: Bible Puzzle Journey Infographic Poster -->
+      <article class="work-card" data-category="prototype" data-search="Bible Puzzle Journey Infographic Poster prototype 資訊圖表 海報">
+        <div class="card-thumb img-thumb">
+          <img src="prototype/Bible%20Puzzle%20Journey%20Infographic%20Poster.png" alt="Bible Puzzle Infographic Poster" loading="lazy" class="card-img" />
+          <span class="card-badge">資訊海報</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Bible Puzzle Journey 資訊圖表海報</h3>
+          <p class="card-intro">統整聖經拼圖冒險全貌的巨幅資訊圖表海報。整合遊戲世界觀設定、歷史地理考證對照、各章節核心解謎機制與成就獎勵系統，以一體化排版呈現宏大的敘事脈絡，兼具視覺美感與高度資訊傳播價值。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與工具</span>
+              <div class="tag-container">
+                <span class="api-tag">資訊可視化架構 (Infographics)</span>
+                <span class="api-tag">網格排版系統</span>
+                <span class="api-tag">向量印刷輸出標準</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">遊戲展覽攤位大圖輸出、主題教育活動教學圖解、數位典藏宣傳海報。</p>
+            </div>
+          </div>
+          <a href="prototype/Bible%20Puzzle%20Journey%20Infographic%20Poster.png" target="_blank" class="open-btn">
+            <span>檢視巨幅海報</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Prototype 7: 我的第一個 Notion 資料庫 -->
+      <article class="work-card" data-category="prototype" data-search="我的第一個 Notion 資料庫 prototype notion 生產力 知識管理">
+        <div class="card-thumb img-thumb">
+          <img src="prototype/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E5%80%8B%20Notion%20%E8%B3%87%E6%96%99%E5%BA%AB.png" alt="我的第一個 Notion 資料庫" loading="lazy" class="card-img" />
+          <span class="card-badge">知識管理</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">我的第一個 Notion 資料庫系統架構</h3>
+          <p class="card-intro">高度結構化個人知識管理與專案追蹤系統模型。活用多維表格、關聯屬性 (Relations & Rollups) 與看板視圖，打造涵蓋閱讀筆記、代辦目標與靈感資產的第二大腦，實現資訊高效率檢索與人生系統化紀錄。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與工具</span>
+              <div class="tag-container">
+                <span class="api-tag">Notion Database API 架構</span>
+                <span class="api-tag">關聯式資料模型 (Relational DB)</span>
+                <span class="api-tag">自訂屬性 Rollup 運算</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">個人生產力第二大腦建置、專案里程碑看板管理、靈感知識庫數位歸檔。</p>
+            </div>
+          </div>
+          <a href="prototype/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E5%80%8B%20Notion%20%E8%B3%87%E6%96%99%E5%BA%AB.png" target="_blank" class="open-btn">
+            <span>檢視資料庫設計</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Prototype 8: Trade Specialist Candidate Profile -->
+      <article class="work-card" data-category="prototype" data-search="Trade Specialist Candidate Profile prototype 履歷 看板 專才">
+        <div class="card-thumb img-thumb">
+          <img src="prototype/Trade_Specialist_Candidate_Profile.png" alt="Trade Specialist Candidate Profile" loading="lazy" class="card-img" />
+          <span class="card-badge">專才看板</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Trade Specialist Candidate Profile 專才看板</h3>
+          <p class="card-intro">專為國際貿易專才設計的高階個人特質與專業資歷視覺化看板。一頁式整合外語能力評級、跨國供應鏈實戰戰績、核心性格優勢與專案關鍵績效 (KPI)，以專業圖表取代枯燥文字，精準傳遞人才商業價值。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與規範</span>
+              <div class="tag-container">
+                <span class="api-tag">履歷視覺資訊設計</span>
+                <span class="api-tag">能力量化雷達圖</span>
+                <span class="api-tag">KPI 指標數據可視化</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">跨國企業外商求職個人網站、高階獵頭人才推薦報告、專業資歷作品集。</p>
+            </div>
+          </div>
+          <a href="prototype/Trade_Specialist_Candidate_Profile.png" target="_blank" class="open-btn">
+            <span>檢視專才檔案</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- ==================== 5. CREATIVE PHOTO & ART ==================== -->
+
+      <!-- Photo 1: Pop-Art Selfie Comic Collage -->
+      <article class="work-card" data-category="photo" data-search="Pop-Art Selfie Comic Collage creative photo 普普 藝術 漫畫 拼貼">
+        <div class="card-thumb img-thumb">
+          <img src="creative%20photo/Pop-Art%20Selfie%20Comic%20Collage.png" alt="Pop-Art Selfie" loading="lazy" class="card-img" />
+          <span class="card-badge">普普藝術</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Pop-Art 普普自拍漫畫拼貼創作</h3>
+          <p class="card-intro">結合美式波普 (Pop-Art) 網點、鮮明對比撞色與經典美漫擬聲詞邊框的自拍肖像二次創作。透過現代數位濾鏡與幾何色塊重構人物神情，展現大膽前衛的視覺張力，營造極具街頭潮流氣息的現代波普藝術風格。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與風格</span>
+              <div class="tag-container">
+                <span class="api-tag">半色調網點演算 (Halftone)</span>
+                <span class="api-tag">高對比色票分離</span>
+                <span class="api-tag">向量文字擬聲貼圖合成</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">個人社群搶眼大頭照、潮牌服飾聯名印花概念、當代波普數位藝術展。</p>
+            </div>
+          </div>
+          <a href="creative%20photo/Pop-Art%20Selfie%20Comic%20Collage.png" target="_blank" class="open-btn">
+            <span>瀏覽作品全圖</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Photo 2: Nineframe -->
+      <article class="work-card" data-category="photo" data-search="Nineframe creative photo 九宮格 藝術 攝影">
+        <div class="card-thumb img-thumb">
+          <img src="creative%20photo/Nineframe.png" alt="Nineframe" loading="lazy" class="card-img" />
+          <span class="card-badge">九宮格美學</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Nineframe 九宮格創意視覺藝術</h3>
+          <p class="card-intro">運用 Instagram 經典九宮格切片思維構建的整體視覺敘事作品。將單一宏大構圖分割為九個獨立卻互相呼應的方形畫幅，近看展現細膩特寫、遠觀匯聚震撼全貌，徹底突破傳統單張靜態照片的視覺展示邊界。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與風格</span>
+              <div class="tag-container">
+                <span class="api-tag">九宮格矩陣裁切演算法</span>
+                <span class="api-tag">視覺連續性對齊技術</span>
+                <span class="api-tag">無損多圖分割輸出</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">社群媒體 IG 震撼主頁排版、品牌主視覺發表活動、連貫多格海報展示。</p>
+            </div>
+          </div>
+          <a href="creative%20photo/Nineframe.png" target="_blank" class="open-btn">
+            <span>瀏覽作品全圖</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Photo 3: Moonlit Wolf Guardian in the Forest -->
+      <article class="work-card" data-category="photo" data-search="Moonlit Wolf Guardian in the Forest creative photo 狼 森林 守護者 月夜">
+        <div class="card-thumb img-thumb">
+          <img src="creative%20photo/Moonlit%20Wolf%20Guardian%20in%20the%20Forest.png" alt="Moonlit Wolf Guardian" loading="lazy" class="card-img" />
+          <span class="card-badge">奇幻靈獸</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">森林狼神守護者 (Moonlit Wolf Guardian)</h3>
+          <p class="card-intro">融合幽藍月夜、神秘古木與威儀狼神的奇幻概念視覺作品。運用多層次丁達爾光效、細膩皮毛光影刻畫與幽邃景深，勾勒出守護自然秩序的靈獸威嚴，散發純粹、寧靜而強大不可侵犯的神秘史詩氛圍。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與風格</span>
+              <div class="tag-container">
+                <span class="api-tag">體積光效渲染 (Volumetric)</span>
+                <span class="api-tag">景深透視疊加技術</span>
+                <span class="api-tag">HDR 光影平衡微調</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">奇幻小說封面插畫、桌面高畫質沉浸桌布、數位遊戲場景載入背景圖。</p>
+            </div>
+          </div>
+          <a href="creative%20photo/Moonlit%20Wolf%20Guardian%20in%20the%20Forest.png" target="_blank" class="open-btn">
+            <span>瀏覽作品全圖</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Photo 4: Lunara_ Lycan of the Violet Moon -->
+      <article class="work-card" data-category="photo" data-search="Lunara Lycan of the Violet Moon creative photo 紫月 狼神 角色">
+        <div class="card-thumb img-thumb">
+          <img src="creative%20photo/Lunara_%20Lycan%20of%20the%20Violet%20Moon.png" alt="Lunara Lycan" loading="lazy" class="card-img" />
+          <span class="card-badge">概念肖像</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Lunara：紫月狼神概念肖像</h3>
+          <p class="card-intro">以紫月神秘光芒為基底的超現實奇幻角色肖像。深邃的紫藍色調與冷光反差勾勒出主角銳利而沉著的雙眸，結合神聖圖騰與月夜能量場氛圍，將獸性與智慧完美融合，營造直擊心靈深處的空靈守護之美。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與風格</span>
+              <div class="tag-container">
+                <span class="api-tag">霓虹邊緣光描摹技術</span>
+                <span class="api-tag">色調分離與高光染色</span>
+                <span class="api-tag">角色概念人設構建</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">遊戲英雄角色概念圖、NFT 數位藝術創作、魔幻影集宣傳概念主視覺。</p>
+            </div>
+          </div>
+          <a href="creative%20photo/Lunara_%20Lycan%20of%20the%20Violet%20Moon.png" target="_blank" class="open-btn">
+            <span>瀏覽作品全圖</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Photo 5: VIRENNU_ Keeper of Boundaries -->
+      <article class="work-card" data-category="photo" data-search="VIRENNU Keeper of Boundaries creative photo 守護者 肖像 概念">
+        <div class="card-thumb img-thumb">
+          <img src="creative%20photo/VIRENNU_%20Keeper%20of%20Boundaries.png" alt="VIRENNU Keeper" loading="lazy" class="card-img" />
+          <span class="card-badge">次元守護</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">VIRENNU：邊界守護者概念肖像</h3>
+          <p class="card-intro">探索未知虛空與次元交界點的奇幻角色設定畫作。以精巧面部細節、神秘異域符文與深邃光影明暗對比，詮釋守護次元平衡的宿命感與靜穆英姿，充滿強烈的電影敘事感與深邃的世界觀想像空間。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與風格</span>
+              <div class="tag-container">
+                <span class="api-tag">局部高光雕琢工藝</span>
+                <span class="api-tag">低明度微反光處理</span>
+                <span class="api-tag">人物心理光影佈局</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">影視概念角色設計提案、3D 建模原畫參考、奇幻角色卡牌稀有卡面。</p>
+            </div>
+          </div>
+          <a href="creative%20photo/VIRENNU_%20Keeper%20of%20Boundaries.png" target="_blank" class="open-btn">
+            <span>瀏覽作品全圖</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Photo 6: Liberty of Statue -->
+      <article class="work-card" data-category="photo" data-search="Liberty of Statue creative photo 自由女神 攝影 概念">
+        <div class="card-thumb img-thumb">
+          <img src="creative%20photo/Liberty%20of%20Statue.png" alt="Liberty of Statue" loading="lazy" class="card-img" />
+          <span class="card-badge">當代攝影</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">Liberty of Statue 自由女神創意概念攝影</h3>
+          <p class="card-intro">將世界著名地標自由女神像賦予全新現代美學詮釋的實驗性視覺創作。透過特殊視角切入、強烈雲層氣勢烘托與當代色調微調，重塑歷經歲月洗禮的青銅雕像與火炬精神，傳遞跨越時代的自由意志信念。</p>
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用技術與風格</span>
+              <div class="tag-container">
+                <span class="api-tag">廣角透視畸變校正</span>
+                <span class="api-tag">動態天候光影合成</span>
+                <span class="api-tag">冷暖色溫平衡技術</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">當代城市人文專題攝影、國際文化雜誌封面專題、跨域藝術展覽視覺。</p>
+            </div>
+          </div>
+          <a href="creative%20photo/Liberty%20of%20Statue.png" target="_blank" class="open-btn">
+            <span>瀏覽作品全圖</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- ==================== 6. ORIGINAL AUDIO & MUSIC ==================== -->
+
+      <!-- Audio 1: Steel Rain -->
+      <article class="work-card" data-category="audio" data-search="Steel Rain 鋼鐵之雨 mp3 電子音樂 配樂 原創">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">原創音樂</span>
+          <div class="thumb-icon-wrap">🎵</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">原創音樂《Steel Rain》（鋼鐵之雨）</h3>
+          <p class="card-intro">融合賽博龐克風格與重度節奏感的原創電子音樂作品。運用層層堆疊的低頻打擊樂、失真合成器音色與冷冽金屬質感的音效採樣，模擬暴雨洗刷機械都市的緊張壓迫感，兼具強烈聽覺張力與電影級場景沉浸感。</p>
+          
+          <!-- Direct Audio Player -->
+          <div class="audio-player-box">
+            <audio controls preload="metadata">
+              <source src="mp3/Steel_Rain.mp3" type="audio/mpeg">
+              您的瀏覽器不支援音訊播放器。
+            </audio>
+          </div>
+
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">HTML5 Audio Element</span>
+                <span class="api-tag">Web Audio API</span>
+                <span class="api-tag">Audio Decoding & Buffer</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">科幻遊戲背景配樂 (BGM)、動漫戰鬥場景剪輯、深夜程式編寫專注音樂。</p>
+            </div>
+          </div>
+          <a href="mp3/Steel_Rain.mp3" target="_blank" class="open-btn">
+            <span>開啟原始音訊檔</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <!-- Audio 2: AudioTranscriberAI (Caged) -->
+      <article class="work-card" data-category="audio" data-search="AudioTranscriberAI Caged mp3 配樂 音訊 電子 AI">
+        <div class="card-thumb" style="background: linear-gradient(135deg, #9333ea 0%, #581c87 100%);">
+          <div class="thumb-pattern"></div>
+          <span class="card-badge">科技配樂</span>
+          <div class="thumb-icon-wrap">🎧</div>
+        </div>
+        <div class="card-body">
+          <h3 class="card-title">原創音訊《AudioTranscriberAI (Caged)》</h3>
+          <p class="card-intro">探索人工智慧與人聲語意轉換邊界的實驗性配樂創作。樂曲中融入聲學數位濾波、節奏脈衝與空間回音殘響，將被代碼與算力拘束的意識以音樂旋律具象化，呈現極具未來科技感與深度思考的聽覺敘事體驗。</p>
+          
+          <!-- Direct Audio Player -->
+          <div class="audio-player-box">
+            <audio controls preload="metadata">
+              <source src="mp3/AudioTranscriberAI%20(Caged).mp3" type="audio/mpeg">
+              您的瀏覽器不支援音訊播放器。
+            </audio>
+          </div>
+
+          <div class="meta-box">
+            <div class="meta-row">
+              <span class="meta-label">🛠️ 使用到哪些 API</span>
+              <div class="tag-container">
+                <span class="api-tag">HTML5 Audio Element</span>
+                <span class="api-tag">Web Audio Node Graph</span>
+                <span class="api-tag">數位濾波音訊合成</span>
+              </div>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">🎯 應用場景</span>
+              <p class="scenario-text">AI 科技產品展示宣傳短片、科技發布會開場音效、Podcast 專案轉場配樂。</p>
+            </div>
+          </div>
+          <a href="mp3/AudioTranscriberAI%20(Caged).mp3" target="_blank" class="open-btn">
+            <span>開啟原始音訊檔</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </article>
+
+      <div class="empty-state" id="emptyState">
+        <p style="font-size: 1.1rem; margin-bottom: 6px;">查無相符的作品</p>
+        <p style="font-size: 0.85rem;">請嘗試不同關鍵字或切換分類標籤</p>
+      </div>
+
+    </div>
+
+    <!-- About Me Section -->
+    <section id="about" class="about-section">
+      <div class="about-card">
+        <div class="profile-header">
+          <div class="avatar-wrap">
+            <div class="avatar-inner">👨‍💻</div>
+          </div>
+          <div class="profile-info">
+            <h3>開發者探索者</h3>
+            <p>Full-Stack Web & Creative Multi-Disciplinary Designer</p>
+          </div>
+        </div>
+
+        <p class="about-bio">
+          熱愛將創意思維、視覺美學與實用工程技術融合的數位創作者。跨足純前端互動應用、資料視覺化、系統架構原型規劃、商業平面廣告、AI 概念影像與音樂音訊創作。深信優秀的作品不僅在於代碼的純粹，更是為使用者解決問題並傳遞美感體驗的綜合藝術。
+        </p>
+
+        <div class="skill-grid">
+          <div class="skill-item">
+            <div class="skill-title">📱 現代前端與行動優先</div>
+            <div class="skill-desc">HTML5, CSS3, ES6+ JS, Tailwind CSS, 響應式佈局</div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-title">📊 數據視覺化與解析</div>
+            <div class="skill-desc">Chart.js, Canvas API, SheetJS 離線 Excel 解析, 財報儀表板</div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-title">🎮 互動音效與遊戲化</div>
+            <div class="skill-desc">Web Audio API, Tone.js, 粒子特效, 經營模擬邏輯</div>
+          </div>
+          <div class="skill-item">
+            <div class="skill-title">🎨 多媒體與系統藍圖</div>
+            <div class="skill-desc">Figma UI/UX, 系統拓撲架構圖, 商業廣告 DM, 數位音樂配樂</div>
+          </div>
+        </div>
+
+        <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding-top: 10px; border-top: 1px solid var(--border);">
+          © 2026 我的網頁與多媒體作品集 · 手機優先響應式設計
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Bottom Mobile Dock Navigation -->
+  <div class="bottom-nav">
+    <a href="#catalog" class="bnav-item active" id="bnavCatalog">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+      <span>作品目錄</span>
+    </a>
+    <a href="#searchInput" class="bnav-item" id="bnavSearch" onclick="document.getElementById('searchInput').focus();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <span>搜尋</span>
+    </a>
+    <a href="#about" class="bnav-item" id="bnavAbout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span>關於我</span>
+    </a>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const filterPills = document.querySelectorAll('.filter-pill');
+    const cards = document.querySelectorAll('.work-card');
+    const emptyState = document.getElementById('emptyState');
+    const worksCount = document.getElementById('worksCount');
+
+    let currentFilter = 'all';
+    let searchQuery = '';
+
+    function updateFeed() {
+      let visible = 0;
+      cards.forEach(card => {
+        const category = card.getAttribute('data-category');
+        const searchText = (card.getAttribute('data-search') || '') + ' ' + card.innerText;
+        
+        const matchCategory = (currentFilter === 'all') || (category === currentFilter);
+        const matchSearch = !searchQuery || searchText.toLowerCase().includes(searchQuery);
+
+        if (matchCategory && matchSearch) {
+          card.style.display = 'block';
+          visible++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      emptyState.style.display = visible === 0 ? 'block' : 'none';
+      worksCount.textContent = `顯示 ${visible} 個作品`;
+    }
+
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentFilter = pill.getAttribute('data-filter');
+        updateFeed();
+      });
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      updateFeed();
+    });
+
+    window.addEventListener('scroll', () => {
+      const scrollPos = window.scrollY + 220;
+      const aboutSection = document.getElementById('about');
+      const bnavCatalog = document.getElementById('bnavCatalog');
+      const bnavAbout = document.getElementById('bnavAbout');
+
+      if (aboutSection && scrollPos >= aboutSection.offsetTop) {
+        bnavAbout.classList.add('active');
+        bnavCatalog.classList.remove('active');
+      } else {
+        bnavCatalog.classList.add('active');
+        bnavAbout.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>楊老大便當店 - 份量澎湃、用心料理，老大請客般的滿足！</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Noto Sans TC & Zen Maru Gothic -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#C23B22',
+                            darkRed: '#8B0000',
+                            gold: '#D4AF37',
+                            cream: '#FFFDF5',
+                            warmBg: '#FDF6E2',
+                            accent: '#E65100',
+                            green: '#2E7D32'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                        heading: ['Zen Maru Gothic', 'Noto Sans TC', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FDF6E2;
+            font-family: 'Noto Sans TC', sans-serif;
+            color: #333;
+        }
+        .hero-pattern {
+            background-color: #fdf6e2;
+            background-image: radial-gradient(#e5d7b8 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+        .badge-tag {
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #C23B22;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="hero-pattern min-h-screen flex flex-col justify-between">
+
+    <!-- 頂部導覽列 -->
+    <header class="sticky top-0 z-40 bg-brand-red text-white shadow-md border-b-4 border-yellow-400">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-brand-red font-black text-xl border-2 border-yellow-400 shadow">
+                    楊
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black font-heading tracking-wide leading-none">楊老大便當店</h1>
+                    <p class="text-xs text-yellow-200 mt-1 font-medium">份量澎湃．用心料理．老大請客般的滿足！</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <a href="tel:0212345678" class="hidden md:flex items-center space-x-1 bg-yellow-400 hover:bg-yellow-300 text-brand-darkRed font-bold px-3 py-1.5 rounded-full text-sm transition">
+                    <i class="fa-solid fa-phone"></i>
+                    <span>02-1234-5678</span>
+                </a>
+                <button id="cartBtn" onclick="toggleCart()" class="relative bg-white text-brand-red font-bold px-4 py-2 rounded-full shadow hover:bg-yellow-50 transition flex items-center space-x-2">
+                    <i class="fa-solid fa-cart-shopping text-lg"></i>
+                    <span class="hidden sm:inline">購物車</span>
+                    <span id="cartBadge" class="absolute -top-2 -right-2 bg-yellow-400 text-brand-darkRed font-black text-xs w-6 h-6 rounded-full flex items-center justify-center border-2 border-brand-red">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 開幕橫幅公告 -->
+    <div class="bg-yellow-400 border-b border-yellow-500 text-brand-darkRed py-2 px-4 text-center font-bold text-sm md:text-base flex items-center justify-center space-x-2 shadow-inner">
+        <i class="fa-solid fa-bullhorn text-brand-red animate-bounce"></i>
+        <span>【開幕慶優惠】團體訂購滿 10 個便當即贈送 1 個！附設外送專線，熱烈預訂中！</span>
+    </div>
+
+    <!-- 主要內容區 -->
+    <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-grow">
+        
+        <!-- 店家簡介 Banner -->
+        <section class="bg-white rounded-2xl p-6 mb-8 shadow-lg border-2 border-amber-200 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 opacity-10 text-brand-red text-9xl pointer-events-none">
+                <i class="fa-solid fa-bowl-rice"></i>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left z-10">
+                <div class="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-amber-100 border-4 border-brand-red flex-shrink-0 flex items-center justify-center overflow-hidden shadow-md relative">
+                    <!-- 模擬楊老大頭像/插畫 -->
+                    <div class="text-center">
+                        <i class="fa-solid fa-user-ninja text-5xl text-brand-red"></i>
+                        <span class="block text-xs font-black text-brand-darkRed mt-1">楊老大</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="inline-block bg-brand-red text-white text-xs px-3 py-1 rounded-full font-bold mb-2">
+                        均附三樣配菜與半顆滷蛋
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-black font-heading text-brand-darkRed">美味豐盛．真正飽足！</h2>
+                    <p class="text-gray-600 text-sm sm:text-base mt-2 max-w-xl">
+                        老闆楊老大堅持用最實在的份量與傳統手藝，照顧每一位饕客的胃。招牌炸排骨與秘製紅燒肉，絕對讓您吃得心滿意足！
+                    </p>
+                    <div class="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start text-xs font-bold text-amber-800">
+                        <span class="bg-amber-100 px-2.5 py-1 rounded-md border border-amber-300"><i class="fa-solid fa-pepper-hot text-red-500 mr-1"></i>辣蘿蔔乾免費提供</span>
+                        <span class="bg-amber-100 px-2.5 py-1 rounded-md border border-amber-300"><i class="fa-solid fa-plus text-amber-600 mr-1"></i>白飯可加量 (+10元)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 外送專線卡片 -->
+            <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 text-center flex-shrink-0 w-full md:w-64 z-10">
+                <div class="text-xs text-amber-800 font-bold uppercase tracking-wider mb-1">團體外送 / 預訂專線</div>
+                <a href="tel:0212345678" class="text-2xl font-black text-brand-red hover:underline block my-1">
+                    02-1234-5678
+                </a>
+                <div class="text-xs text-gray-500">
+                    <p><i class="fa-regular fa-clock mr-1"></i>午餐 10:30 - 14:00</p>
+                    <p><i class="fa-regular fa-clock mr-1"></i>晚餐 16:30 - 20:00</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 菜單分類標籤 -->
+        <div class="flex overflow-x-auto space-x-2 mb-6 pb-2 custom-scrollbar">
+            <button onclick="scrollToCategory('cat-0')" class="px-5 py-2.5 bg-brand-red text-white font-bold rounded-xl shadow-md whitespace-nowrap hover:bg-brand-darkRed transition flex items-center space-x-2">
+                <i class="fa-solid fa-thumbs-up"></i>
+                <span>老大招牌推薦</span>
+            </button>
+            <button onclick="scrollToCategory('cat-1')" class="px-5 py-2.5 bg-white text-gray-700 hover:bg-amber-100 font-bold rounded-xl shadow-md whitespace-nowrap transition border border-amber-200 flex items-center space-x-2">
+                <i class="fa-solid fa-bowl-food text-amber-600"></i>
+                <span>經典台味系列</span>
+            </button>
+            <button onclick="scrollToCategory('cat-2')" class="px-5 py-2.5 bg-white text-gray-700 hover:bg-amber-100 font-bold rounded-xl shadow-md whitespace-nowrap transition border border-amber-200 flex items-center space-x-2">
+                <i class="fa-solid fa-fish text-blue-600"></i>
+                <span>雙拼與海鮮</span>
+            </button>
+            <button onclick="scrollToCategory('cat-3')" class="px-5 py-2.5 bg-white text-gray-700 hover:bg-amber-100 font-bold rounded-xl shadow-md whitespace-nowrap transition border border-amber-200 flex items-center space-x-2">
+                <i class="fa-solid fa-drumstick-bite text-amber-700"></i>
+                <span>單點與湯品</span>
+            </button>
+        </div>
+
+        <!-- 菜單列表區塊 -->
+        <div id="menuContainer" class="space-y-10">
+            <!-- 由 JS 動態渲染菜單 -->
+        </div>
+
+    </main>
+
+    <!-- 底部店家資訊與版權 -->
+    <footer class="bg-stone-800 text-stone-300 mt-12 border-t-4 border-brand-red">
+        <div class="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-xl font-bold text-white font-heading mb-3 flex items-center">
+                    <span class="w-7 h-7 bg-brand-red text-white rounded-full inline-flex items-center justify-center text-sm mr-2">楊</span>
+                    楊老大便當店
+                </h3>
+                <p class="text-sm leading-relaxed text-stone-400">
+                    嚴選新鮮食材，傳承古早美味。份量澎湃、用心料理，讓您每一口都能感受到如老大請客般的熱情與滿足！
+                </p>
+            </div>
+            <div>
+                <h4 class="text-lg font-bold text-yellow-400 mb-3 font-heading"><i class="fa-solid fa-location-dot mr-2"></i>店家資訊</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><strong class="text-white">外送專線：</strong> <a href="tel:0212345678" class="hover:text-yellow-400">02-1234-5678</a></li>
+                    <li><strong class="text-white">店家地址：</strong> 台北市大安區和平路125號</li>
+                    <li><strong class="text-white">營業時間：</strong>
+                        <span class="block ml-16 text-stone-400">午餐 10:30 - 14:00</span>
+                        <span class="block ml-16 text-stone-400">晚餐 16:30 - 20:00</span>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-lg font-bold text-yellow-400 mb-3 font-heading"><i class="fa-solid fa-bell mr-2"></i>訂購小提示</h4>
+                <ul class="space-y-2 text-sm text-stone-400">
+                    <li>• 便當均附三樣精選配菜與半顆滷蛋。</li>
+                    <li>• 白飯可加量 (大份 +$10)。</li>
+                    <li>• <span class="text-red-400 font-bold">辣蘿蔔乾免費提供</span>，歡迎主動告知需求！</li>
+                    <li>• 團體訂購滿 10 個便當免費贈送 1 個。</li>
+                </ul>
+            </div>
+        </div>
+        <div class="bg-stone-900 py-4 text-center text-xs text-stone-500">
+            &copy; 2026 楊老大便當店 版權所有．網頁設計示範
+        </div>
+    </footer>
+
+    <!-- 購物車抽屜 (Drawer) -->
+    <div id="cartModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 hidden transition-opacity duration-300 flex justify-end">
+        <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col justify-between transform transition-transform duration-300">
+            <!-- 購物車標頭 -->
+            <div class="bg-brand-red text-white p-4 flex justify-between items-center border-b-4 border-yellow-400">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-cart-shopping text-xl"></i>
+                    <h3 class="text-xl font-bold font-heading">您的點餐清單</h3>
+                </div>
+                <button onclick="toggleCart()" class="text-white hover:text-yellow-300 text-2xl font-bold px-2">
+                    &times;
+                </button>
+            </div>
+
+            <!-- 購物車內容區 -->
+            <div id="cartItems" class="p-4 overflow-y-auto flex-grow space-y-3 custom-scrollbar">
+                <!-- JS 動態渲染 -->
+            </div>
+
+            <!-- 點餐選項與統計結帳區 -->
+            <div class="p-4 bg-amber-50 border-t border-amber-200 space-y-3">
+                
+                <!-- 免費附加選項 -->
+                <div class="bg-white p-3 rounded-lg border border-amber-200">
+                    <label class="flex items-center space-x-2 text-sm font-bold text-gray-700 cursor-pointer">
+                        <input type="checkbox" id="spicyRadishOption" class="w-4 h-4 text-brand-red rounded focus:ring-brand-red">
+                        <span>需要免費辣蘿蔔乾 <span class="text-xs text-red-500 font-normal">(免費提供)</span></span>
+                    </label>
+                </div>
+
+                <!-- 滿十送一優惠說明卡 -->
+                <div id="promoAlert" class="bg-yellow-100 border border-yellow-300 rounded-lg p-2.5 text-xs text-amber-900 flex items-start space-x-2">
+                    <i class="fa-solid fa-gift text-brand-red text-base mt-0.5"></i>
+                    <div>
+                        <span id="promoText">滿 10 個便當送 1 個優惠中！</span>
+                    </div>
+                </div>
+
+                <!-- 金額統計 -->
+                <div class="space-y-1 text-sm border-t border-dashed border-gray-300 pt-2">
+                    <div class="flex justify-between text-gray-600">
+                        <span>餐點小計：</span>
+                        <span id="subtotalPrice" class="font-bold">NT$ 0</span>
+                    </div>
+                    <div class="flex justify-between text-brand-red font-medium" id="discountRow">
+                        <span>滿十送一折扣：</span>
+                        <span id="discountPrice">- NT$ 0</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-black text-brand-darkRed pt-1 border-t border-gray-300">
+                        <span>結帳總金額：</span>
+                        <span id="totalPrice" class="text-2xl text-brand-red">NT$ 0</span>
+                    </div>
+                </div>
+
+                <!-- 顧客備註與發送訂單 -->
+                <div>
+                    <input type="text" id="orderNote" placeholder="備註需求 (例如：飯少、不加菜...)" class="w-full text-sm p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-red mb-2">
+                    <button id="submitBtn" onclick="submitOrder()" class="w-full bg-brand-red hover:bg-brand-darkRed text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center space-x-2 text-base">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span id="submitBtnText">送出預訂訂單</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 訂單成功提示 Modal -->
+    <div id="successModal" class="fixed inset-0 z-50 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl transform transition-all border-4 border-yellow-400">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 class="text-xl font-bold font-heading text-gray-800 mb-2">訂單已送出並成功登記！</h3>
+            <p class="text-sm text-gray-600 mb-6">您的訂單資料已同步寫入系統，請撥打外送專線與店家確認取餐或送餐時間。</p>
+            <div class="space-y-2">
+                <a href="tel:0212345678" class="block w-full bg-brand-red hover:bg-brand-darkRed text-white font-bold py-3 rounded-xl shadow transition">
+                    <i class="fa-solid fa-phone mr-1"></i> 立即撥打專線 (02-1234-5678)
+                </a>
+                <button onclick="closeSuccessModal()" class="block w-full bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-2.5 rounded-xl transition text-sm">
+                    關閉並繼續瀏覽
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // -------------------------------------------------------------
+        // 請將此處替換為您在 Google Apps Script 部署後取得的 Web App URL
+        // -------------------------------------------------------------
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQAMAtjNS9tQRgVPSR0HIH_4M9FLgWsHGkaNRKdHOiZ_uDojnuIAMbWv5N2tVEBByKLw/exec";
+
+        // 菜單資料結構 (完全根據 DM 設計)
+        const menuData = [
+            {
+                category: "老大招牌推薦",
+                note: "均附三樣配菜與半顆滷蛋",
+                items: [
+                    {
+                        id: 101,
+                        name: "楊老大招牌炸排骨飯",
+                        price: 105,
+                        tag: "推薦",
+                        desc: "金黃酥脆大排骨，獨家醃製入味！",
+                        icon: "fa-drumstick-bite",
+                        hasSize: false
+                    },
+                    {
+                        id: 102,
+                        name: "秘製厚切紅燒肉飯",
+                        price: 110,
+                        tag: "熱銷",
+                        desc: "肥瘦相間厚切紅燒肉，滷香濃郁超下飯！",
+                        icon: "fa-bowl-rice",
+                        hasSize: false
+                    },
+                    {
+                        id: 103,
+                        name: "懷舊香酥雞腿飯",
+                        price: 120,
+                        tag: "",
+                        desc: "外酥內嫩多汁大雞腿，古早味經典！",
+                        icon: "fa-drumstick-bite",
+                        hasSize: false
+                    }
+                ]
+            },
+            {
+                category: "經典台味系列",
+                note: "便當 / 特盛美味選擇",
+                items: [
+                    {
+                        id: 201,
+                        name: "醬燒古早味滷肉飯",
+                        price: 90,
+                        tag: "",
+                        desc: "手工切丁甘醇醬香，懷舊好滋味",
+                        icon: "fa-bowl-rice",
+                        hasSize: false
+                    },
+                    {
+                        id: 202,
+                        name: "秘製老滷排骨飯",
+                        price: 105,
+                        tag: "",
+                        desc: "先炸後滷透心入味，軟嫩多汁",
+                        icon: "fa-drumstick-bite",
+                        hasSize: false
+                    },
+                    {
+                        id: 203,
+                        name: "祖傳爌肉飯 (大)",
+                        price: 100,
+                        tag: "",
+                        desc: "大份爌肉，精選三層肉軟爛入味",
+                        icon: "fa-bowl-rice",
+                        hasSize: false
+                    },
+                    {
+                        id: 204,
+                        name: "祖傳爌肉飯 (小)",
+                        price: 80,
+                        tag: "",
+                        desc: "小份爌肉，精緻美味剛剛好",
+                        icon: "fa-bowl-rice",
+                        hasSize: false
+                    },
+                    {
+                        id: 205,
+                        name: "蔥爆牛肉飯",
+                        price: 115,
+                        tag: "爆炒",
+                        desc: "鮮嫩牛肉大火蔥爆，香氣四溢",
+                        icon: "fa-fire",
+                        hasSize: false
+                    }
+                ]
+            },
+            {
+                category: "人氣美味雙拼與海鮮",
+                note: "雙重享受．鮮美選擇",
+                items: [
+                    {
+                        id: 301,
+                        name: "雙拼大滿足飯 (排骨+紅燒肉)",
+                        price: 145,
+                        tag: "雙拼超值",
+                        desc: "一次享有招牌排骨與秘製紅燒肉！",
+                        icon: "fa-utensils",
+                        hasSize: false
+                    },
+                    {
+                        id: 302,
+                        name: "酥炸鮮魚排飯",
+                        price: 110,
+                        tag: "",
+                        desc: "外皮酥脆魚肉細緻，鮮美可口",
+                        icon: "fa-fish",
+                        hasSize: false
+                    },
+                    {
+                        id: 303,
+                        name: "蒜香椒鹽鱈魚飯",
+                        price: 125,
+                        tag: "鮮美",
+                        desc: "頂級鱈魚輔以蒜香椒鹽調味，香氣誘人",
+                        icon: "fa-fish",
+                        hasSize: false
+                    }
+                ]
+            },
+            {
+                category: "超值單點與湯品",
+                note: "豐富美味隨意搭配",
+                items: [
+                    {
+                        id: 401,
+                        name: "單點 懷舊香酥雞腿",
+                        price: 80,
+                        tag: "單點",
+                        desc: "美味大雞腿單點",
+                        icon: "fa-drumstick-bite",
+                        isSide: true
+                    },
+                    {
+                        id: 402,
+                        name: "單點 楊老大炸排骨",
+                        price: 65,
+                        tag: "單點",
+                        desc: "招牌金黃排骨單點",
+                        icon: "fa-drumstick-bite",
+                        isSide: true
+                    },
+                    {
+                        id: 403,
+                        name: "每日例湯 (貢丸湯 / 味噌湯)",
+                        price: 30,
+                        tag: "熱湯",
+                        desc: "熱騰騰鮮美湯品 (口味每日隨機或備註)",
+                        icon: "fa-mug-hot",
+                        isSide: true
+                    },
+                    {
+                        id: 404,
+                        name: "招牌滷油豆腐 / 滷蛋",
+                        price: 15,
+                        tag: "小菜",
+                        desc: "吸飽老滷汁的入味小品",
+                        icon: "fa-egg",
+                        isSide: true
+                    }
+                ]
+            }
+        ];
+
+        // 購物車狀態
+        let cart = [];
+
+        // 初始化頁面
+        window.onload = function() {
+            renderMenu();
+            updateCartUI();
+        };
+
+        // 渲染菜單
+        function renderMenu() {
+            const container = document.getElementById('menuContainer');
+            container.innerHTML = '';
+
+            menuData.forEach((cat, index) => {
+                const section = document.createElement('div');
+                section.id = `cat-${index}`;
+                section.className = "bg-white rounded-2xl p-5 sm:p-6 shadow-md border border-amber-100";
+
+                let itemsHtml = '';
+                cat.items.forEach(item => {
+                    itemsHtml += `
+                        <div class="border border-amber-100 rounded-xl p-4 flex flex-col justify-between hover:shadow-md transition bg-amber-50/30 relative">
+                            ${item.tag ? `<span class="absolute top-3 right-3 bg-brand-red text-white text-xs font-bold px-2 py-0.5 rounded-full">${item.tag}</span>` : ''}
+                            <div>
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <i class="fa-solid ${item.icon} text-brand-red text-lg"></i>
+                                    <h4 class="font-bold text-gray-800 text-lg">${item.name}</h4>
+                                </div>
+                                <p class="text-gray-500 text-xs mb-3 line-clamp-2">${item.desc}</p>
+                            </div>
+                            
+                            <div class="mt-2 pt-2 border-t border-dashed border-amber-200 flex items-center justify-between">
+                                <span class="text-xl font-black text-brand-darkRed">NT$ ${item.price}</span>
+                                <button onclick="addToCart(${item.id})" class="bg-brand-red hover:bg-brand-darkRed text-white px-3.5 py-1.5 rounded-lg text-sm font-bold shadow transition flex items-center space-x-1">
+                                    <i class="fa-solid fa-plus text-xs"></i>
+                                    <span>加入訂單</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                section.innerHTML = `
+                    <div class="border-b-2 border-brand-red pb-3 mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-1">
+                        <div>
+                            <h3 class="text-2xl font-black text-brand-darkRed font-heading flex items-center">
+                                <span class="w-3 h-6 bg-brand-red rounded-full mr-2.5 inline-block"></span>
+                                ${cat.category}
+                            </h3>
+                        </div>
+                        <span class="text-xs text-amber-800 bg-amber-100 font-bold px-3 py-1 rounded-full w-fit">
+                            ${cat.note}
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${itemsHtml}
+                    </div>
+                `;
+
+                container.appendChild(section);
+            });
+        }
+
+        // 捲動至特定分類
+        function scrollToCategory(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                const offset = 80;
+                const bodyRect = document.body.getBoundingClientRect().top;
+                const elementRect = el.getBoundingClientRect().top;
+                const elementPosition = elementRect - bodyRect;
+                const offsetPosition = elementPosition - offset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // 加入購物車 (處理選項)
+        function addToCart(itemId) {
+            let foundItem = null;
+            menuData.forEach(cat => {
+                const match = cat.items.find(i => i.id === itemId);
+                if (match) foundItem = match;
+            });
+
+            if (!foundItem) return;
+
+            // 檢查是否已在購物車
+            const cartIndex = cart.findIndex(c => c.id === itemId);
+            if (cartIndex > 0 || cartIndex === 0) {
+                cart[cartIndex].quantity += 1;
+            } else {
+                cart.push({
+                    id: foundItem.id,
+                    name: foundItem.name,
+                    price: foundItem.price,
+                    isSide: foundItem.isSide || false,
+                    addExtraRice: false, // 是否加飯 (+10)
+                    quantity: 1
+                });
+            }
+
+            updateCartUI();
+            
+            // 提示動畫
+            const badge = document.getElementById('cartBadge');
+            badge.classList.add('scale-125');
+            setTimeout(() => badge.classList.remove('scale-125'), 200);
+        }
+
+        // 切換加飯選項
+        function toggleExtraRice(index) {
+            cart[index].addExtraRice = !cart[index].addExtraRice;
+            updateCartUI();
+        }
+
+        // 修改數量
+        function changeQty(index, delta) {
+            cart[index].quantity += delta;
+            if (cart[index].quantity <= 0) {
+                cart.splice(index, 1);
+            }
+            updateCartUI();
+        }
+
+        // 更新購物車UI與價格計算
+        function updateCartUI() {
+            const cartItemsEl = document.getElementById('cartItems');
+            const cartBadge = document.getElementById('cartBadge');
+            const subtotalEl = document.getElementById('subtotalPrice');
+            const discountEl = document.getElementById('discountPrice');
+            const totalEl = document.getElementById('totalPrice');
+            const promoText = document.getElementById('promoText');
+
+            // 計算數量
+            const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartBadge.innerText = totalCount;
+
+            if (cart.length === 0) {
+                cartItemsEl.innerHTML = `
+                    <div class="text-center py-12 text-gray-400">
+                        <i class="fa-solid fa-basket-shopping text-5xl mb-3 text-amber-200"></i>
+                        <p class="text-sm">購物車目前是空的喔！</p>
+                        <p class="text-xs text-gray-400 mt-1">快點選上方美味餐點吧！</p>
+                    </div>
+                `;
+                subtotalEl.innerText = 'NT$ 0';
+                discountEl.innerText = '- NT$ 0';
+                totalEl.innerText = 'NT$ 0';
+                promoText.innerText = '團體訂購滿 10 個便當送 1 個優惠中！';
+                return;
+            }
+
+            let cartHtml = '';
+            let subtotal = 0;
+            let bentoCount = 0; // 計算便當總數量以利實施滿十送一
+            let cheapestBentoPrice = Infinity;
+
+            cart.forEach((item, index) => {
+                const unitExtra = item.addExtraRice ? 10 : 0;
+                const itemTotalPrice = (item.price + unitExtra) * item.quantity;
+                subtotal += itemTotalPrice;
+
+                if (!item.isSide) {
+                    bentoCount += item.quantity;
+                    if (item.price < cheapestBentoPrice) {
+                        cheapestBentoPrice = item.price;
+                    }
+                }
+
+                cartHtml += `
+                    <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h5 class="font-bold text-gray-800 text-sm">${item.name}</h5>
+                                <div class="text-xs text-brand-darkRed font-semibold mt-0.5">
+                                    NT$ ${item.price} ${item.addExtraRice ? '<span class="text-amber-700">(加飯 +$10)</span>' : ''}
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-black text-gray-800">NT$ ${itemTotalPrice}</span>
+                            </div>
+                        </div>
+
+                        <!-- 可選選項: 便當加飯選項 -->
+                        ${!item.isSide ? `
+                            <div class="mt-2 pt-2 border-t border-dashed border-amber-200 flex items-center justify-between">
+                                <label class="flex items-center space-x-1.5 text-xs text-gray-600 cursor-pointer">
+                                    <input type="checkbox" ${item.addExtraRice ? 'checked' : ''} onchange="toggleExtraRice(${index})" class="rounded text-brand-red focus:ring-brand-red w-3.5 h-3.5">
+                                    <span>白飯加量 (+10元)</span>
+                                </label>
+                            </div>
+                        ` : ''}
+
+                        <!-- 數量控制區 -->
+                        <div class="mt-2 flex justify-between items-center">
+                            <button onclick="changeQty(${index}, -${item.quantity})" class="text-xs text-red-500 hover:underline">
+                                <i class="fa-solid fa-trash-can mr-1"></i>刪除
+                            </button>
+                            <div class="flex items-center space-x-2 bg-white px-2 py-1 rounded-lg border border-amber-300 shadow-sm">
+                                <button onclick="changeQty(${index}, -1)" class="w-6 h-6 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded font-bold text-xs flex items-center justify-center">-</button>
+                                <span class="text-sm font-bold w-5 text-center">${item.quantity}</span>
+                                <button onclick="changeQty(${index}, 1)" class="w-6 h-6 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded font-bold text-xs flex items-center justify-center">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            cartItemsEl.innerHTML = cartHtml;
+
+            // 計算滿十送一優惠 (以購買便當中最便宜者為折抵金額)
+            let discount = 0;
+            const freeBentoNum = Math.floor(bentoCount / 10);
+
+            if (freeBentoNum > 0 && cheapestBentoPrice !== Infinity) {
+                discount = freeBentoNum * cheapestBentoPrice;
+                promoText.innerHTML = `<span class="font-bold text-brand-red">符合開幕優惠！已為您折抵 ${freeBentoNum} 個便當金額！</span>`;
+            } else {
+                const remaining = 10 - (bentoCount % 10);
+                promoText.innerText = `再訂購 ${remaining} 個便當即可獲得 1 個免費便當！`;
+            }
+
+            const finalTotal = Math.max(0, subtotal - discount);
+
+            subtotalEl.innerText = `NT$ ${subtotal}`;
+            discountEl.innerText = `- NT$ ${discount}`;
+            totalEl.innerText = `NT$ ${finalTotal}`;
+        }
+
+        // 開啟/關閉購物車
+        function toggleCart() {
+            const modal = document.getElementById('cartModal');
+            modal.classList.toggle('hidden');
+        }
+
+        // 關閉成功提示彈窗
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        // 送出訂單至 Google 試算表
+        async function submitOrder() {
+            if (cart.length === 0) {
+                alert('您的購物車是空的，請先選擇餐點喔！');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const spicyRadish = document.getElementById('spicyRadishOption').checked ? '需要辣蘿蔔乾' : '不需要';
+            const note = document.getElementById('orderNote').value.trim();
+            const totalPrice = document.getElementById('totalPrice').innerText;
+
+            // 組合訂單明細文字
+            const itemsDetail = cart.map(item => `${item.name} x${item.quantity}${item.addExtraRice ? '(加飯)' : ''}`).join('、');
+
+            // 鎖定按鈕避免重複發送
+            submitBtn.disabled = true;
+            submitBtnText.innerText = "傳送訂單中...";
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+            const orderPayload = {
+                itemsDetail: itemsDetail,
+                spicyRadish: spicyRadish,
+                note: note,
+                totalPrice: totalPrice
+            };
+
+            try {
+                // 如果已設定真實的 Apps Script URL，發送非同步 POST 請求
+                if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL") {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', // 避開 CORS 限制的核心關鍵
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(orderPayload)
+                    });
+                } else {
+                    console.log("模擬訂單發送內容：", orderPayload);
+                }
+
+                // 清空購物車與狀態
+                cart = [];
+                document.getElementById('orderNote').value = '';
+                updateCartUI();
+                toggleCart();
+
+                // 顯示成功提示 Modal
+                document.getElementById('successModal').classList.remove('hidden');
+
+            } catch (error) {
+                console.error("寫入試算表時發生錯誤：", error);
+                alert("訂單送出失敗，請直接撥打電話 02-1234-5678 訂購！");
+            } finally {
+                // 解鎖按鈕
+                submitBtn.disabled = false;
+                submitBtnText.innerText = "送出預訂訂單";
+                submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        }
+    </script>
+</body>
+</html>

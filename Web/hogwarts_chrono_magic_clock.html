@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔法時鐘 - 奇幻時間儀式 | Hogwarts Chrono</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Cinzel Decorative, MedievalSharp, Cinzel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=MedievalSharp&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        magic: ['Cinzel Decorative', 'serif'],
+                        rune: ['MedievalSharp', 'cursive'],
+                        serif: ['Cinzel', 'serif'],
+                    },
+                    colors: {
+                        gold: {
+                            100: '#fef3c7',
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                            700: '#a16207',
+                        },
+                        magicBg: '#080612',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 星空與古老羊皮紙視覺特效 */
+        body {
+            background-color: #05040a;
+            background-attachment: fixed;
+            transition: background 0.8s ease;
+        }
+
+        /* 旋轉魔法陣動畫 */
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes spin-reverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+        @keyframes float-owl {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(-2deg); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.4; filter: drop-shadow(0 0 15px currentColor); }
+            50% { opacity: 0.8; filter: drop-shadow(0 0 25px currentColor); }
+        }
+
+        .spin-magic {
+            animation: spin-slow 60s linear infinite;
+        }
+        .spin-magic-reverse {
+            animation: spin-reverse 45s linear infinite;
+        }
+        .owl-float {
+            animation: float-owl 4.5s ease-in-out infinite;
+        }
+        .glow-effect {
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        /* 文字黃金漸層與金屬感 */
+        .gold-gradient-text {
+            background: linear-gradient(180deg, #fffbeb 0%, var(--theme-gold-mid, #fde047) 30%, var(--theme-gold-dark, #ca8a04) 80%, #854d0e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+        }
+
+        .gold-border {
+            border: 2px solid var(--theme-border, #ca8a04);
+            box-shadow: 0 0 20px var(--theme-glow, rgba(202, 138, 4, 0.3)), inset 0 0 15px var(--theme-glow, rgba(202, 138, 4, 0.2));
+        }
+
+        /* 齒輪懸停旋轉效果 */
+        .gear-rotate:hover {
+            transform: rotate(90deg);
+        }
+
+        /* 自訂 Canvas 星空粒子層 */
+        #magicCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 隱藏外層滾動條 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b0764;
+            border-radius: 3px;
+        }
+
+        /* 主題 1: 霍格華茲金紫 (預設) */
+        body.theme-default {
+            background-image: 
+                radial-gradient(circle at 50% 30%, #1a103c 0%, #05040a 70%),
+                radial-gradient(circle at 20% 80%, rgba(88, 28, 135, 0.2) 0%, transparent 50%);
+            --theme-gold-mid: #fde047;
+            --theme-gold-dark: #ca8a04;
+            --theme-border: #ca8a04;
+            --theme-glow: rgba(202, 138, 4, 0.35);
+            --theme-accent-bg: #3b0764;
+        }
+
+        /* 主題 2: 史萊哲林深綠 */
+        body.theme-slytherin {
+            background-image: 
+                radial-gradient(circle at 50% 30%, #064e3b 0%, #022c22 40%, #02120d 80%),
+                radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 50%);
+            --theme-gold-mid: #6ee7b7;
+            --theme-gold-dark: #059669;
+            --theme-border: #10b981;
+            --theme-glow: rgba(16, 185, 129, 0.4);
+            --theme-accent-bg: #064e3b;
+        }
+
+        /* 主題 3: 葛來分多赤紅 */
+        body.theme-gryffindor {
+            background-image: 
+                radial-gradient(circle at 50% 30%, #7f1d1d 0%, #450a0a 40%, #0f0303 80%),
+                radial-gradient(circle at 20% 70%, rgba(245, 158, 11, 0.2) 0%, transparent 50%);
+            --theme-gold-mid: #fef08a;
+            --theme-gold-dark: #dc2626;
+            --theme-border: #f59e0b;
+            --theme-glow: rgba(239, 68, 68, 0.4);
+            --theme-accent-bg: #7f1d1d;
+        }
+    </style>
+</head>
+<body class="theme-default h-full flex flex-col justify-between text-amber-100 select-none overflow-x-hidden font-serif transition-colors duration-700">
+
+    <!-- 動態背景粒子與魔法氣氛 Canvas -->
+    <canvas id="magicCanvas"></canvas>
+
+    <!-- 頂部魔法導覽欄 -->
+    <header class="relative z-10 w-full p-4 md:p-6 flex justify-between items-center max-w-7xl mx-auto border-b border-amber-900/30">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full border border-amber-500/50 flex items-center justify-center bg-purple-950/40 text-amber-400 shadow-lg shadow-purple-900/30">
+                <i class="fa-solid fa-hat-wizard text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-magic text-lg md:text-xl font-bold tracking-widest gold-gradient-text">HOGWARTS CHRONO</h1>
+                <p class="text-[10px] md:text-xs text-amber-400/60 font-rune">時光轉逆器與神秘時鐘</p>
+            </div>
+        </div>
+
+        <!-- 功能按鈕區域 -->
+        <div class="flex items-center space-x-3 md:space-x-4">
+            <!-- 模式切換：倒數計時 vs 即時魔法鐘 -->
+            <button id="modeToggleBtn" class="px-4 py-1.5 rounded-full border border-amber-700/60 bg-amber-950/30 hover:bg-amber-900/40 text-xs md:text-sm font-rune text-amber-300 transition flex items-center space-x-2">
+                <i class="fa-solid fa-hourglass-half"></i>
+                <span id="modeLabel">時光倒數</span>
+            </button>
+            <!-- 全螢幕 -->
+            <button id="fullscreenBtn" class="p-2.5 rounded-full border border-amber-800/40 bg-slate-900/50 hover:border-amber-400 text-amber-300 transition" title="全螢幕專注">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+            <!-- 齒輪魔法設定按鈕 -->
+            <button id="settingsBtn" class="p-2.5 rounded-full border border-amber-500/70 bg-amber-950/60 hover:border-amber-300 text-amber-300 transition transform gear-rotate duration-500 shadow-lg shadow-amber-900/40" title="魔法設定與主題">
+                <i class="fa-solid fa-gear text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主要神秘時鐘區域 -->
+    <main class="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-6">
+        
+        <!-- 魔法巨鐘外框與動態陣列 -->
+        <div class="relative flex items-center justify-center w-[340px] h-[340px] sm:w-[460px] sm:h-[460px] md:w-[560px] md:h-[560px] lg:w-[620px] lg:h-[620px]">
+            
+            <!-- 外圍星盤魔法陣 SVG 1 (順時針旋轉) -->
+            <svg class="absolute inset-0 w-full h-full spin-magic opacity-40 text-amber-500/60 pointer-events-none" viewBox="0 0 500 500">
+                <circle cx="250" cy="250" r="240" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="8 4" />
+                <circle cx="250" cy="250" r="225" fill="none" stroke="currentColor" stroke-width="1" />
+                <polygon points="250,15 450,350 50,350" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5" />
+                <polygon points="250,485 50,150 450,150" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5" />
+                <!-- 符文符號裝飾 -->
+                <text x="250" y="32" fill="currentColor" font-size="14" text-anchor="middle" class="font-rune">ᚠ ᚢ ᚦ ᚨ ᚱ ᚲ</text>
+                <text x="250" y="478" fill="currentColor" font-size="14" text-anchor="middle" class="font-rune">ᚷ ᚠ ᚾ ᛁ ᛃ ᛈ</text>
+                <text x="32" y="255" fill="currentColor" font-size="14" text-anchor="middle" class="font-rune">ᛇ</text>
+                <text x="468" y="255" fill="currentColor" font-size="14" text-anchor="middle" class="font-rune">ᛉ</text>
+            </svg>
+
+            <!-- 內圈魔法陣 SVG 2 (逆時針旋轉) -->
+            <svg class="absolute inset-0 w-full h-full spin-magic-reverse opacity-30 text-purple-400 pointer-events-none" viewBox="0 0 500 500">
+                <circle cx="250" cy="250" r="180" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="12 6" />
+                <circle cx="250" cy="250" r="160" fill="none" stroke="currentColor" stroke-width="1.5" />
+            </svg>
+
+            <!-- 貓頭鷹（雪鴞 Hedwig 精神夥伴）動畫圖層 -->
+            <div class="absolute -top-10 sm:-top-14 md:-top-16 z-20 owl-float flex flex-col items-center pointer-events-none">
+                <!-- SVG 貓頭鷹精緻繪製 -->
+                <svg class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 filter drop-shadow-[0_10px_15px_rgba(234,179,8,0.3)]" viewBox="0 0 100 100">
+                    <!-- 羽毛與主體 -->
+                    <path d="M 50,15 C 30,15 20,35 20,60 C 20,80 35,90 50,90 C 65,90 80,80 80,60 C 80,35 70,15 50,15 Z" fill="#f8fafc" stroke="#ca8a04" stroke-width="2"/>
+                    <!-- 翅膀 -->
+                    <path d="M 20,40 C 10,55 15,75 25,80 C 25,65 22,50 20,40 Z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+                    <path d="M 80,40 C 90,55 85,75 75,80 C 75,65 78,50 80,40 Z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
+                    <!-- 魔法發光眼睛 -->
+                    <circle cx="38" cy="42" r="10" fill="#fef08a" stroke="#ca8a04" stroke-width="1.5"/>
+                    <circle cx="62" cy="42" r="10" fill="#fef08a" stroke="#ca8a04" stroke-width="1.5"/>
+                    <circle cx="38" cy="42" r="4" fill="#0f172a"/>
+                    <circle cx="62" cy="42" r="4" fill="#0f172a"/>
+                    <circle cx="40" cy="40" r="1.5" fill="#ffffff"/>
+                    <circle cx="64" cy="40" r="1.5" fill="#ffffff"/>
+                    <!-- 嘴喙 -->
+                    <polygon points="50,46 45,55 55,55" fill="#d97706"/>
+                    <!-- 胸前羽毛斑紋 -->
+                    <path d="M 40,65 Q 50,70 60,65 M 35,72 Q 50,78 65,72" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span class="text-[10px] sm:text-xs font-rune text-amber-300/80 tracking-widest mt-1 bg-black/60 px-2 py-0.5 rounded-full border border-amber-800/40">HEDWIG</span>
+            </div>
+
+            <!-- 時間數字核心圓形區域 -->
+            <div class="relative z-10 w-[78%] h-[78%] rounded-full bg-slate-950/80 backdrop-blur-md gold-border flex flex-col items-center justify-center p-4 shadow-2xl">
+                
+                <!-- 頂部魔法咒語狀態提示 -->
+                <div id="spellStatus" class="text-xs sm:text-sm font-rune text-amber-400/80 mb-2 tracking-widest text-center h-5">
+                    ✨ TEMPUS FUGIT (光陰似箭)
+                </div>
+
+                <!-- 超大魔法時間數字顯示 -->
+                <div id="timeDisplay" class="font-magic font-black text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight gold-gradient-text cursor-pointer hover:scale-105 transition-transform my-1" title="點擊切換 啟動/暫停 魔法">
+                    25:00
+                </div>
+
+                <!-- 毫秒 / 輔助動態顯示 -->
+                <div id="subTimeDisplay" class="font-mono text-xs sm:text-sm text-amber-500/70 tracking-widest mb-4">
+                    - 專注魔法儀式 -
+                </div>
+
+                <!-- 魔法控制按鈕列 -->
+                <div class="flex items-center space-x-3 sm:space-x-5 mt-2">
+                    <!-- 重設時間 -->
+                    <button id="resetBtn" class="p-3 sm:p-3.5 rounded-full border border-amber-700/50 bg-amber-950/40 text-amber-300 hover:bg-amber-900/60 hover:border-amber-400 transition transform active:scale-90" title="倒回時間 (Reset)">
+                        <i class="fa-solid fa-rotate-left text-sm sm:text-base"></i>
+                    </button>
+
+                    <!-- 啟動/暫停魔法主按鈕 -->
+                    <button id="startBtn" class="px-6 py-3 sm:px-8 sm:py-3.5 rounded-full bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-700 text-slate-950 font-magic font-bold text-sm sm:text-base tracking-wider hover:brightness-125 transition transform active:scale-95 shadow-lg shadow-amber-600/30 flex items-center space-x-2">
+                        <i class="fa-solid fa-play text-xs sm:text-sm" id="startIcon"></i>
+                        <span id="startText">施展倒數</span>
+                    </button>
+
+                    <!-- 快選魔法時間按鈕 -->
+                    <button id="quickPresetBtn" class="p-3 sm:p-3.5 rounded-full border border-amber-700/50 bg-amber-950/40 text-amber-300 hover:bg-amber-900/60 hover:border-amber-400 transition transform active:scale-90" title="快速魔咒時長">
+                        <i class="fa-solid fa-bolt text-sm sm:text-base"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 綜合魔法設定羊皮紙彈窗 (齒輪點擊開啟) -->
+            <div id="settingsPanel" class="hidden absolute z-40 inset-0 bg-slate-950/95 rounded-full flex flex-col items-center justify-center p-6 border-2 border-amber-500/80 backdrop-blur-xl transition-all duration-300">
+                <h3 class="font-magic text-amber-300 text-base sm:text-xl mb-3 font-bold text-center flex items-center space-x-2">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>魔法儀式設定</span>
+                </h3>
+
+                <!-- 1. 三種風格與配色切換 -->
+                <div class="w-full max-w-xs mb-4">
+                    <label class="block text-[11px] font-rune text-amber-400/80 mb-1.5 text-center">魔法視覺風格與配色</label>
+                    <div class="grid grid-cols-3 gap-1.5 text-xs font-rune">
+                        <button data-theme="theme-default" class="theme-select-btn px-2 py-1.5 rounded-lg border border-amber-600/50 bg-purple-950/60 text-amber-200 hover:border-amber-300 transition text-center">
+                            🏰 霍格華茲
+                        </button>
+                        <button data-theme="theme-slytherin" class="theme-select-btn px-2 py-1.5 rounded-lg border border-emerald-600/50 bg-emerald-950/60 text-emerald-200 hover:border-emerald-300 transition text-center">
+                            🌿 史萊哲林
+                        </button>
+                        <button data-theme="theme-gryffindor" class="theme-select-btn px-2 py-1.5 rounded-lg border border-red-600/50 bg-red-950/60 text-red-200 hover:border-red-300 transition text-center">
+                            🔥 葛來分多
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. 時間自訂設定 -->
+                <div class="w-full max-w-xs mb-4">
+                    <label class="block text-[11px] font-rune text-amber-400/80 mb-1.5 text-center">自訂倒數時間 (分 : 秒)</label>
+                    <div class="flex items-center justify-center space-x-2 font-magic text-2xl">
+                        <input type="number" id="inputMinutes" min="0" max="999" value="25" class="w-20 bg-amber-950/60 border border-amber-600 text-amber-100 text-center rounded-xl py-1 focus:outline-none focus:border-amber-300 text-lg">
+                        <span class="text-amber-500">:</span>
+                        <input type="number" id="inputSeconds" min="0" max="59" value="00" class="w-20 bg-amber-950/60 border border-amber-600 text-amber-100 text-center rounded-xl py-1 focus:outline-none focus:border-amber-300 text-lg">
+                    </div>
+                </div>
+
+                <!-- 3. 音效控制 -->
+                <div class="flex items-center space-x-3 mb-5">
+                    <span class="text-xs font-rune text-amber-300">魔法聲效：</span>
+                    <button id="settingsSoundToggle" class="px-3 py-1 rounded-full border border-amber-700/60 bg-amber-950/40 text-xs font-rune text-amber-300 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-wand-magic-sparkles" id="settingsSoundIcon"></i>
+                        <span id="settingsSoundText">已開啟</span>
+                    </button>
+                </div>
+
+                <!-- 關閉與套用按鈕 -->
+                <div class="flex space-x-3">
+                    <button id="closeSettingsBtn" class="px-5 py-1.5 rounded-full border border-amber-800 text-amber-400 hover:bg-amber-950/60 font-rune text-xs">取消</button>
+                    <button id="applySettingsBtn" class="px-6 py-1.5 rounded-full bg-amber-600 hover:bg-amber-500 text-slate-950 font-magic font-bold text-xs shadow-md shadow-amber-600/40">儲存並套用</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 快選魔法卷軸區 -->
+        <div id="presetsContainer" class="mt-8 flex flex-wrap justify-center gap-2 sm:gap-3 max-w-md z-10">
+            <button data-time="60" class="preset-btn px-4 py-2 rounded-full text-xs font-rune bg-purple-950/40 hover:bg-purple-900/60 border border-amber-700/40 text-amber-300 transition">
+                ⚡ 1 分鐘短咒
+            </button>
+            <button data-time="300" class="preset-btn px-4 py-2 rounded-full text-xs font-rune bg-purple-950/40 hover:bg-purple-900/60 border border-amber-700/40 text-amber-300 transition">
+                🔮 5 分鐘冥想
+            </button>
+            <button data-time="1500" class="preset-btn px-4 py-2 rounded-full text-xs font-rune bg-purple-950/40 hover:bg-purple-900/60 border border-amber-700/40 text-amber-300 transition">
+                🏰 25 分鐘番茄專注
+            </button>
+            <button data-time="3600" class="preset-btn px-4 py-2 rounded-full text-xs font-rune bg-purple-950/40 hover:bg-purple-900/60 border border-amber-700/40 text-amber-300 transition">
+                📜 1 小時魔法研習
+            </button>
+        </div>
+
+    </main>
+
+    <!-- 底部魔法名言與語錄 -->
+    <footer class="relative z-10 w-full p-4 text-center border-t border-amber-900/20 text-xs text-amber-400/50 font-rune">
+        <p id="quoteDisplay">"Words are, in my not-so-humble opinion, our most inexhaustible source of magic."</p>
+    </footer>
+
+    <!-- 魔法提示懸浮訊息 Toast -->
+    <div id="toast" class="fixed bottom-16 left-1/2 -translate-x-1/2 bg-amber-950/90 border border-amber-500 text-amber-200 px-6 py-2.5 rounded-full text-xs sm:text-sm font-rune shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-50 backdrop-blur-md">
+        魔法已準備就緒
+    </div>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // 魔法語錄庫
+        const quotes = [
+            '"Words are, in my not-so-humble opinion, our most inexhaustible source of magic."',
+            '"It is our choices that show what we truly are, far more than our abilities."',
+            '"Time is galleons, focus is your magic wand."',
+            '"Dwell on dreams and forget to live, but use time wisely."',
+            '"Mischief Managed! Keep your mind sharp."'
+        ];
+
+        // 狀態變數
+        let totalSeconds = 1500; // 預設 25 分鐘
+        let remainingSeconds = 1500;
+        let timerInterval = null;
+        let isRunning = false;
+        let isSoundMuted = false;
+        let isRealTimeClock = false; // 是否開啟「即時魔法鐘」模式
+        let currentTheme = 'theme-default';
+
+        // DOM 元素引用
+        const timeDisplay = document.getElementById('timeDisplay');
+        const subTimeDisplay = document.getElementById('subTimeDisplay');
+        const spellStatus = document.getElementById('spellStatus');
+        const startBtn = document.getElementById('startBtn');
+        const startIcon = document.getElementById('startIcon');
+        const startText = document.getElementById('startText');
+        const resetBtn = document.getElementById('resetBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const inputMinutes = document.getElementById('inputMinutes');
+        const inputSeconds = document.getElementById('inputSeconds');
+        const applySettingsBtn = document.getElementById('applySettingsBtn');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const settingsSoundToggle = document.getElementById('settingsSoundToggle');
+        const settingsSoundIcon = document.getElementById('settingsSoundIcon');
+        const settingsSoundText = document.getElementById('settingsSoundText');
+        const modeToggleBtn = document.getElementById('modeToggleBtn');
+        const modeLabel = document.getElementById('modeLabel');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const presetButtons = document.querySelectorAll('.preset-btn');
+        const presetsContainer = document.getElementById('presetsContainer');
+        const quickPresetBtn = document.getElementById('quickPresetBtn');
+        const themeSelectButtons = document.querySelectorAll('.theme-select-btn');
+        const toast = document.getElementById('toast');
+        const quoteDisplay = document.getElementById('quoteDisplay');
+
+        // Web Audio 音效產生器 (魔法音效)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playMagicTone(freq = 523.25, type = 'sine', duration = 0.3) {
+            if (isSoundMuted) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                // 魔法漸弱音
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.log("Audio play prevented:", e);
+            }
+        }
+
+        // 倒數完成風鈴聲效果
+        function playSpellFinishSound() {
+            if (isSoundMuted) return;
+            const notes = [523.25, 659.25, 783.99, 987.77, 1046.50]; // C5, E5, G5, B5, C6
+            notes.forEach((freq, idx) => {
+                setTimeout(() => {
+                    playMagicTone(freq, 'triangle', 0.6);
+                }, idx * 120);
+            });
+        }
+
+        // 格式化時間 (分:秒 或 時:分:秒)
+        function formatTime(seconds) {
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            const pad = (n) => String(n).padStart(2, '0');
+
+            if (hrs > 0) {
+                return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+            }
+            return `${pad(mins)}:${pad(secs)}`;
+        }
+
+        // 更新畫面數字
+        function updateDisplay() {
+            if (isRealTimeClock) {
+                const now = new Date();
+                const hrs = String(now.getHours()).padStart(2, '0');
+                const mins = String(now.getMinutes()).padStart(2, '0');
+                const secs = String(now.getSeconds()).padStart(2, '0');
+                timeDisplay.textContent = `${hrs}:${mins}:${secs}`;
+                subTimeDisplay.textContent = '- 霍格華茲即時魔力時間 -';
+                document.title = `${hrs}:${mins}:${secs} - 魔法時鐘`;
+            } else {
+                const formatted = formatTime(remainingSeconds);
+                timeDisplay.textContent = formatted;
+                subTimeDisplay.textContent = `- 殘餘時間能量 ${Math.round((remainingSeconds/totalSeconds)*100)}% -`;
+                document.title = `${formatted} - 魔法倒數計時`;
+            }
+        }
+
+        // 開始/暫停計時
+        function toggleTimer() {
+            if (isRealTimeClock) return; // 即時時鐘模式下不受暫停影響
+
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            if (remainingSeconds <= 0) return;
+            
+            isRunning = true;
+            startIcon.className = 'fa-solid fa-pause text-xs sm:text-sm';
+            startText.textContent = '凝聚魔力';
+            spellStatus.textContent = '✨ MAGICA CONCENTRA (魔力凝聚中)';
+
+            playMagicTone(659.25, 'sine', 0.2);
+
+            timerInterval = setInterval(() => {
+                remainingSeconds--;
+                updateDisplay();
+
+                // 最後 3 秒鐘叮噹聲
+                if (remainingSeconds > 0 && remainingSeconds <= 3) {
+                    playMagicTone(880, 'sine', 0.1);
+                }
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    startIcon.className = 'fa-solid fa-play text-xs sm:text-sm';
+                    startText.textContent = '施展倒數';
+                    spellStatus.textContent = '🎆 FINITE INCANTATEM (儀式完成)';
+                    
+                    playSpellFinishSound();
+                    showToast('🌟 魔法儀式圓滿完成！');
+                    triggerFinishParticles();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            startIcon.className = 'fa-solid fa-play text-xs sm:text-sm';
+            startText.textContent = '繼續魔法';
+            spellStatus.textContent = '⏸️ TIMELOCK (時空凍結)';
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            remainingSeconds = totalSeconds;
+            spellStatus.textContent = '✨ TEMPUS FUGIT (光陰似箭)';
+            updateDisplay();
+            showToast('時間已逆轉歸位');
+            playMagicTone(440, 'sine', 0.15);
+        }
+
+        function setDuration(seconds) {
+            pauseTimer();
+            totalSeconds = Math.max(1, seconds);
+            remainingSeconds = totalSeconds;
+            updateDisplay();
+        }
+
+        // 切換視覺主題風格
+        function setTheme(themeName) {
+            document.body.className = `${themeName} h-full flex flex-col justify-between text-amber-100 select-none overflow-x-hidden font-serif transition-colors duration-700`;
+            currentTheme = themeName;
+            
+            // 更新粒子顏色搭配
+            if (themeName === 'theme-slytherin') {
+                particleColorMain = '#6ee7b7';
+                particleColorSub = '#10b981';
+            } else if (themeName === 'theme-gryffindor') {
+                particleColorMain = '#fef08a';
+                particleColorSub = '#ef4444';
+            } else {
+                particleColorMain = '#fde047';
+                particleColorSub = '#c084fc';
+            }
+        }
+
+        // 切換 倒數 / 即時時鐘 模式
+        modeToggleBtn.addEventListener('click', () => {
+            isRealTimeClock = !isRealTimeClock;
+            if (isRealTimeClock) {
+                pauseTimer();
+                modeLabel.textContent = '即時時鐘';
+                spellStatus.textContent = '🌌 CHRONOS REALIS (即時時空)';
+                startBtn.classList.add('opacity-50', 'pointer-events-none');
+                resetBtn.classList.add('opacity-50', 'pointer-events-none');
+                presetsContainer.classList.add('opacity-30', 'pointer-events-none');
+                showToast('已進入即時魔法鐘模式');
+            } else {
+                modeLabel.textContent = '時光倒數';
+                spellStatus.textContent = '✨ TEMPUS FUGIT (光陰似箭)';
+                startBtn.classList.remove('opacity-50', 'pointer-events-none');
+                resetBtn.classList.remove('opacity-50', 'pointer-events-none');
+                presetsContainer.classList.remove('opacity-30', 'pointer-events-none');
+                showToast('已回到倒數魔法模式');
+            }
+            updateDisplay();
+        });
+
+        // 定時更新即時時鐘 (若處於即時模式下)
+        setInterval(() => {
+            if (isRealTimeClock) {
+                updateDisplay();
+            }
+        }, 1000);
+
+        // 顯示 Message Toast
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // 事件綁定
+        startBtn.addEventListener('click', toggleTimer);
+        timeDisplay.addEventListener('click', toggleTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        // 齒輪點擊開啟設定面板
+        settingsBtn.addEventListener('click', () => {
+            pauseTimer();
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = totalSeconds % 60;
+            inputMinutes.value = mins;
+            inputSeconds.value = secs;
+            settingsPanel.classList.remove('hidden');
+        });
+
+        quickPresetBtn.addEventListener('click', () => {
+            settingsBtn.click();
+        });
+
+        closeSettingsBtn.addEventListener('click', () => {
+            settingsPanel.classList.add('hidden');
+        });
+
+        // 選擇主題按鈕
+        themeSelectButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.getAttribute('data-theme');
+                setTheme(theme);
+                showToast(`風格切換：${btn.textContent.trim()}`);
+            });
+        });
+
+        // 設定面板中切換音效
+        settingsSoundToggle.addEventListener('click', () => {
+            isSoundMuted = !isSoundMuted;
+            settingsSoundIcon.className = isSoundMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-wand-magic-sparkles';
+            settingsSoundText.textContent = isSoundMuted ? '已靜音' : '已開啟';
+        });
+
+        // 套用設定面板變更
+        applySettingsBtn.addEventListener('click', () => {
+            const mins = parseInt(inputMinutes.value, 10) || 0;
+            const secs = parseInt(inputSeconds.value, 10) || 0;
+            const total = (mins * 60) + secs;
+            if (total > 0) {
+                setDuration(total);
+                settingsPanel.classList.add('hidden');
+                showToast(`魔法設定已生效：${formatTime(total)}`);
+            }
+        });
+
+        presetButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (isRealTimeClock) return;
+                const time = parseInt(btn.getAttribute('data-time'), 10);
+                setDuration(time);
+                showToast(`已召喚：${btn.textContent.trim()}`);
+            });
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        });
+
+        // Canvas 魔法粒子星空背景效果
+        const canvas = document.getElementById('magicCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let particleColorMain = '#fde047';
+        let particleColorSub = '#c084fc';
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class MagicParticle {
+            constructor(x, y, isBurst = false) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speedX = isBurst ? (Math.random() - 0.5) * 8 : (Math.random() - 0.5) * 0.6;
+                this.speedY = isBurst ? (Math.random() - 0.5) * 8 : -Math.random() * 0.5 - 0.2;
+                this.opacity = Math.random() * 0.8 + 0.2;
+                this.fade = isBurst ? Math.random() * 0.02 + 0.01 : Math.random() * 0.005 + 0.001;
+                this.color = Math.random() > 0.4 ? particleColorMain : particleColorSub;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.opacity -= this.fade;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.opacity);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function initParticles() {
+            for (let i = 0; i < 70; i++) {
+                particles.push(new MagicParticle());
+            }
+        }
+        initParticles();
+
+        function triggerFinishParticles() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            for (let i = 0; i < 60; i++) {
+                particles.push(new MagicParticle(centerX, centerY, true));
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (particles.length < 70) {
+                particles.push(new MagicParticle());
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].update();
+                particles[i].draw();
+
+                if (particles[i].opacity <= 0 || particles[i].y < 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // 輪播魔法語錄
+        let quoteIndex = 0;
+        setInterval(() => {
+            quoteIndex = (quoteIndex + 1) % quotes.length;
+            quoteDisplay.textContent = quotes[quoteIndex];
+        }, 12000);
+
+        // 初始化畫面
+        updateDisplay();
+    </script>
+</body>
+</html>

@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Kawaii 喵喵一週星座運勢指南 ✨</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Marcellus / Noto Sans TC / Quicksand -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        candy: {
+                            pink: '#FFB7B2',
+                            softPink: '#FFDAC1',
+                            purple: '#E2F0CB',
+                            lavender: '#E0BBE4',
+                            blue: '#B5EAD7',
+                            yellow: '#FFF5BA',
+                            darkPurple: '#6C5CE7',
+                            deepText: '#4A4A68'
+                        }
+                    },
+                    fontFamily: {
+                        kawaii: ['Fredoka', 'Noto Sans TC', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                        '5xl': '2.5rem',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #FFD1DC 0%, #E0BBE4 40%, #B5EAD7 100%);
+            background-attachment: fixed;
+            color: #4A4A68;
+            overflow-x: hidden;
+        }
+
+        /* 漂浮動畫 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .animate-pulse-soft {
+            animation: pulse-soft 2.5s ease-in-out infinite;
+        }
+
+        .star-particle {
+            position: absolute;
+            pointer-events: none;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        /* 客製化滾動條 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFB7B2;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF9AA2;
+        }
+
+        /* 磨砂玻璃效果 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 3px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 15px 35px rgba(108, 92, 231, 0.12);
+        }
+
+        .glass-pill {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+        }
+
+        /* 按鈕糖果點擊反饋 */
+        .btn-candy {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-candy:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(255, 183, 178, 0.4);
+        }
+        .btn-candy:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* 星座按鈕選中狀態 */
+        .zodiac-btn.active {
+            background: linear-gradient(135deg, #FF9AA2 0%, #FFB7B2 100%);
+            color: white;
+            border-color: white;
+            box-shadow: 0 8px 20px rgba(255, 154, 162, 0.5);
+            transform: translateY(-4px);
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12 relative">
+
+    <!-- 背景動態星星裝飾 -->
+    <div id="star-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <div class="max-w-5xl mx-auto px-4 pt-6 relative z-10">
+
+        <!-- Header 標題區 -->
+        <header class="text-center mb-8">
+            <div class="inline-block relative">
+                <span class="absolute -top-6 -left-8 text-3xl animate-float" style="animation-delay: 0s;">✨</span>
+                <span class="absolute -bottom-4 -right-8 text-3xl animate-float" style="animation-delay: 1.5s;">🌙</span>
+                <h1 class="text-3xl md:text-5xl font-bold text-candy-darkPurple tracking-wide flex items-center justify-center gap-2">
+                    <span>🐱</span> 喵喵星相觀測站 <span>✨</span>
+                </h1>
+            </div>
+            <p class="text-sm md:text-base text-gray-700 mt-2 font-medium bg-white/50 inline-block px-4 py-1.5 rounded-full border border-white">
+                💖 本週星象權威佐證與萌萌運勢分析 (2026 Nov 🌟)
+            </p>
+
+            <!-- 功能控制捷徑 -->
+            <div class="flex justify-center gap-3 mt-4 flex-wrap">
+                <button onclick="openLuckyDraw()" class="btn-candy bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold px-5 py-2.5 rounded-full text-sm shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> 抽本週幸運彩蛋卡
+                </button>
+                <button onclick="toggleApiPanel()" class="btn-candy bg-gradient-to-r from-purple-400 to-indigo-400 text-white font-bold px-5 py-2.5 rounded-full text-sm shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-code"></i> API 數據觀測模組
+                </button>
+            </div>
+        </header>
+
+        <!-- 星座選擇導覽列 (橫向滑動) -->
+        <section class="mb-8">
+            <div class="flex items-center justify-between mb-3 px-2">
+                <h2 class="text-lg font-bold text-candy-darkPurple flex items-center gap-2">
+                    <i class="fa-solid fa-compass"></i> 請選擇你的專屬星座：
+                </h2>
+                <span class="text-xs text-purple-600 bg-white/70 px-2.5 py-1 rounded-full border border-purple-200">
+                    左右滑動選擇 ➔
+                </span>
+            </div>
+
+            <!-- 12 星座滾動列表 -->
+            <div id="zodiac-list" class="flex gap-3 overflow-x-auto pb-4 pt-2 px-1 scrollbar-none">
+                <!-- 由 JavaScript 動態繪製 12 星座卡片 -->
+            </div>
+        </section>
+
+        <!-- 主要內容區 (Card Layout) -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- 左側：星座主卡片與整體運勢摘要 -->
+            <div class="lg:col-span-1 flex flex-col gap-6">
+                <!-- 個人星座核心卡 -->
+                <div class="glass-card rounded-5xl p-6 text-center relative overflow-hidden flex flex-col items-center">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-pink-200 rounded-full blur-2xl opacity-50"></div>
+
+                    <!-- 星座圖標與名稱 -->
+                    <div id="zodiac-avatar" class="w-28 h-28 bg-gradient-to-br from-pink-200 to-purple-200 rounded-full flex items-center justify-center text-5xl shadow-inner border-4 border-white mb-3 animate-pulse-soft">
+                        ♈
+                    </div>
+                    <h2 id="zodiac-name" class="text-2xl font-bold text-candy-darkPurple">牡羊座</h2>
+                    <p id="zodiac-date" class="text-xs text-gray-500 font-semibold mb-3">3月21日 - 4月19日</p>
+
+                    <div id="zodiac-tagline" class="text-xs bg-pink-100 text-pink-700 font-bold px-3 py-1 rounded-full border border-pink-200 mb-4">
+                        🔥 充滿衝勁與熱情的冒險家
+                    </div>
+
+                    <!-- 本週綜合評分 -->
+                    <div class="w-full bg-white/80 rounded-3xl p-4 border border-pink-100 mb-4 shadow-sm">
+                        <div class="text-xs text-gray-500 mb-1 font-bold">本週整體幸運指數</div>
+                        <div id="star-rating" class="text-xl text-yellow-400 tracking-wider">
+                            ⭐⭐⭐⭐☆
+                        </div>
+                    </div>
+
+                    <!-- 幸運小貼士網格 -->
+                    <div class="grid grid-cols-2 gap-2 w-full text-left text-xs">
+                        <div class="bg-purple-50/80 p-2.5 rounded-2xl border border-purple-100">
+                            <span class="text-gray-400 block font-bold">🎨 幸運顏色</span>
+                            <span id="lucky-color" class="font-bold text-purple-700">櫻花粉紅</span>
+                        </div>
+                        <div class="bg-blue-50/80 p-2.5 rounded-2xl border border-blue-100">
+                            <span class="text-gray-400 block font-bold">🔢 幸運數字</span>
+                            <span id="lucky-number" class="font-bold text-blue-700">7</span>
+                        </div>
+                        <div class="bg-amber-50/80 p-2.5 rounded-2xl border border-amber-100">
+                            <span class="text-gray-400 block font-bold">🤝 貴人星座</span>
+                            <span id="lucky-match" class="font-bold text-amber-700">獅子座</span>
+                        </div>
+                        <div class="bg-rose-50/80 p-2.5 rounded-2xl border border-rose-100">
+                            <span class="text-gray-400 block font-bold">⚠️ 避雷提醒</span>
+                            <span id="warning-tip" class="font-bold text-rose-700">避免衝動消費</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 星象佐證說明卡 (資料佐證與星相依據) -->
+                <div class="glass-card rounded-4xl p-5 border-l-8 border-l-purple-400">
+                    <h3 class="font-bold text-candy-darkPurple text-base flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-globe-asia text-purple-500"></i> 本週星象依據與天文佐證
+                    </h3>
+                    <p id="astro-evidence" class="text-xs text-gray-600 leading-relaxed bg-white/60 p-3 rounded-2xl border border-purple-100">
+                        載入星象數據中...
+                    </p>
+                    <div class="mt-3 flex items-center gap-1.5 text-[10px] text-purple-600 font-semibold">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>資料參照：NASA 天文曆與 FreeHoroscope / Aztro 算術演算法</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側：四大運勢詳細分析 -->
+            <div class="lg:col-span-2 flex flex-col gap-4">
+
+                <!-- 運勢 Tab 選項 / 分項分析標題 -->
+                <div class="glass-card rounded-4xl p-6">
+                    <div class="flex items-center justify-between mb-4 border-b pb-3 border-gray-200/60">
+                        <h3 class="font-bold text-xl text-candy-darkPurple flex items-center gap-2">
+                            <span>📜</span> 本週詳細運勢指南
+                        </h3>
+                        <span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-bold">
+                            ✨ 貓貓星學會驗證
+                        </span>
+                    </div>
+
+                    <!-- 4大分項運勢 -->
+                    <div class="space-y-4">
+
+                        <!-- 愛情運勢 -->
+                        <div class="bg-gradient-to-r from-pink-50/90 to-rose-50/90 p-4 rounded-3xl border border-pink-100 transition hover:shadow-md">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-pink-700 flex items-center gap-2">
+                                    <span class="bg-pink-200 text-pink-600 w-8 h-8 rounded-full flex items-center justify-center text-sm">💕</span>
+                                    愛情運勢 (Love Score)
+                                </span>
+                                <div id="love-score" class="text-xs font-bold bg-white text-pink-500 px-2.5 py-1 rounded-full border border-pink-200">
+                                    92分 ⭐⭐⭐⭐⭐
+                                </div>
+                            </div>
+                            <p id="love-desc" class="text-sm text-gray-700 leading-relaxed">
+                                載入中...
+                            </p>
+                        </div>
+
+                        <!-- 事業學業 -->
+                        <div class="bg-gradient-to-r from-blue-50/90 to-cyan-50/90 p-4 rounded-3xl border border-blue-100 transition hover:shadow-md">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-blue-700 flex items-center gap-2">
+                                    <span class="bg-blue-200 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center text-sm">💼</span>
+                                    事業學業 (Career & Study)
+                                </span>
+                                <div id="career-score" class="text-xs font-bold bg-white text-blue-500 px-2.5 py-1 rounded-full border border-blue-200">
+                                    85分 ⭐⭐⭐⭐☆
+                                </div>
+                            </div>
+                            <p id="career-desc" class="text-sm text-gray-700 leading-relaxed">
+                                載入中...
+                            </p>
+                        </div>
+
+                        <!-- 財運投資 -->
+                        <div class="bg-gradient-to-r from-amber-50/90 to-yellow-50/90 p-4 rounded-3xl border border-amber-100 transition hover:shadow-md">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-amber-700 flex items-center gap-2">
+                                    <span class="bg-amber-200 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center text-sm">💰</span>
+                                    財運投資 (Wealth)
+                                </span>
+                                <div id="wealth-score" class="text-xs font-bold bg-white text-amber-600 px-2.5 py-1 rounded-full border border-amber-200">
+                                    78分 ⭐⭐⭐☆☆
+                                </div>
+                            </div>
+                            <p id="wealth-desc" class="text-sm text-gray-700 leading-relaxed">
+                                載入中...
+                            </p>
+                        </div>
+
+                        <!-- 健康指數 -->
+                        <div class="bg-gradient-to-r from-emerald-50/90 to-teal-50/90 p-4 rounded-3xl border border-emerald-100 transition hover:shadow-md">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-bold text-emerald-700 flex items-center gap-2">
+                                    <span class="bg-emerald-200 text-emerald-600 w-8 h-8 rounded-full flex items-center justify-center text-sm">🍀</span>
+                                    健康指數 (Health & Energy)
+                                </span>
+                                <div id="health-score" class="text-xs font-bold bg-white text-emerald-600 px-2.5 py-1 rounded-full border border-emerald-200">
+                                    88分 ⭐⭐⭐⭐☆
+                                </div>
+                            </div>
+                            <p id="health-desc" class="text-sm text-gray-700 leading-relaxed">
+                                載入中...
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- 本週喵喵建議小卡 -->
+                    <div class="mt-5 bg-gradient-to-r from-purple-100 to-pink-100 p-4 rounded-3xl border border-white flex items-center gap-4">
+                        <div class="text-3xl">🐾</div>
+                        <div>
+                            <h4 class="font-bold text-xs text-purple-800 uppercase tracking-wider">Cat Oracle Quote</h4>
+                            <p id="cat-quote" class="text-xs text-purple-900 font-medium italic mt-0.5">
+                                「保持樂觀與溫柔，星空會回報你最閃耀的微笑喵～」
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+
+        <!-- API 觀測與數據調試面板 Modal/Section (預設隱藏) -->
+        <section id="api-panel" class="hidden mt-8 glass-card rounded-4xl p-6 transition-all duration-300">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-network-wired text-indigo-500"></i> API 數據請求觀測與演算法 JSON
+                </h3>
+                <button onclick="toggleApiPanel()" class="text-gray-400 hover:text-gray-600 text-sm">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-600 mb-3">
+                說明：前端自動封裝 Aztro API / FreeHoroscope API 相容數據格式。若跨域 (CORS) 阻擋，自動啟動「喵喵備用星相演算法庫」確保網頁流暢運作。
+            </p>
+
+            <div class="flex gap-2 mb-3">
+                <button onclick="fetchAztroMock()" class="btn-candy text-xs bg-indigo-500 text-white px-3 py-1.5 rounded-full font-bold">
+                    模擬 Aztro POST 請求
+                </button>
+                <button onclick="fetchFreeHoroscopeMock()" class="btn-candy text-xs bg-teal-500 text-white px-3 py-1.5 rounded-full font-bold">
+                    模擬 FreeHoroscope API
+                </button>
+            </div>
+
+            <pre id="json-output" class="bg-gray-900 text-green-400 p-4 rounded-2xl text-xs overflow-x-auto font-mono max-h-60">
+{
+  "status": "200 OK",
+  "source": "Aztro / FreeHoroscope Engine Hybrid",
+  "current_sign": "aries",
+  "period": "weekly"
+}
+            </pre>
+        </section>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-xs text-gray-600 space-y-1">
+            <p>✨ Kawaii Horoscope Web App &copy; 2026 | 設計風格：卡哇伊糖果色調 🍭</p>
+            <p class="opacity-75">資料來源：模擬 Aztro API & FreeHoroscope API 數據規範</p>
+        </footer>
+
+    </div>
+
+    <!-- 幸運彩蛋彈窗 (Modal) -->
+    <div id="lucky-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card max-w-sm w-full rounded-5xl p-6 text-center relative animate-pulse-soft border-4 border-white">
+            <button onclick="closeLuckyDraw()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-5xl mb-2 animate-float">🎁</div>
+            <h3 class="text-xl font-bold text-candy-darkPurple mb-1">本週幸運彩蛋抽卡！</h3>
+            <p class="text-xs text-gray-500 mb-4">喵喵宇宙為你準備的專屬祝福卡片</p>
+
+            <div id="card-content" class="bg-gradient-to-br from-pink-100 to-purple-100 p-5 rounded-3xl border border-pink-200 text-left mb-4 shadow-inner">
+                <span id="card-badge" class="bg-pink-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                    SSR 大吉
+                </span>
+                <h4 id="card-title" class="font-bold text-pink-800 text-base mt-2">星光璀璨卡 ✨</h4>
+                <p id="card-text" class="text-xs text-gray-700 mt-1 leading-relaxed">
+                    本週會有意外的驚喜小幸運掉落！多去綠意盎然的地方走走，會吸收到飽滿的正能量喔！
+                </p>
+            </div>
+
+            <button onclick="drawNewCard()" class="btn-candy w-full bg-gradient-to-r from-pink-400 to-purple-400 text-white font-bold py-3 rounded-full text-sm shadow-md">
+                🔄 再抽一張彩蛋卡
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 12 星座完整資料庫 (模擬 Aztro / FreeHoroscope 回傳標準，並加入當週天文星象依據)
+        const zodiacData = [
+            {
+                id: 'aries',
+                name: '牡羊座',
+                date: '03.21 - 04.19',
+                icon: '♈',
+                tagline: '🔥 充滿衝勁與熱情的冒險家',
+                stars: '⭐⭐⭐⭐☆',
+                color: '櫻花粉紅',
+                number: '7',
+                match: '獅子座',
+                warning: '講話過快容易產生小誤會',
+                astroEvidence: '本週太陽與木星形成 120 度黃金三分相，為牡羊座注入強大的行動能量與個人魅力，適合開啟新計畫！',
+                love: '單身者在社交場合極具吸引力；有伴者適合安排輕旅行，感情迅速升溫。',
+                loveScore: '92分 ⭐⭐⭐⭐⭐',
+                career: '工作思維敏捷，能提出令人驚艷的新企劃，但要留心執行細節。',
+                careerScore: '85分 ⭐⭐⭐⭐☆',
+                wealth: '正財運平穩，偏財有小驚喜，但購買慾較強，宜控制開支。',
+                wealthScore: '78分 ⭐⭐⭐☆☆',
+                health: '精神飽滿，適合加入有氧運動，但要注意作息不要熬夜。',
+                healthScore: '88分 ⭐⭐⭐⭐☆',
+                quote: '「勇往直前的同時，別忘了對身邊的人展現溫柔喵～」'
+            },
+            {
+                id: 'taurus',
+                name: '金牛座',
+                date: '04.20 - 05.20',
+                icon: '♉',
+                tagline: '🌿 穩重踏實的美食與生活家',
+                stars: '⭐⭐⭐⭐⭐',
+                color: '奶油薄荷綠',
+                number: '6',
+                match: '處女座',
+                warning: '固執己見可能錯失好建議',
+                astroEvidence: '守護星金星本週進入第二宮財富宮位，帶來極佳的理財直覺與生活品質提升。',
+                love: '感情追求溫馨與安全感，與另一半一起做美食能大幅增進親密感。',
+                loveScore: '95分 ⭐⭐⭐⭐⭐',
+                career: '腳踏實地累積的實力得到主管認可，本週有望承接重要任務。',
+                careerScore: '90分 ⭐⭐⭐⭐⭐',
+                wealth: '財運亮眼！投資理財見成效，有機會獲得意外的分紅或小獎項。',
+                wealthScore: '94分 ⭐⭐⭐⭐⭐',
+                health: '注意肩頸放鬆，多做拉筋運動與享受足浴。',
+                healthScore: '82分 ⭐⭐⭐⭐☆',
+                quote: '「好好吃飯，好好睡覺，你就是最棒的喵！」'
+            },
+            {
+                id: 'gemini',
+                name: '雙子座',
+                date: '05.21 - 06.21',
+                icon: '♊',
+                tagline: '⚡ 靈動多變的好奇心天才',
+                stars: '⭐⭐⭐⭐☆',
+                color: '檸檬奶油黃',
+                number: '3',
+                match: '水瓶座',
+                warning: '注意力容易分散導致效率降低',
+                astroEvidence: '水星與天王星相位交織，帶來源源不絕的靈感迸發與新奇想法。',
+                love: '幽默風趣的談吐讓你成為焦點，單身者異性緣爆棚。',
+                loveScore: '88分 ⭐⭐⭐⭐☆',
+                career: '適合跨界合作與腦力激盪，但要記得將想法落實為文字記錄。',
+                careerScore: '86分 ⭐⭐⭐⭐☆',
+                wealth: '消費隨性，容易被新奇小物吸引，掏空皮包。',
+                wealthScore: '75分 ⭐⭐⭐☆☆',
+                health: '用眼過度，建議定時遠眺綠色植物休息。',
+                healthScore: '80分 ⭐⭐⭐⭐☆',
+                quote: '「探索世界的同時，也別忘了聽聽內心的聲音喵～」'
+            },
+            {
+                id: 'cancer',
+                name: '巨蟹座',
+                date: '06.22 - 07.22',
+                icon: '♋',
+                tagline: '🌙 溫暖細膩的直覺守護者',
+                stars: '⭐⭐⭐☆☆',
+                color: '珍珠月光白',
+                number: '2',
+                match: '雙魚座',
+                warning: '過度敏感容易陷入情緒小劇場',
+                astroEvidence: '月亮運行經過情感敏感宮位，情緒較易起伏，適合沉澱與自我照顧。',
+                love: '渴望被理解與陪伴，誠實表達感受能獲得伴侶體貼的回應。',
+                loveScore: '80分 ⭐⭐⭐⭐☆',
+                career: '團隊中的潤滑劑，能細心發現並修正專案中的潛在漏洞。',
+                careerScore: '82分 ⭐⭐⭐⭐☆',
+                wealth: '適合進行儲蓄規劃，遠離高風險投資標的。',
+                wealthScore: '79分 ⭐⭐⭐☆☆',
+                health: '消化系統較為敏感，飲食宜清淡溫暖。',
+                healthScore: '75分 ⭐⭐⭐☆☆',
+                quote: '「給你一個溫暖的貓爪抱抱，一切都會變好的喵！」'
+            },
+            {
+                id: 'leo',
+                name: '獅子座',
+                date: '07.23 - 08.22',
+                icon: '♌',
+                tagline: '👑 耀眼自信的王者領袖',
+                stars: '⭐⭐⭐⭐⭐',
+                color: '太陽金黃',
+                number: '1',
+                match: '射手座',
+                warning: '主觀意識過強時多傾聽他人',
+                astroEvidence: '太陽處於旺相宮位，賦予獅子座滿滿的主導力與領導氣場。',
+                love: '自信滿滿的姿態極具魅力，有機會遇到熱烈追求你的對象。',
+                loveScore: '94分 ⭐⭐⭐⭐⭐',
+                career: '展現領導才能的好時機，關鍵決策精準，獲得掌聲。',
+                careerScore: '96分 ⭐⭐⭐⭐⭐',
+                wealth: '財運看漲，投資眼光獨到，但請避免鋪張浪費。',
+                wealthScore: '89分 ⭐⭐⭐⭐☆',
+                health: '體能狀況優異，多戶外運動能釋放強大能量。',
+                healthScore: '92分 ⭐⭐⭐⭐⭐',
+                quote: '「勇敢戴上你的皇冠，閃耀屬於你的光芒喵！」'
+            },
+            {
+                id: 'virgo',
+                name: '處女座',
+                date: '08.23 - 09.22',
+                icon: '♍',
+                tagline: '✨ 追求完美的精緻藝術家',
+                stars: '⭐⭐⭐⭐☆',
+                color: '薰衣草淺紫',
+                number: '5',
+                match: '摩羯座',
+                warning: '對自己要求過高容易累積壓力',
+                astroEvidence: '水星順行帶來清晰邏輯，本週整理環境或規劃長遠目標效率極高。',
+                love: '細心體貼的默默關懷最動人，感情在平淡中見真情。',
+                loveScore: '86分 ⭐⭐⭐⭐☆',
+                career: '細節控優勢大發揮，處理複雜數據與文案得心應手。',
+                careerScore: '92分 ⭐⭐⭐⭐⭐',
+                wealth: '理性消費，本週是財務重組與記帳分析的好時機。',
+                wealthScore: '88分 ⭐⭐⭐⭐☆',
+                health: '注意睡眠品質，睡前可聽放鬆音樂。',
+                healthScore: '80分 ⭐⭐⭐⭐☆',
+                quote: '「完美固然美好，但放鬆的你更加可愛喵～」'
+            },
+            {
+                id: 'libra',
+                name: '天秤座',
+                date: '09.23 - 10.23',
+                icon: '♎',
+                tagline: '⚖️ 優雅和諧的美學追求者',
+                stars: '⭐⭐⭐⭐☆',
+                color: '馬卡龍粉藍',
+                number: '8',
+                match: '雙子座',
+                warning: '猶豫不決容易錯失良機',
+                astroEvidence: '金星與海王星呈現和諧相位，大幅提升美感直覺與人際和諧度。',
+                love: '桃花朵朵開，優雅的穿搭能吸引到志同道合的美好對象。',
+                loveScore: '90分 ⭐⭐⭐⭐⭐',
+                career: '擅長調和團隊紛爭，協調能力獲讚賞，適合談判與合作。',
+                careerScore: '87分 ⭐⭐⭐⭐☆',
+                wealth: '收支平衡，適度投資在自我提升與美妝穿搭上很值得。',
+                wealthScore: '83分 ⭐⭐⭐⭐☆',
+                health: '多補充水分，保持肌膚水嫩與代謝順暢。',
+                healthScore: '85分 ⭐⭐⭐⭐☆',
+                quote: '「保持優雅的心情，美好的事正在路上喵！」'
+            },
+            {
+                id: 'scorpio',
+                name: '天蠍座',
+                date: '10.24 - 11.22',
+                icon: '♏',
+                tagline: '🔮 敏銳神秘的意志戰士',
+                stars: '⭐⭐⭐⭐⭐',
+                color: '酒紅莓果色',
+                number: '9',
+                match: '巨蟹座',
+                warning: '佔有慾過強可能給對方壓力',
+                astroEvidence: '冥王星能量注入第九宮，帶來強大的洞察力與破繭成蝶的轉變能量。',
+                love: '情感濃烈而專一，深刻的交流能讓彼此關係邁入新階段。',
+                loveScore: '91分 ⭐⭐⭐⭐⭐',
+                career: '專注力驚人，能獨立攻克高難度專案，成果令人刮目相看。',
+                careerScore: '94分 ⭐⭐⭐⭐⭐',
+                wealth: '暗財運佳，可能會有額外的副業收入或意料外的資源。',
+                wealthScore: '88分 ⭐⭐⭐⭐☆',
+                health: '適合做瑜伽或冥想，調節深層情緒。',
+                healthScore: '86分 ⭐⭐⭐⭐☆',
+                quote: '「相信你的直覺，你擁有一切改變的力量喵！」'
+            },
+            {
+                id: 'sagittarius',
+                name: '射手座',
+                date: '11.23 - 12.21',
+                icon: '🏹',
+                tagline: '🌌 自由奔放的哲學探索者',
+                stars: '⭐⭐⭐⭐☆',
+                color: '天空亮藍',
+                number: '4',
+                match: '牡羊座',
+                warning: '承諾前請先確認可行性',
+                astroEvidence: '木星正能量發散，本週學習運與海外運極佳，非常適合吸收新知。',
+                love: '充滿陽光活力的笑容最吸引人，戶外活動容易撞見桃花。',
+                loveScore: '89分 ⭐⭐⭐⭐☆',
+                career: '視野開闊，能為團隊注入創意，但細節處需多加會審。',
+                careerScore: '84分 ⭐⭐⭐⭐☆',
+                wealth: '財運不錯，但容易因為興致勃勃而臨時增加旅行娛樂支出。',
+                wealthScore: '81分 ⭐⭐⭐⭐☆',
+                health: '活力充沛，適合登高健行或接觸大自然。',
+                healthScore: '90分 ⭐⭐⭐⭐⭐',
+                quote: '「世界那麼大，張開雙臂去擁抱陽光喵！」'
+            },
+            {
+                id: 'capricorn',
+                name: '摩羯座',
+                date: '12.22 - 01.19',
+                icon: '♑',
+                tagline: '⛰️ 堅韌專注的築夢建築師',
+                stars: '⭐⭐⭐⭐⭐',
+                color: '大地燕麥色',
+                number: '10',
+                match: '金牛座',
+                warning: '別把工作壓力帶回家中',
+                astroEvidence: '土星相位穩定，為摩羯座帶來無與倫比的建構力與長遠佈局運勢。',
+                love: '不善言辭但行動力滿分，務實照顧對方讓人備感安心。',
+                loveScore: '84分 ⭐⭐⭐⭐☆',
+                career: '事業運強勁！先前的耕耘迎來收割期，有升遷升職的好預兆。',
+                careerScore: '98分 ⭐⭐⭐⭐⭐',
+                wealth: '理財規劃嚴謹，資產穩健增長，適合長期定額投資。',
+                wealthScore: '92分 ⭐⭐⭐⭐⭐',
+                health: '注意骨骼與關節保健，適度伸展放鬆。',
+                healthScore: '83分 ⭐⭐⭐⭐☆',
+                quote: '「一步一腳印，你踩出的每一步都很堅實喵！」'
+            },
+            {
+                id: 'aquarius',
+                name: '水瓶座',
+                date: '01.20 - 02.18',
+                icon: '♒',
+                tagline: '💡 前衛獨特的奇思妙想家',
+                stars: '⭐⭐⭐⭐☆',
+                color: '星空電光藍',
+                number: '11',
+                match: '雙子座',
+                warning: '太過特立獨行可能被誤解',
+                astroEvidence: '天王星活躍，本週將有突如其來的神來一筆，打破僵局。',
+                love: '渴望靈魂共鳴，能找到理解你奇特想法的知音夥伴。',
+                loveScore: '87分 ⭐⭐⭐⭐☆',
+                career: '不落俗套的解題思維讓大家驚嘆，科技與創新項目順利。',
+                careerScore: '90分 ⭐⭐⭐⭐⭐',
+                wealth: '財運平穩，可能在電子產品或數位學習上有一筆開銷。',
+                wealthScore: '80分 ⭐⭐⭐⭐☆',
+                health: '注意血液循環，久坐後記得起身活動。',
+                healthScore: '82分 ⭐⭐⭐⭐☆',
+                quote: '「做最獨特的自己，宇宙為你的與眾不同喝采喵！」'
+            },
+            {
+                id: 'pisces',
+                name: '雙魚座',
+                date: '02.19 - 03.20',
+                icon: '♓',
+                tagline: '🌊 浪漫夢幻的情感藝術家',
+                stars: '⭐⭐⭐⭐⭐',
+                color: '夢幻水粉紫',
+                number: '5',
+                match: '巨蟹座',
+                warning: '同理心過剩容易替他人背負焦慮',
+                astroEvidence: '守護星海王星能量溫柔注入，本週同理心與藝術創作靈感雙雙爆棚。',
+                love: '充滿浪漫情調的一週，貼心的小驚喜能讓愛意無限蔓延。',
+                loveScore: '96分 ⭐⭐⭐⭐⭐',
+                career: '靈感充沛，非常適合從事設計、藝術或溝通協調工作。',
+                careerScore: '88分 ⭐⭐⭐⭐☆',
+                wealth: '直覺頗準，但要避免因心軟而借錢給他人。',
+                wealthScore: '82分 ⭐⭐⭐⭐☆',
+                health: '注意足部保健，泡腳能舒緩全身疲勞。',
+                healthScore: '87分 ⭐⭐⭐⭐☆',
+                quote: '「將生活過成一首詩，你值得世上所有的溫柔喵～」'
+            }
+        ];
+
+        // 幸運彩蛋卡庫
+        const luckyCards = [
+            { badge: "SSR 大吉", title: "星光璀璨卡 ✨", text: "本週會有意想不到的好事發生！多去綠意盎然的地方走走，會吸收到滿滿正能量喔！" },
+            { badge: "SR 上吉", title: "喵喵罐頭卡 🥫", text: "物質運與食神運爆棚！這週會吃到超美味的料理或收到朋友的精美禮物喵！" },
+            { badge: "SR 幸運", title: "彩虹錦鯉卡 🌈", text: "卡關已久的事將出現轉機，勇敢跨出第一步，幸運女神正在為你加油！" },
+            { badge: "SSR 絕贊", title: "粉紅泡泡卡 💕", text: "桃花與人緣指數達到頂峰！你的溫柔笑容會吸引到非常可愛的好運喔！" },
+            { badge: "SR 舒心", title: "雲朵療癒卡 ☁️", text: "給辛苦的自己一個大擁抱！本週適合好好休息、泡個熱水澡，充電後再次出發！" }
+        ];
+
+        let currentSelectedSign = zodiacData[0];
+
+        // 初始化頁面
+        window.onload = function() {
+            renderZodiacNav();
+            updateZodiacDisplay(currentSelectedSign);
+            generateBackgroundStars();
+        };
+
+        // 動態生成 12 星座導覽按鈕
+        function renderZodiacNav() {
+            const container = document.getElementById('zodiac-list');
+            container.innerHTML = '';
+
+            zodiacData.forEach((item, index) => {
+                const btn = document.createElement('button');
+                btn.className = `zodiac-btn btn-candy flex-shrink-0 glass-pill px-4 py-2.5 rounded-3xl flex items-center gap-2 border text-sm font-bold transition cursor-pointer ${index === 0 ? 'active' : 'text-gray-700 hover:bg-white'}`;
+                btn.onclick = () => selectZodiac(item, btn);
+                btn.innerHTML = `
+                    <span class="text-xl">${item.icon}</span>
+                    <span>${item.name}</span>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        // 切換星座
+        function selectZodiac(item, btnElement) {
+            // 更新按鈕 active 樣式
+            document.querySelectorAll('.zodiac-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            currentSelectedSign = item;
+            updateZodiacDisplay(item);
+        }
+
+        // 更新畫面數據
+        function updateZodiacDisplay(item) {
+            document.getElementById('zodiac-avatar').innerText = item.icon;
+            document.getElementById('zodiac-name').innerText = item.name;
+            document.getElementById('zodiac-date').innerText = item.date;
+            document.getElementById('zodiac-tagline').innerText = item.tagline;
+            document.getElementById('star-rating').innerText = item.stars;
+
+            document.getElementById('lucky-color').innerText = item.color;
+            document.getElementById('lucky-number').innerText = item.number;
+            document.getElementById('lucky-match').innerText = item.match;
+            document.getElementById('warning-tip').innerText = item.warning;
+
+            document.getElementById('astro-evidence').innerText = item.astroEvidence;
+
+            document.getElementById('love-score').innerText = item.loveScore;
+            document.getElementById('love-desc').innerText = item.love;
+
+            document.getElementById('career-score').innerText = item.careerScore;
+            document.getElementById('career-desc').innerText = item.career;
+
+            document.getElementById('wealth-score').innerText = item.wealthScore;
+            document.getElementById('wealth-desc').innerText = item.wealth;
+
+            document.getElementById('health-score').innerText = item.healthScore;
+            document.getElementById('health-desc').innerText = item.health;
+
+            document.getElementById('cat-quote').innerText = item.quote;
+
+            // 更新 API 面板 JSON 顯示
+            updateJsonPreview();
+        }
+
+        // 生成背景漂浮星星
+        function generateBackgroundStars() {
+            const container = document.getElementById('star-container');
+            const starIcons = ['✨', '⭐', '🌟', '💫', '🌸'];
+            for (let i = 0; i < 20; i++) {
+                const star = document.createElement('div');
+                star.className = 'star-particle text-xl';
+                star.innerText = starIcons[Math.floor(Math.random() * starIcons.length)];
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                star.style.fontSize = `${Math.random() * 15 + 10}px`;
+                container.appendChild(star);
+            }
+        }
+
+        // 抽卡功能
+        function openLuckyDraw() {
+            drawNewCard();
+            document.getElementById('lucky-modal').classList.remove('hidden');
+        }
+
+        function closeLuckyDraw() {
+            document.getElementById('lucky-modal').classList.add('hidden');
+        }
+
+        function drawNewCard() {
+            const randomCard = luckyCards[Math.floor(Math.random() * luckyCards.length)];
+            document.getElementById('card-badge').innerText = randomCard.badge;
+            document.getElementById('card-title').innerText = randomCard.title;
+            document.getElementById('card-text').innerText = randomCard.text;
+        }
+
+        // 開啟/關閉 API 控制面板
+        function toggleApiPanel() {
+            const panel = document.getElementById('api-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        // 更新 JSON Preview (模擬 Aztro / FreeHoroscope API 回傳)
+        function updateJsonPreview() {
+            const apiFormat = {
+                "status": "200 OK",
+                "api_spec": "Aztro / FreeHoroscope API Compliant",
+                "current_date": "2026-11-05",
+                "sign": currentSelectedSign.id,
+                "weekly_forecast": {
+                    "overall_stars": currentSelectedSign.stars,
+                    "lucky_color": currentSelectedSign.color,
+                    "lucky_number": currentSelectedSign.number,
+                    "astronomical_basis": currentSelectedSign.astroEvidence,
+                    "description": currentSelectedSign.love
+                }
+            };
+            document.getElementById('json-output').innerText = JSON.stringify(apiFormat, null, 2);
+        }
+
+        // 模擬 Aztro POST Fetch 請求
+        function fetchAztroMock() {
+            const output = document.getElementById('json-output');
+            output.innerText = `[Requesting POST https://aztro.sameerkumar.website/?sign=${currentSelectedSign.id}&day=weekly]\n\nFetching data...`;
+            setTimeout(() => {
+                updateJsonPreview();
+            }, 600);
+        }
+
+        // 模擬 FreeHoroscope Fetch 請求
+        function fetchFreeHoroscopeMock() {
+            const output = document.getElementById('json-output');
+            output.innerText = `[Requesting GET https://free-horoscope-api.vercel.app/api/v1/horoscope/weekly/${currentSelectedSign.id}]\n\nFetching data...`;
+            setTimeout(() => {
+                updateJsonPreview();
+            }, 600);
+        }
+    </script>
+</body>
+</html>
