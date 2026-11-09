@@ -1,6 +1,6 @@
 # ✨ 我的網頁與多媒體作品集 (My Web & Creative Portfolio)
 
-> 專為行動裝置優先（Mobile-First）設計的個人作品展覽館，收錄純前端互動應用、數據分析儀表板、互動休閒遊戲、系統原型藍圖、商業廣告 DM、AI 概念影像與原創音樂等 31 件作品。
+> 專為行動裝置優先（Mobile-First）設計的個人作品展覽館，收錄純前端互動應用、數據分析儀表板、互動休閒遊戲、系統原型藍圖、商業廣告 DM、AI 概念影像與原創音樂等 32 件作品。
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/zarac715-raven/my-works?color=indigo&style=for-the-badge)
 ![GitHub last commit](https://img.shields.io/github/last-commit/zarac715-raven/my-works?color=purple&style=for-the-badge)
@@ -54,9 +54,10 @@ My works/
 │   ├── Pop-Art Selfie Comic Collage.png
 │   ├── Nineframe.png
 │   ├── Moonlit Wolf Guardian in the Forest.png
+│   ├── LUNARA_ Lycan Guardian Bond.jpg
 │   ├── Lunara_ Lycan of the Violet Moon.png
 │   ├── VIRENNU_ Keeper of Boundaries.png
-│   └── Liberty of Statue.png (等 12 件)
+│   └── Liberty of Statue.png (等 13 件)
 └── mp3/                  # 原創電子音樂與配樂 (2 首)
     ├── Steel_Rain.mp3
     └── AudioTranscriberAI (Caged).mp3
